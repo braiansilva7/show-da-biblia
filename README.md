@@ -12,11 +12,6 @@ Monorepo no padrão Underchat: Drizzle models + Atlas (prod/seed), packages `@co
 3. Aplique schema + seed: `pnpm seed:local`.
 4. API local: `pnpm dev:manager_api`.
 
-Administrador seed:
-
-- e-mail: `braian.diogenes@gmail.com`
-- senha: `Gannicus#87`
-
 MinIO console: `http://localhost:9003` (credenciais em `S3_ACCESS_KEY` / `S3_SECRET_KEY`).
 
 ## Rotas da manager_api
