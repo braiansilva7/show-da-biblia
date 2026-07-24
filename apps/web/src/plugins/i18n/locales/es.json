@@ -4,7 +4,7 @@
   "login_subtitle": "Inicie sesión para acceder al panel de administración.",
   "email": "Correo electrónico",
   "password": "Contraseña",
-  "email_placeholder": "email@email.com",
+  "email_placeholder": "email{'@'}email.com",
   "show": "Mostrar",
   "hide": "Ocultar",
   "login": "Ingresar",

@@ -116,6 +116,8 @@ services:
         condition: service_healthy
       minio:
         condition: service_healthy
+    networks:
+      - show-da-biblia
 
 networks:
   show-da-biblia:

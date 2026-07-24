@@ -4,7 +4,7 @@
   "login_subtitle": "Entre com seus dados para acessar o painel administrativo.",
   "email": "E-mail",
   "password": "Senha",
-  "email_placeholder": "email@email.com",
+  "email_placeholder": "email{'@'}email.com",
   "show": "Exibir",
   "hide": "Ocultar",
   "login": "Entrar",

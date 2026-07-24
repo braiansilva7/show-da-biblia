@@ -4,7 +4,7 @@
   "login_subtitle": "Sign in to access the administration panel.",
   "email": "Email",
   "password": "Password",
-  "email_placeholder": "email@email.com",
+  "email_placeholder": "email{'@'}email.com",
   "show": "Show",
   "hide": "Hide",
   "login": "Sign in",
