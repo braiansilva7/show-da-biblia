@@ -23,6 +23,7 @@ ENV NODE_ENV=production
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/apps/manager_api/package.json ./apps/manager_api/package.json
 COPY --from=build /app/apps/manager_api/dist ./apps/manager_api/dist
+COPY --from=build /app/packages/plugins/i18next/locales ./apps/manager_api/dist/packages/plugins/i18next/locales
 
 EXPOSE 3000
 

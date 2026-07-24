@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import { container } from 'tsyringe';
-import { AuthController } from '@core/controllers/auth/index.js';
-import { authenticatedPermissions } from '@core/permissions/index.js';
+import { AuthController } from '@/controllers/auth/index.js';
+import { authenticatedPermissions } from '@/permissions/index.js';
 import { currentUserSchema } from '@core/schema/auth/me/index.js';
 import { loginSchema } from '@core/schema/auth/login/index.js';
 

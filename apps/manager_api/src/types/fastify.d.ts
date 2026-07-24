@@ -2,6 +2,7 @@ import type { User, UserRole } from '@core/common/types/user.js';
 import type { AppDatabase } from '@core/plugins/database/index.js';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { Pool } from 'pg';
+import type { TFunction } from 'i18next';
 
 declare module '@fastify/jwt' {
   interface FastifyJWT {
@@ -13,6 +14,7 @@ declare module '@fastify/jwt' {
 declare module 'fastify' {
   interface FastifyRequest {
     authenticatedUser?: User;
+    t: TFunction;
   }
 
   interface FastifyInstance {

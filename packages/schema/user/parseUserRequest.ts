@@ -1,6 +1,8 @@
 import type { FastifyRequest } from 'fastify';
 import type { LanguageCode, UserRole } from '@core/common/types/user.js';
-import type { CreateUserInput, UpdateUserInput } from '@core/services/user.service.js';
+import type { ICreateUserInput } from '@core/interfaces/user/ICreateUserInput.js';
+import type { IProfilePicture } from '@core/interfaces/user/IProfilePicture.js';
+import type { IUpdateUserInput } from '@core/interfaces/user/IUpdateUserInput.js';
 
 const languageCodes = new Set(['pt-BR', 'en', 'es']);
 const roles = new Set(['ADMIN', 'PLAYER']);
@@ -32,15 +34,9 @@ function parseRole(value: unknown): UserRole | undefined {
   return raw && roles.has(raw) ? (raw as UserRole) : undefined;
 }
 
-export type ParsedProfilePicture = {
-  buffer: Buffer;
-  mimeType: string;
-  originalName: string;
-};
-
 export async function parseUserMultipart(request: FastifyRequest): Promise<{
   fields: Record<string, unknown>;
-  profilePicture: ParsedProfilePicture | null;
+  profilePicture: IProfilePicture | null;
 }> {
   const contentType = request.headers['content-type'] ?? '';
   if (!contentType.includes('multipart/form-data')) {
@@ -48,7 +44,7 @@ export async function parseUserMultipart(request: FastifyRequest): Promise<{
   }
 
   const fields: Record<string, unknown> = {};
-  let profilePicture: ParsedProfilePicture | null = null;
+  let profilePicture: IProfilePicture | null = null;
 
   for await (const part of request.parts()) {
     if (part.type === 'file') {
@@ -74,8 +70,8 @@ export async function parseUserMultipart(request: FastifyRequest): Promise<{
 
 export function parseCreateUserInput(
   fields: Record<string, unknown>,
-  profilePicture: ParsedProfilePicture | null
-): CreateUserInput | null {
+  profilePicture: IProfilePicture | null
+): ICreateUserInput | null {
   const username = asString(fields.username)?.trim();
   const email = asString(fields.email)?.trim();
   const password = asString(fields.password);
@@ -102,9 +98,9 @@ export function parseCreateUserInput(
 
 export function parseUpdateUserInput(
   fields: Record<string, unknown>,
-  profilePicture: ParsedProfilePicture | null
-): UpdateUserInput | null {
-  const input: UpdateUserInput = {};
+  profilePicture: IProfilePicture | null
+): IUpdateUserInput | null {
+  const input: IUpdateUserInput = {};
   const username = asString(fields.username)?.trim();
   const email = asString(fields.email)?.trim();
   const password = asString(fields.password);

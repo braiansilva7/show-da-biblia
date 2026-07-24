@@ -6,8 +6,10 @@ import { registerJwt } from '@core/plugins/jwt.js';
 import { registerDatabase } from '@core/plugins/database/index.js';
 import { registerMultipart } from '@core/plugins/multipart/index.js';
 import { registerAuthenticateJwt } from '@core/middlewares/authenticate-jwt.js';
+import i18nextPlugin from '@core/plugins/i18next/index.js';
 import healthRoutes from '@/routes/health.route.js';
 import routes from '@/routes/index.js';
+import swaggerPlugin from '@/plugins/swagger/index.js';
 
 export async function buildServer() {
   const app = Fastify({ logger: true });
@@ -16,6 +18,8 @@ export async function buildServer() {
   await app.register(registerMultipart);
   await app.register(registerCors);
   await app.register(registerJwt);
+  await app.register(i18nextPlugin);
+  await app.register(swaggerPlugin);
   registerAuthenticateJwt(app);
   await app.register(healthRoutes);
   await app.register(routes, { prefix: '/api/v1' });

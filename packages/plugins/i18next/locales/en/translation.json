@@ -1,0 +1,15 @@
+{
+  "auth_credentials_required": "Email and password are required.",
+  "auth_invalid_credentials": "Invalid credentials.",
+  "auth_invalid_or_expired_token": "Invalid or expired token.",
+  "auth_unauthorized_user": "Unauthorized user.",
+  "auth_admin_access_only": "Access is restricted to administrators.",
+  "user_create_invalid_input": "Provide a username, valid email, password with at least 8 characters, role, and language.",
+  "user_already_exists": "A user with this username or email already exists.",
+  "user_update_invalid_input": "Provide at least one valid field to update.",
+  "user_self_admin_change_forbidden": "You cannot deactivate your own account or remove its administrator role.",
+  "user_not_found": "User not found.",
+  "user_invalid_id": "Invalid user identifier.",
+  "user_self_delete_forbidden": "You cannot delete your own account.",
+  "user_delete_has_dependencies": "This user has linked data and cannot be deleted. Deactivate the account instead."
+}

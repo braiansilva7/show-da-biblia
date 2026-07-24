@@ -28,7 +28,7 @@ export class UserController {
     const input = parseCreateUserInput(fields, profilePicture);
     if (!input) {
       return reply.code(400).send({
-        message: 'Informe nome de usuário, e-mail válido, senha de ao menos 8 caracteres, perfil e idioma.',
+        message: request.t('user_create_invalid_input'),
       });
     }
 
@@ -36,7 +36,7 @@ export class UserController {
       return reply.code(201).send({ user: await this.creator.execute(input) });
     } catch (error) {
       if (postgresErrorCode(error) === '23505') {
-        return reply.code(409).send({ message: 'Já existe um usuário com este nome ou e-mail.' });
+        return reply.code(409).send({ message: request.t('user_already_exists') });
       }
       throw error;
     }
@@ -47,21 +47,21 @@ export class UserController {
     const { fields, profilePicture } = await parseUserMultipart(request);
     const input = parseUpdateUserInput(fields, profilePicture);
     if (!id || !input) {
-      return reply.code(400).send({ message: 'Informe ao menos um campo válido para edição.' });
+      return reply.code(400).send({ message: request.t('user_update_invalid_input') });
     }
 
     try {
       const result = await this.updater.execute(id, input, request.authenticatedUser!);
       if ('error' in result) {
         return reply.code(400).send({
-          message: 'Você não pode desativar nem remover o perfil administrador da própria conta.',
+          message: request.t('user_self_admin_change_forbidden'),
         });
       }
-      if (!result.user) return reply.code(404).send({ message: 'Usuário não encontrado.' });
+      if (!result.user) return reply.code(404).send({ message: request.t('user_not_found') });
       return { user: result.user };
     } catch (error) {
       if (postgresErrorCode(error) === '23505') {
-        return reply.code(409).send({ message: 'Já existe um usuário com este nome ou e-mail.' });
+        return reply.code(409).send({ message: request.t('user_already_exists') });
       }
       throw error;
     }
@@ -69,19 +69,19 @@ export class UserController {
 
   public deleteUser = async (request: FastifyRequest, reply: FastifyReply) => {
     const id = parseUserId(request.params);
-    if (!id) return reply.code(400).send({ message: 'Identificador de usuário inválido.' });
+    if (!id) return reply.code(400).send({ message: request.t('user_invalid_id') });
 
     try {
       const result = await this.deleter.execute(id, request.authenticatedUser!);
       if ('error' in result) {
-        return reply.code(400).send({ message: 'Você não pode excluir a própria conta.' });
+        return reply.code(400).send({ message: request.t('user_self_delete_forbidden') });
       }
-      if (!result.deleted) return reply.code(404).send({ message: 'Usuário não encontrado.' });
+      if (!result.deleted) return reply.code(404).send({ message: request.t('user_not_found') });
       return reply.code(204).send();
     } catch (error) {
       if (postgresErrorCode(error) === '23503') {
         return reply.code(409).send({
-          message: 'Este usuário possui dados vinculados e não pode ser excluído. Desative-o em vez disso.',
+          message: request.t('user_delete_has_dependencies'),
         });
       }
       throw error;

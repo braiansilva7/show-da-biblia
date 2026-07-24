@@ -1,30 +1,10 @@
 import { inject, injectable } from 'tsyringe';
 import { hashPassword, verifyPassword } from '@core/common/functions/password.js';
-import type { LanguageCode, User, UserListItem, UserRole } from '@core/common/types/user.js';
+import type { User, UserListItem } from '@core/common/types/user.js';
+import type { ICreateUserInput } from '@core/interfaces/user/ICreateUserInput.js';
+import type { IUpdateUserInput } from '@core/interfaces/user/IUpdateUserInput.js';
 import { UserRepository } from '@core/repositories/user/user.repository.js';
 import { StorageService } from '@core/services/storage.service.js';
-
-export type CreateUserInput = {
-  username: string;
-  email: string;
-  password: string;
-  role: UserRole;
-  languageCode: LanguageCode;
-  countryId?: string | null;
-  active?: boolean;
-  profilePicture?: { buffer: Buffer; mimeType: string; originalName: string } | null;
-};
-
-export type UpdateUserInput = Partial<{
-  username: string;
-  email: string;
-  password: string;
-  role: UserRole;
-  languageCode: LanguageCode;
-  countryId: string | null;
-  active: boolean;
-  profilePicture: { buffer: Buffer; mimeType: string; originalName: string } | null;
-}>;
 
 @injectable()
 export class UserService {
@@ -45,7 +25,7 @@ export class UserService {
     return this.userRepository.findByEmail(email);
   }
 
-  async create(input: CreateUserInput): Promise<UserListItem> {
+  async create(input: ICreateUserInput): Promise<UserListItem> {
     let profilePictureUrl: string | null = null;
     if (input.profilePicture) {
       profilePictureUrl = await this.storageService.uploadProfilePicture(input.profilePicture);
@@ -63,7 +43,7 @@ export class UserService {
     });
   }
 
-  async update(id: string, input: UpdateUserInput, authenticatedUser: User) {
+  async update(id: string, input: IUpdateUserInput, authenticatedUser: User) {
     if (id === authenticatedUser.id && (input.active === false || input.role === 'PLAYER')) {
       return { error: 'SELF_ADMIN_CHANGE' as const };
     }

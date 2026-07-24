@@ -1,9 +1,10 @@
 import { Type } from '@sinclair/typebox';
 import { errorMessageSchema } from '@core/schema/common/user.schema.js';
+import { ETagSwagger } from '@core/common/enums/ETagSwagger.js';
 
 export const deleteUserSchema = {
   description: 'Remove um usuário',
-  tags: ['users'],
+  tags: [ETagSwagger.user],
   security: [{ authenticateJwt: [] }],
   params: Type.Object({ id: Type.String({ format: 'uuid' }) }),
   response: {

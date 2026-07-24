@@ -4,6 +4,7 @@ import { createVuetify } from 'vuetify';
 import * as components from 'vuetify/components';
 import * as directives from 'vuetify/directives';
 import App from './App.vue';
+import { i18n } from './plugins/i18n';
 
 const vuetify = createVuetify({
   components,
@@ -23,4 +24,4 @@ const vuetify = createVuetify({
   },
 });
 
-createApp(App).use(vuetify).mount('#app');
+createApp(App).use(vuetify).use(i18n).mount('#app');

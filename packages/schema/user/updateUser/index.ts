@@ -2,10 +2,11 @@ import { Type } from '@sinclair/typebox';
 import { updateUserRequestSchema } from './request.schema.js';
 import { updateUserResponseSchema } from './response.schema.js';
 import { errorMessageSchema } from '@core/schema/common/user.schema.js';
+import { ETagSwagger } from '@core/common/enums/ETagSwagger.js';
 
 export const updateUserSchema = {
   description: 'Atualiza um usuário',
-  tags: ['users'],
+  tags: [ETagSwagger.user],
   consumes: ['multipart/form-data', 'application/json'],
   security: [{ authenticateJwt: [] }],
   params: Type.Object({ id: Type.String({ format: 'uuid' }) }),

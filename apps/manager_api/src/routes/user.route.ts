@@ -1,12 +1,12 @@
 import type { FastifyInstance } from 'fastify';
 import { container } from 'tsyringe';
-import { UserController } from '@core/controllers/user/index.js';
+import { UserController } from '@/controllers/user/index.js';
 import {
   userCreatePermissions,
   userDeletePermissions,
   userUpdatePermissions,
   userViewPermissions,
-} from '@core/permissions/index.js';
+} from '@/permissions/index.js';
 import { createUserSchema } from '@core/schema/user/createUser/index.js';
 import { deleteUserSchema } from '@core/schema/user/deleteUser/index.js';
 import { listUsersSchema } from '@core/schema/user/listUsers/index.js';

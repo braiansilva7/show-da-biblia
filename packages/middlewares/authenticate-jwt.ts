@@ -10,18 +10,18 @@ export function registerAuthenticateJwt(server: FastifyInstance) {
       try {
         await request.jwtVerify();
       } catch {
-        reply.code(401).send({ message: 'Token inválido ou expirado.' });
+        reply.code(401).send({ message: request.t('auth_invalid_or_expired_token') });
         return;
       }
 
       const userRepository = container.resolve(UserRepository);
       const user = await userRepository.findById(request.user.user_id);
       if (!user || !user.active) {
-        reply.code(401).send({ message: 'Usuário não autorizado.' });
+        reply.code(401).send({ message: request.t('auth_unauthorized_user') });
         return;
       }
       if (allowedRoles.length && !allowedRoles.includes(user.role)) {
-        reply.code(403).send({ message: 'Acesso restrito a administradores.' });
+        reply.code(403).send({ message: request.t('auth_admin_access_only') });
         return;
       }
       request.authenticatedUser = user;

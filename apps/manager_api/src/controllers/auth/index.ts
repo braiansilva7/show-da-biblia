@@ -12,11 +12,11 @@ export class AuthController {
   public login = async (request: FastifyRequest<{ Body: LoginRequest }>, reply: FastifyReply) => {
     const { email, password } = request.body;
     if (!email || !password) {
-      return reply.code(400).send({ message: 'E-mail e senha são obrigatórios.' });
+      return reply.code(400).send({ message: request.t('auth_credentials_required') });
     }
 
     const user = await this.loginUseCase.execute(email, password);
-    if (!user) return reply.code(401).send({ message: 'Credenciais inválidas.' });
+    if (!user) return reply.code(401).send({ message: request.t('auth_invalid_credentials') });
 
     const config = managerApiEnvironment();
     const accessToken = await reply.jwtSign({ user_id: user.id, module: 'manager', role: user.role });

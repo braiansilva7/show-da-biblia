@@ -1,5 +1,5 @@
 import type { FastifyInstance } from 'fastify';
-import { healthController } from '@core/controllers/health/index.js';
+import { healthController } from '@/controllers/health/index.js';
 import { healthSchema } from '@core/schema/health/health/index.js';
 
 export default function healthRoutes(server: FastifyInstance) {
