@@ -14,7 +14,10 @@ type AuthenticatedUser = {
 
 type ManagedUser = AuthenticatedUser & {
   active: boolean;
-  createdAt: string;
+  created_at: string;
+  country_id?: string | null;
+  profile_picture_url?: string | null;
+  total_score?: number;
 };
 
 type LoginResponse = {
@@ -399,7 +402,7 @@ onMounted(restoreSession);
                   <td><span class="tag role-tag">{{ roleLabel(managedUser.role) }}</span></td>
                   <td>{{ languageLabel(managedUser.language_code) }}</td>
                   <td><span :class="['tag', managedUser.active ? 'active-tag' : 'inactive-tag']">{{ managedUser.active ? 'Ativo' : 'Inativo' }}</span></td>
-                  <td>{{ formattedDate(managedUser.createdAt) }}</td>
+                  <td>{{ formattedDate(managedUser.created_at) }}</td>
                   <td class="row-actions"><v-btn type="button" variant="text" size="small" @click="openEditUserDialog(managedUser)">Editar</v-btn><v-btn class="danger-action" color="error" type="button" variant="text" size="small" @click="requestUserDeletion(managedUser)">Excluir</v-btn></td>
                 </tr>
               </tbody>

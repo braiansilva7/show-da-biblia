@@ -2,18 +2,29 @@
 
 Base inicial do jogo **Show da Bíblia**.
 
-O projeto contém a `manager_api` mínima de autenticação, uma base web administrativa e
-uma base mobile. Questões, partidas e ranking serão construídos nas próximas
-etapas.
+Monorepo no padrão Underchat: Drizzle models + Atlas (prod/seed), packages `@core/*`,
+`manager_api`, web admin e mobile.
 
 ## Início rápido
 
-1. Copie `.env.example` para `.env` e substitua todos os valores de exemplo.
-2. Suba o banco e a API: `docker compose up --build -d`. O serviço `migrator`
-   aplica as migrations pendentes antes de iniciar a API.
+1. Copie `.env.example` para `.env` e ajuste os valores.
+2. Suba infra: `pnpm db:up` (Postgres, Atlas shadow DB, MinIO e Atlas CLI).
+3. Aplique schema + seed: `pnpm seed:local`.
+4. API local: `pnpm dev:manager_api`.
 
-O administrador inicial é criado pela migration `002_seed_jokers_and_administrator.sql`.
-Para executar migrations fora do Docker, use `pnpm install && pnpm migrate`.
+Administrador seed:
 
-Rotas disponíveis: `GET /health`, `POST /api/v1/auth/login` e
-`GET /api/v1/auth/me`.
+- e-mail: `braian.diogenes@gmail.com`
+- senha: `Gannicus#87`
+
+MinIO console: `http://localhost:9003` (credenciais em `S3_ACCESS_KEY` / `S3_SECRET_KEY`).
+
+## Rotas da manager_api
+
+- `GET /health`
+- `POST /api/v1/auth/login`
+- `GET /api/v1/auth/me`
+- `GET|POST /api/v1/users`
+- `PATCH|DELETE /api/v1/users/:id`
+
+Create/update de usuário aceitam JSON ou `multipart/form-data` (campo `profile_picture`).
