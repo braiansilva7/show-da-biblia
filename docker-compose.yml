@@ -1,0 +1,53 @@
+name: show-da-biblia
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: show-da-biblia-db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - '5432:5432'
+    volumes:
+      - show_da_biblia_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  manager_api:
+    build:
+      context: .
+      dockerfile: apps/manager_api/Dockerfile
+    container_name: show-da-biblia-manager-api
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      API_PORT: 3000
+    ports:
+      - '3000:3000'
+    depends_on:
+      migrator:
+        condition: service_completed_successfully
+      db:
+        condition: service_healthy
+
+  migrator:
+    build:
+      context: .
+      dockerfile: apps/manager_api/Dockerfile
+    container_name: show-da-biblia-migrator
+    command: ['node', 'apps/manager_api/dist/migrate.js']
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: 'no'
+
+volumes:
+  show_da_biblia_postgres_data:

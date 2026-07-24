@@ -1,0 +1,17 @@
+{
+  "expo": {
+    "name": "Show da Bíblia",
+    "slug": "show-da-biblia",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.showdabiblia.mobile"
+    },
+    "android": {
+      "package": "com.showdabiblia.mobile"
+    }
+  }
+}
+

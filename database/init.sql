@@ -1,0 +1,3 @@
+-- O esquema é controlado por migrations versionadas em database/migrations.
+-- Este arquivo permanece vazio para manter compatibilidade com instalações antigas
+-- que montavam /docker-entrypoint-initdb.d/001-init.sql.
