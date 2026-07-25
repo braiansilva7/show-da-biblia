@@ -1,16 +1,22 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { container } from 'tsyringe';
-import type { UserRole } from '@core/common/types/user.js';
+import type { PermissionAction } from '@core/common/types/permission.js';
 import { UserRepository } from '@core/repositories/user/user.repository.js';
 
 export function registerAuthenticateJwt(server: FastifyInstance) {
   server.decorate(
     'authenticateJwt',
-    async (request: FastifyRequest, reply: FastifyReply, allowedRoles: UserRole[]) => {
+    async (
+      request: FastifyRequest,
+      reply: FastifyReply,
+      allowedPermissions: PermissionAction[]
+    ) => {
       try {
         await request.jwtVerify();
       } catch {
-        reply.code(401).send({ message: request.t('auth_invalid_or_expired_token') });
+        reply
+          .code(401)
+          .send({ message: request.t('auth_invalid_or_expired_token') });
         return;
       }
 
@@ -20,8 +26,13 @@ export function registerAuthenticateJwt(server: FastifyInstance) {
         reply.code(401).send({ message: request.t('auth_unauthorized_user') });
         return;
       }
-      if (allowedRoles.length && !allowedRoles.includes(user.role)) {
-        reply.code(403).send({ message: request.t('auth_admin_access_only') });
+      if (
+        allowedPermissions.length &&
+        !allowedPermissions.some((permission) =>
+          user.permissions.includes(permission)
+        )
+      ) {
+        reply.code(403).send({ message: request.t('auth_permission_denied') });
         return;
       }
       request.authenticatedUser = user;

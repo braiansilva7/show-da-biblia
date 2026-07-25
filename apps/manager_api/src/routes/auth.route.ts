@@ -7,10 +7,16 @@ import { loginSchema } from '@core/schema/auth/login/index.js';
 
 export default function authRoutes(server: FastifyInstance) {
   const authController = container.resolve(AuthController);
-  server.post('/auth/login', { schema: loginSchema, handler: authController.login });
+  server.post('/auth/login', {
+    schema: loginSchema,
+    handler: authController.login,
+  });
   server.get('/auth/me', {
     schema: currentUserSchema,
     handler: authController.currentUser,
-    preHandler: [(request, reply) => server.authenticateJwt(request, reply, authenticatedPermissions)],
+    preHandler: [
+      (request, reply) =>
+        server.authenticateJwt(request, reply, authenticatedPermissions),
+    ],
   });
 }

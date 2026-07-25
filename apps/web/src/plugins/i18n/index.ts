@@ -1,8 +1,14 @@
 import { createI18n } from 'vue-i18n';
 
 const messages = Object.fromEntries(
-  Object.entries(import.meta.glob<{ default: Record<string, string> }>('./locales/*.json', { eager: true }))
-    .map(([path, module]) => [path.slice(path.lastIndexOf('/') + 1, -5), module.default])
+  Object.entries(
+    import.meta.glob<{ default: Record<string, string> }>('./locales/*.json', {
+      eager: true,
+    })
+  ).map(([path, module]) => [
+    path.slice(path.lastIndexOf('/') + 1, -5),
+    module.default,
+  ])
 );
 
 function browserLocale(): 'pt' | 'en' | 'es' {

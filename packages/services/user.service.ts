@@ -1,5 +1,8 @@
 import { inject, injectable } from 'tsyringe';
-import { hashPassword, verifyPassword } from '@core/common/functions/password.js';
+import {
+  hashPassword,
+  verifyPassword,
+} from '@core/common/functions/password.js';
 import type { User, UserListItem } from '@core/common/types/user.js';
 import type { ICreateUserInput } from '@core/interfaces/user/ICreateUserInput.js';
 import type { IUpdateUserInput } from '@core/interfaces/user/IUpdateUserInput.js';
@@ -28,14 +31,16 @@ export class UserService {
   async create(input: ICreateUserInput): Promise<UserListItem> {
     let profilePictureUrl: string | null = null;
     if (input.profilePicture) {
-      profilePictureUrl = await this.storageService.uploadProfilePicture(input.profilePicture);
+      profilePictureUrl = await this.storageService.uploadProfilePicture(
+        input.profilePicture
+      );
     }
 
     return this.userRepository.create({
       username: input.username,
       email: input.email,
       passwordHash: await hashPassword(input.password),
-      role: input.role,
+      permissionRoleId: input.permissionRoleId,
       languageCode: input.languageCode,
       countryId: input.countryId ?? null,
       profilePictureUrl,
@@ -44,7 +49,10 @@ export class UserService {
   }
 
   async update(id: string, input: IUpdateUserInput, authenticatedUser: User) {
-    if (id === authenticatedUser.id && (input.active === false || input.role === 'PLAYER')) {
+    if (
+      id === authenticatedUser.id &&
+      (input.active === false || input.permissionRoleId !== undefined)
+    ) {
       return { error: 'SELF_ADMIN_CHANGE' as const };
     }
 
@@ -53,15 +61,19 @@ export class UserService {
 
     let profilePictureUrl = current.profilePictureUrl;
     if (input.profilePicture) {
-      profilePictureUrl = await this.storageService.uploadProfilePicture(input.profilePicture);
+      profilePictureUrl = await this.storageService.uploadProfilePicture(
+        input.profilePicture
+      );
       await this.storageService.deleteByUrl(current.profilePictureUrl);
     }
 
     const user = await this.userRepository.update(id, {
       username: input.username,
       email: input.email,
-      passwordHash: input.password ? await hashPassword(input.password) : undefined,
-      role: input.role,
+      passwordHash: input.password
+        ? await hashPassword(input.password)
+        : undefined,
+      permissionRoleId: input.permissionRoleId,
       languageCode: input.languageCode,
       countryId: input.countryId,
       profilePictureUrl: input.profilePicture ? profilePictureUrl : undefined,
@@ -76,7 +88,8 @@ export class UserService {
     const current = await this.userRepository.findById(id);
     if (!current) return { deleted: false };
     const deleted = await this.userRepository.delete(id);
-    if (deleted) await this.storageService.deleteByUrl(current.profilePictureUrl);
+    if (deleted)
+      await this.storageService.deleteByUrl(current.profilePictureUrl);
     return { deleted };
   }
 }
@@ -87,7 +100,9 @@ export class AuthService {
 
   async login(email: string, password: string): Promise<User | null> {
     const user = await this.userService.findByEmail(email);
-    const passwordMatches = user ? await verifyPassword(password, user.passwordHash) : false;
+    const passwordMatches = user
+      ? await verifyPassword(password, user.passwordHash)
+      : false;
     return user && user.active && passwordMatches ? user : null;
   }
 }

@@ -10,12 +10,22 @@ export async function hashPassword(password: string): Promise<string> {
   return `scrypt$${salt.toString('base64url')}$${derivedKey.toString('base64url')}`;
 }
 
-export async function verifyPassword(password: string, storedHash: string): Promise<boolean> {
+export async function verifyPassword(
+  password: string,
+  storedHash: string
+): Promise<boolean> {
   const [algorithm, encodedSalt, encodedKey] = storedHash.split('$');
   if (algorithm !== 'scrypt' || !encodedSalt || !encodedKey) return false;
 
   const salt = Buffer.from(encodedSalt, 'base64url');
   const expectedKey = Buffer.from(encodedKey, 'base64url');
-  const derivedKey = (await scryptAsync(password, salt, expectedKey.length)) as Buffer;
-  return expectedKey.length === derivedKey.length && timingSafeEqual(expectedKey, derivedKey);
+  const derivedKey = (await scryptAsync(
+    password,
+    salt,
+    expectedKey.length
+  )) as Buffer;
+  return (
+    expectedKey.length === derivedKey.length &&
+    timingSafeEqual(expectedKey, derivedKey)
+  );
 }

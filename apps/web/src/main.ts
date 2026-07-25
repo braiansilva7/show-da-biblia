@@ -3,6 +3,7 @@ import 'vuetify/styles';
 import { createVuetify } from 'vuetify';
 import * as components from 'vuetify/components';
 import * as directives from 'vuetify/directives';
+import '@/assets/styles/main.css';
 import App from './App.vue';
 import { i18n } from './plugins/i18n';
 

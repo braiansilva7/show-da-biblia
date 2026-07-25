@@ -1,6 +1,6 @@
-import type { UserRole } from '@core/common/types/user.js';
-export const authenticatedPermissions: UserRole[] = [];
-export const userViewPermissions: UserRole[] = ['ADMIN'];
-export const userCreatePermissions: UserRole[] = ['ADMIN'];
-export const userUpdatePermissions: UserRole[] = ['ADMIN'];
-export const userDeletePermissions: UserRole[] = ['ADMIN'];
+import type { PermissionAction } from '@core/common/types/permission.js';
+export const authenticatedPermissions: PermissionAction[] = [];
+export const userViewPermissions: PermissionAction[] = ['users.view'];
+export const userCreatePermissions: PermissionAction[] = ['users.create'];
+export const userUpdatePermissions: PermissionAction[] = ['users.update'];
+export const userDeletePermissions: PermissionAction[] = ['users.delete'];

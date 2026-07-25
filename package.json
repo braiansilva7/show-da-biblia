@@ -16,6 +16,8 @@
     "dev:mobile": "pnpm --filter @show-da-biblia/mobile dev",
     "build": "turbo run build",
     "typecheck": "turbo run typecheck",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "db:up": "docker compose up --build -d db atlas-db minio minio-setup atlas",
     "atlas:run": "atlas migrate hash --env ${ENV} --var DB_ATLAS=${DB_ATLAS} && atlas migrate apply --env ${ENV} --var DB_ATLAS=${DB_ATLAS} --url \"${DB_DATABASE_URL}\"",
     "atlas:run:docker": "docker compose run --rm -T -e ENV -e DB_ATLAS -e DB_DATABASE_URL atlas sh -c 'atlas migrate hash --env ${ENV} --var DB_ATLAS=${DB_ATLAS} && atlas migrate apply --env ${ENV} --var DB_ATLAS=${DB_ATLAS} --url \"${DB_DATABASE_URL}\"'",
@@ -49,9 +51,11 @@
     "@types/node": "^24.10.0",
     "@types/pg": "^8.20.0",
     "drizzle-kit": "^0.31.4",
+    "prettier": "^3.9.0",
     "tsc-alias": "^1.8.16",
     "tsx": "^4.22.4",
     "turbo": "^2.10.0",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "uuid": "^14.0.1"
   }
 }

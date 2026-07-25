@@ -1,5 +1,8 @@
 import { Type, type Static } from '@sinclair/typebox';
-import { publicUserSchema, errorMessageSchema } from '@core/schema/common/user.schema.js';
+import {
+  publicUserSchema,
+  errorMessageSchema,
+} from '@core/schema/common/user.schema.js';
 import { ETagSwagger } from '@core/common/enums/ETagSwagger.js';
 
 export const listUsersResponseSchema = Type.Object({

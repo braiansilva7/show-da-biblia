@@ -1,4 +1,8 @@
-import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
+import {
+  S3Client,
+  PutObjectCommand,
+  DeleteObjectCommand,
+} from '@aws-sdk/client-s3';
 import { injectable } from 'tsyringe';
 import { randomUUID } from 'node:crypto';
 import { s3Environment } from '@core/config/environments.js';
@@ -16,8 +20,13 @@ export class StorageService {
     },
   });
 
-  async uploadProfilePicture(input: IUploadProfilePictureInput): Promise<string> {
-    const extension = this.extensionFromMime(input.mimeType) ?? this.extensionFromName(input.originalName) ?? 'bin';
+  async uploadProfilePicture(
+    input: IUploadProfilePictureInput
+  ): Promise<string> {
+    const extension =
+      this.extensionFromMime(input.mimeType) ??
+      this.extensionFromName(input.originalName) ??
+      'bin';
     const key = `users/profile-pictures/${randomUUID()}.${extension}`;
 
     await this.client.send(

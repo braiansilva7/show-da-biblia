@@ -1,8 +1,15 @@
-import { boolean, pgTable, smallint, text, uuid, varchar } from 'drizzle-orm/pg-core';
+import {
+  boolean,
+  pgTable,
+  smallint,
+  text,
+  uuid,
+  varchar,
+} from 'drizzle-orm/pg-core';
 import { questions } from '@core/models/question/question.model.js';
 
 export const answerOptions = pgTable('answer_options', {
-  id: uuid('id').defaultRandom().primaryKey().notNull(),
+  id: uuid('id').primaryKey().notNull(),
   question_id: uuid('question_id')
     .references(() => questions.id, { onDelete: 'cascade' })
     .notNull(),
@@ -11,7 +18,7 @@ export const answerOptions = pgTable('answer_options', {
 });
 
 export const answerOptionTranslations = pgTable('answer_option_translations', {
-  id: uuid('id').defaultRandom().primaryKey().notNull(),
+  id: uuid('id').primaryKey().notNull(),
   answer_option_id: uuid('answer_option_id')
     .references(() => answerOptions.id, { onDelete: 'cascade' })
     .notNull(),

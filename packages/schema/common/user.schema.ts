@@ -6,13 +6,23 @@ export const languageCodeSchema = Type.Union([
   Type.Literal('es'),
 ]);
 
-export const userRoleSchema = Type.Union([Type.Literal('ADMIN'), Type.Literal('PLAYER')]);
+export const permissionActionSchema = Type.String();
 
 export const publicUserSchema = Type.Object({
   id: Type.String({ format: 'uuid' }),
   username: Type.String(),
   email: Type.String({ format: 'email' }),
-  role: userRoleSchema,
+  permission_role_id: Type.String({ format: 'uuid' }),
+  permission_role: Type.Optional(
+    Type.Object({
+      id: Type.String({ format: 'uuid' }),
+      name: Type.String(),
+      code: Type.Union([Type.String(), Type.Null()]),
+      is_system: Type.Boolean(),
+      active: Type.Boolean(),
+    })
+  ),
+  permissions: Type.Array(permissionActionSchema),
   country_id: Type.Union([Type.String({ format: 'uuid' }), Type.Null()]),
   language_code: languageCodeSchema,
   profile_picture_url: Type.Union([Type.String(), Type.Null()]),

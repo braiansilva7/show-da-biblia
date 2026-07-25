@@ -7,3 +7,4 @@ export * from './player/playerProgress.model.js';
 export * from './game/gameSession.model.js';
 export * from './joker/joker.model.js';
 export * from './score/scoreEvent.model.js';
+export * from './permission/permission.model.js';

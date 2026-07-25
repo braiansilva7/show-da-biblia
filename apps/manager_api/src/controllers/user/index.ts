@@ -36,7 +36,9 @@ export class UserController {
       return reply.code(201).send({ user: await this.creator.execute(input) });
     } catch (error) {
       if (postgresErrorCode(error) === '23505') {
-        return reply.code(409).send({ message: request.t('user_already_exists') });
+        return reply
+          .code(409)
+          .send({ message: request.t('user_already_exists') });
       }
       throw error;
     }
@@ -47,21 +49,30 @@ export class UserController {
     const { fields, profilePicture } = await parseUserMultipart(request);
     const input = parseUpdateUserInput(fields, profilePicture);
     if (!id || !input) {
-      return reply.code(400).send({ message: request.t('user_update_invalid_input') });
+      return reply
+        .code(400)
+        .send({ message: request.t('user_update_invalid_input') });
     }
 
     try {
-      const result = await this.updater.execute(id, input, request.authenticatedUser!);
+      const result = await this.updater.execute(
+        id,
+        input,
+        request.authenticatedUser!
+      );
       if ('error' in result) {
         return reply.code(400).send({
           message: request.t('user_self_admin_change_forbidden'),
         });
       }
-      if (!result.user) return reply.code(404).send({ message: request.t('user_not_found') });
+      if (!result.user)
+        return reply.code(404).send({ message: request.t('user_not_found') });
       return { user: result.user };
     } catch (error) {
       if (postgresErrorCode(error) === '23505') {
-        return reply.code(409).send({ message: request.t('user_already_exists') });
+        return reply
+          .code(409)
+          .send({ message: request.t('user_already_exists') });
       }
       throw error;
     }
@@ -69,14 +80,18 @@ export class UserController {
 
   public deleteUser = async (request: FastifyRequest, reply: FastifyReply) => {
     const id = parseUserId(request.params);
-    if (!id) return reply.code(400).send({ message: request.t('user_invalid_id') });
+    if (!id)
+      return reply.code(400).send({ message: request.t('user_invalid_id') });
 
     try {
       const result = await this.deleter.execute(id, request.authenticatedUser!);
       if ('error' in result) {
-        return reply.code(400).send({ message: request.t('user_self_delete_forbidden') });
+        return reply
+          .code(400)
+          .send({ message: request.t('user_self_delete_forbidden') });
       }
-      if (!result.deleted) return reply.code(404).send({ message: request.t('user_not_found') });
+      if (!result.deleted)
+        return reply.code(404).send({ message: request.t('user_not_found') });
       return reply.code(204).send();
     } catch (error) {
       if (postgresErrorCode(error) === '23503') {

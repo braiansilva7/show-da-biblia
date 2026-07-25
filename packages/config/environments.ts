@@ -30,7 +30,8 @@ export const s3Environment = {
   secretKey: required('S3_SECRET_KEY'),
   bucket: required('S3_BUCKET'),
   region: process.env.S3_REGION?.trim() || 'us-east-1',
-  publicBaseUrl: process.env.S3_PUBLIC_BASE_URL?.trim() || required('S3_ENDPOINT'),
+  publicBaseUrl:
+    process.env.S3_PUBLIC_BASE_URL?.trim() || required('S3_ENDPOINT'),
 };
 
 export function managerApiEnvironment() {

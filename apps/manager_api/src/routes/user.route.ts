@@ -17,21 +17,33 @@ export default function userRoutes(server: FastifyInstance) {
   server.get('/users', {
     schema: listUsersSchema,
     handler: userController.listUsers,
-    preHandler: [(request, reply) => server.authenticateJwt(request, reply, userViewPermissions)],
+    preHandler: [
+      (request, reply) =>
+        server.authenticateJwt(request, reply, userViewPermissions),
+    ],
   });
   server.post('/users', {
     schema: createUserSchema,
     handler: userController.createUser,
-    preHandler: [(request, reply) => server.authenticateJwt(request, reply, userCreatePermissions)],
+    preHandler: [
+      (request, reply) =>
+        server.authenticateJwt(request, reply, userCreatePermissions),
+    ],
   });
   server.patch('/users/:id', {
     schema: updateUserSchema,
     handler: userController.updateUser,
-    preHandler: [(request, reply) => server.authenticateJwt(request, reply, userUpdatePermissions)],
+    preHandler: [
+      (request, reply) =>
+        server.authenticateJwt(request, reply, userUpdatePermissions),
+    ],
   });
   server.delete('/users/:id', {
     schema: deleteUserSchema,
     handler: userController.deleteUser,
-    preHandler: [(request, reply) => server.authenticateJwt(request, reply, userDeletePermissions)],
+    preHandler: [
+      (request, reply) =>
+        server.authenticateJwt(request, reply, userDeletePermissions),
+    ],
   });
 }
