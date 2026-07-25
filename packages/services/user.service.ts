@@ -81,27 +81,40 @@ export class UserService {
       throw new Error('COUNTRY_NOT_FOUND');
     }
 
-    let profilePictureUrl = current.profilePictureUrl;
+    let profilePictureUrl: string | null | undefined;
+    let uploadedProfilePictureUrl: string | null = null;
     if (input.profilePicture) {
-      profilePictureUrl = await this.storageService.uploadProfilePicture(
+      uploadedProfilePictureUrl = await this.storageService.uploadProfilePicture(
         input.profilePicture
       );
+      profilePictureUrl = uploadedProfilePictureUrl;
+    } else if (input.removeProfilePicture) {
+      profilePictureUrl = null;
     }
 
-    const user = await this.userRepository.update(id, {
-      username: input.username,
-      email: input.email,
-      passwordHash: input.password
-        ? await hashPassword(input.password)
-        : undefined,
-      permissionRoleId: input.permissionRoleId,
-      languageCode: input.languageCode,
-      countryId: input.countryId,
-      profilePictureUrl: input.profilePicture ? profilePictureUrl : undefined,
-      active: input.active,
-    });
+    let user: UserListItem | null;
+    try {
+      user = await this.userRepository.update(id, {
+        username: input.username,
+        email: input.email,
+        passwordHash: input.password
+          ? await hashPassword(input.password)
+          : undefined,
+        permissionRoleId: input.permissionRoleId,
+        languageCode: input.languageCode,
+        countryId: input.countryId,
+        profilePictureUrl,
+        active: input.active,
+      });
+    } catch (error) {
+      if (uploadedProfilePictureUrl)
+        await this.storageService.deleteByUrl(uploadedProfilePictureUrl);
+      throw error;
+    }
 
-    if (user && input.profilePicture)
+    if (!user && uploadedProfilePictureUrl)
+      await this.storageService.deleteByUrl(uploadedProfilePictureUrl);
+    if (user && (input.profilePicture || input.removeProfilePicture))
       await this.storageService.deleteByUrl(current.profilePictureUrl);
 
     return { user };

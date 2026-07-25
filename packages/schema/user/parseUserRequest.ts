@@ -5,6 +5,11 @@ import type { IProfilePicture } from '@core/interfaces/user/IProfilePicture.js';
 import type { IUpdateUserInput } from '@core/interfaces/user/IUpdateUserInput.js';
 
 const languageCodes = new Set(['pt-BR', 'en', 'es']);
+const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+function hasField(fields: Record<string, unknown>, ...names: string[]) {
+  return names.some((name) => fields[name] !== undefined);
+}
 
 function asString(value: unknown): string | undefined {
   if (typeof value === 'string') return value;
@@ -97,7 +102,7 @@ export function parseCreateUserInput(
 
   const active = asBoolean(fields.active);
 
-  if (countryIdRaw === '') return null;
+  if (countryIdRaw === '' || !uuidPattern.test(countryIdRaw)) return null;
 
   return {
     username,
@@ -130,8 +135,20 @@ export function parseUpdateUserInput(
       ? asString(fields.country_id ?? fields.countryId)
       : undefined;
   const active = asBoolean(fields.active);
+  const removeProfilePicture = asBoolean(
+    fields.remove_profile_picture ?? fields.removeProfilePicture
+  );
 
-  if (countryIdRaw === '') return null;
+  if (
+    countryIdRaw === '' ||
+    (hasField(fields, 'language_code', 'languageCode') && !languageCode) ||
+    (hasField(fields, 'active') && active === undefined) ||
+    (hasField(fields, 'remove_profile_picture', 'removeProfilePicture') &&
+      removeProfilePicture === undefined) ||
+    (countryIdRaw !== undefined && !uuidPattern.test(countryIdRaw)) ||
+    (removeProfilePicture && profilePicture)
+  )
+    return null;
 
   if (username !== undefined) input.username = username;
   if (email !== undefined) input.email = email;
@@ -141,6 +158,7 @@ export function parseUpdateUserInput(
   if (countryIdRaw !== undefined) input.countryId = countryIdRaw;
   if (active !== undefined) input.active = active;
   if (profilePicture) input.profilePicture = profilePicture;
+  if (removeProfilePicture) input.removeProfilePicture = true;
 
   return Object.keys(input).length ? input : null;
 }

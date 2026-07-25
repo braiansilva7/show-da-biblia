@@ -11,6 +11,16 @@ import { UserCreatorUseCase } from '@core/useCases/user/UserCreator.usecase.js';
 import { UserDeleterUseCase } from '@core/useCases/user/UserDeleter.usecase.js';
 import { UserListerUseCase } from '@core/useCases/user/UserLister.usecase.js';
 import { UserUpdaterUseCase } from '@core/useCases/user/UserUpdater.usecase.js';
+import type { IProfilePicture } from '@core/interfaces/user/IProfilePicture.js';
+
+function isProfilePictureTooLarge(error: unknown): boolean {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'code' in error &&
+    error.code === 'FST_REQ_FILE_TOO_LARGE'
+  );
+}
 
 @injectable()
 export class UserController {
@@ -39,7 +49,17 @@ export class UserController {
   };
 
   public createUser = async (request: FastifyRequest, reply: FastifyReply) => {
-    const { fields, profilePicture } = await parseUserMultipart(request);
+    let fields: Record<string, unknown>;
+    let profilePicture: IProfilePicture | null;
+    try {
+      ({ fields, profilePicture } = await parseUserMultipart(request));
+    } catch (error) {
+      if (isProfilePictureTooLarge(error))
+        return reply
+          .code(400)
+          .send({ message: request.t('profile_picture_too_large') });
+      throw error;
+    }
     const input = parseCreateUserInput(fields, profilePicture);
     if (!input) {
       return reply.code(400).send({
@@ -79,7 +99,17 @@ export class UserController {
 
   public updateUser = async (request: FastifyRequest, reply: FastifyReply) => {
     const id = parseUserId(request.params);
-    const { fields, profilePicture } = await parseUserMultipart(request);
+    let fields: Record<string, unknown>;
+    let profilePicture: IProfilePicture | null;
+    try {
+      ({ fields, profilePicture } = await parseUserMultipart(request));
+    } catch (error) {
+      if (isProfilePictureTooLarge(error))
+        return reply
+          .code(400)
+          .send({ message: request.t('profile_picture_too_large') });
+      throw error;
+    }
     const input = parseUpdateUserInput(fields, profilePicture);
     if (!id || !input) {
       return reply

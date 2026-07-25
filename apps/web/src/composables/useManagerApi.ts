@@ -223,6 +223,8 @@ export function useManagerApi() {
       if (input.password) payload.set('password', input.password);
       if (input.profile_picture)
         payload.set('profile_picture', input.profile_picture);
+      if (targetUser && input.remove_profile_picture)
+        payload.set('remove_profile_picture', 'true');
       const response = await fetch(
         targetUser
           ? `${apiUrl}/api/v1/users/${targetUser.id}`

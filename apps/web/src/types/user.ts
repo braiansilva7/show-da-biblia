@@ -60,4 +60,5 @@ export interface UserFormInput {
   language_code: LanguageCode;
   active: boolean;
   profile_picture: File | null;
+  remove_profile_picture: boolean;
 }

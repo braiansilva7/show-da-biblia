@@ -10,6 +10,7 @@ export const updateUserRequestSchema = Type.Object(
     language_code: Type.Optional(languageCodeSchema),
     country_id: Type.Optional(Type.String({ format: 'uuid' })),
     active: Type.Optional(Type.Boolean()),
+    remove_profile_picture: Type.Optional(Type.Boolean()),
   },
   { minProperties: 1 }
 );

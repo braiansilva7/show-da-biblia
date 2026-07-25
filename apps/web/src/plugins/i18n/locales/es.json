@@ -48,6 +48,7 @@
   "next": "Siguiente",
   "pagination_status": "Página {page} de {total}",
   "users_per_page": "Usuarios por página",
+  "remove_current_picture": "Eliminar foto actual",
   "loading_users": "Cargando usuarios...",
   "no_users": "No hay usuarios registrados.",
   "user": "Usuario",

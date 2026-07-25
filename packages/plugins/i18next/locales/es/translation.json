@@ -13,6 +13,7 @@
   "user_create_invalid_input": "Indique un nombre de usuario, correo electrónico válido, contraseña de al menos 8 caracteres, perfil, idioma del juego y país de origen.",
   "country_not_found": "El país de origen seleccionado no existe o está inactivo.",
   "profile_picture_invalid": "La foto del usuario debe estar en formato JPEG, PNG, WEBP o GIF.",
+  "profile_picture_too_large": "La foto del usuario debe tener un máximo de 5 MB.",
   "user_already_exists": "Ya existe un usuario con este nombre o correo electrónico.",
   "username_already_exists": "Este nombre de usuario ya está en uso.",
   "user_update_invalid_input": "Indique al menos un campo válido para editar.",

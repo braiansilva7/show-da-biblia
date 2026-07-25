@@ -49,6 +49,7 @@ function emptyForm(): UserFormInput {
     language_code: 'pt-BR',
     active: true,
     profile_picture: null,
+    remove_profile_picture: false,
   };
 }
 watch(
@@ -68,6 +69,7 @@ watch(
           language_code: user.language_code,
           active: user.active,
           profile_picture: null,
+          remove_profile_picture: false,
         }
       : emptyForm();
   },
@@ -82,6 +84,7 @@ function selectProfilePicture(event: Event) {
   const file = input.files?.[0];
   input.value = '';
   if (!file) return;
+  form.value.remove_profile_picture = false;
   cropSource.value = URL.createObjectURL(file);
   isCropOpen.value = true;
 }
@@ -91,6 +94,15 @@ function applyCrop(file: File) {
   localPreviewUrl = URL.createObjectURL(file);
   profilePicturePreview.value = localPreviewUrl;
   form.value.profile_picture = file;
+}
+function toggleRemoveProfilePicture() {
+  if (form.value.remove_profile_picture) {
+    revokeLocalPreview();
+    profilePicturePreview.value = '';
+    form.value.profile_picture = null;
+    return;
+  }
+  profilePicturePreview.value = props.user?.profile_picture_url ?? '';
 }
 </script>
 
@@ -132,6 +144,17 @@ function applyCrop(file: File) {
                 type="file"
                 @change="selectProfilePicture"
               />
+            </span>
+            <span
+              v-if="isEditing && user?.profile_picture_url"
+              class="remove-picture-option"
+            >
+              <input
+                v-model="form.remove_profile_picture"
+                type="checkbox"
+                @change="toggleRemoveProfilePicture"
+              />
+              {{ $t('remove_current_picture') }}
             </span>
           </label>
           <label
@@ -276,5 +299,28 @@ function applyCrop(file: File) {
   opacity: 0;
   position: absolute;
   width: 100%;
+}
+.remove-picture-option {
+  align-items: center;
+  color: #7f4f24;
+  cursor: pointer;
+  display: flex;
+  font-size: 0.75rem;
+  font-weight: 600;
+  gap: 0.35rem;
+  margin: 0.15rem auto 0;
+  width: max-content;
+}
+.remove-picture-option input {
+  accent-color: #7f4f24;
+  cursor: pointer;
+  flex: 0 0 14px;
+  height: 14px;
+  margin: 0;
+  padding: 0;
+  width: 14px;
+}
+.remove-picture-option:has(input:checked) {
+  color: #c73d3e;
 }
 </style>

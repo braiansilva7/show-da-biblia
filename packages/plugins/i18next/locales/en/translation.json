@@ -13,6 +13,7 @@
   "user_create_invalid_input": "Provide a username, valid email, password with at least 8 characters, role, game language, and country of origin.",
   "country_not_found": "The selected country of origin does not exist or is inactive.",
   "profile_picture_invalid": "The user photo must be a JPEG, PNG, WEBP, or GIF file.",
+  "profile_picture_too_large": "The user photo must be no larger than 5 MB.",
   "user_already_exists": "A user with this username or email already exists.",
   "username_already_exists": "This username is already in use.",
   "user_update_invalid_input": "Provide at least one valid field to update.",

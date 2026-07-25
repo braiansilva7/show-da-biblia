@@ -10,4 +10,5 @@ export interface IUpdateUserInput {
   countryId?: string;
   active?: boolean;
   profilePicture?: IProfilePicture | null;
+  removeProfilePicture?: boolean;
 }
