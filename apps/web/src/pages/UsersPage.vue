@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { onBeforeUnmount, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import UserDeleteDialog from '@/components/user/UserDeleteDialog.vue';
 import UserFormDialog from '@/components/user/UserFormDialog.vue';
@@ -15,6 +15,10 @@ import { localeFromLanguage } from '@/utils/locale';
 
 const props = defineProps<{
   users: ManagedUser[];
+  total: number;
+  page: number;
+  limit: number;
+  search: string;
   roles: PermissionRole[];
   countries: Country[];
   error: string;
@@ -28,11 +32,34 @@ const props = defineProps<{
   ) => Promise<boolean>;
   deleteUser: (user: ManagedUser) => Promise<boolean>;
 }>();
-const emit = defineEmits<{ refresh: [] }>();
+const emit = defineEmits<{
+  search: [options: { page?: number; search?: string; limit?: number }];
+}>();
 const { t, locale } = useI18n();
 const isFormOpen = ref(false);
 const editingUser = ref<ManagedUser | null>(null);
 const userPendingDeletion = ref<ManagedUser | null>(null);
+const searchTerm = ref(props.search);
+let searchTimeout: ReturnType<typeof setTimeout> | undefined;
+const totalPages = () => Math.max(1, Math.ceil(props.total / props.limit));
+
+watch(searchTerm, (value) => {
+  if (searchTimeout) clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => {
+    emit('search', { page: 1, search: value });
+  }, 300);
+});
+
+watch(
+  () => props.search,
+  (value) => {
+    if (value !== searchTerm.value) searchTerm.value = value;
+  }
+);
+
+onBeforeUnmount(() => {
+  if (searchTimeout) clearTimeout(searchTimeout);
+});
 function languageLabel(language: LanguageCode) {
   return t(`language_${localeFromLanguage(language)}`);
 }
@@ -42,6 +69,16 @@ function initials(name: string) {
 function createUser() {
   editingUser.value = null;
   isFormOpen.value = true;
+}
+function changePage(value: number) {
+  emit('search', { page: value, search: searchTerm.value });
+}
+function changeLimit(value: unknown) {
+  emit('search', {
+    page: 1,
+    search: searchTerm.value,
+    limit: Number(value),
+  });
 }
 function editUser(user: ManagedUser) {
   editingUser.value = user;
@@ -79,17 +116,23 @@ async function confirmDelete() {
       <div class="data-card-header">
         <div>
           <h2>{{ $t('all_users') }}</h2>
-          <p>{{ $t('users_found', { count: users.length }) }}</p>
+          <p>{{ $t('users_found', { count: total }) }}</p>
         </div>
-        <v-btn
-          class="refresh-button"
-          type="button"
-          variant="outlined"
-          size="small"
-          :loading="isLoading"
-          @click="emit('refresh')"
-          >{{ $t('refresh') }}</v-btn
-        >
+        <label class="users-filter">
+          <svg
+            class="users-filter-icon"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path d="M4 6h16M7 12h10M10 18h4" />
+          </svg>
+          <input
+            v-model="searchTerm"
+            type="search"
+            :placeholder="$t('users_search_placeholder')"
+            :aria-label="$t('users_search_placeholder')"
+          />
+        </label>
       </div>
       <p v-if="error" class="form-error" role="alert">{{ error }}</p>
       <p v-else-if="isLoading" class="empty-state">{{ $t('loading_users') }}</p>
@@ -162,6 +205,30 @@ async function confirmDelete() {
           </tbody>
         </table>
       </div>
+      <footer class="users-pagination">
+        <v-select
+          class="users-per-page"
+          :model-value="limit"
+          :items="[10, 20, 50]"
+          :label="$t('users_per_page')"
+          density="compact"
+          hide-details
+          variant="outlined"
+          :disabled="isLoading"
+          @update:model-value="changeLimit"
+        />
+        <div class="users-pagination-controls">
+          <span>{{ $t('pagination_status', { page, total: totalPages() }) }}</span>
+          <v-pagination
+            :model-value="page"
+            :length="totalPages()"
+            :total-visible="5"
+            density="compact"
+            :disabled="isLoading"
+            @update:model-value="changePage"
+          />
+        </div>
+      </footer>
     </article>
     <UserFormDialog
       :model-value="isFormOpen"

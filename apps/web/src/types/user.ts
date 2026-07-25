@@ -44,6 +44,13 @@ export interface ManagedUser extends AuthenticatedUser {
   total_score?: number;
 }
 
+export interface UsersListResponse {
+  users: ManagedUser[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
 export interface UserFormInput {
   username: string;
   email: string;

@@ -6,6 +6,7 @@ import {
 import type { User, UserListItem } from '@core/common/types/user.js';
 import type { ICreateUserInput } from '@core/interfaces/user/ICreateUserInput.js';
 import type { IUpdateUserInput } from '@core/interfaces/user/IUpdateUserInput.js';
+import type { IListUsersInput } from '@core/interfaces/user/IListUsersInput.js';
 import { UserRepository } from '@core/repositories/user/user.repository.js';
 import { StorageService } from '@core/services/storage.service.js';
 import { CountryService } from '@core/services/country.service.js';
@@ -18,8 +19,8 @@ export class UserService {
     @inject(CountryService) private readonly countryService: CountryService
   ) {}
 
-  list(): Promise<UserListItem[]> {
-    return this.userRepository.list();
+  list(input: IListUsersInput) {
+    return this.userRepository.list(input);
   }
 
   findById(id: string): Promise<User | null> {

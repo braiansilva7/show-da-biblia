@@ -1,5 +1,5 @@
 import { inject, injectable } from 'tsyringe';
-import { and, eq, ne, sql } from 'drizzle-orm';
+import { and, desc, eq, ne, sql } from 'drizzle-orm';
 import type { AppDatabase } from '@core/plugins/database/index.js';
 import { users } from '@core/models/user/user.model.js';
 import type {
@@ -10,6 +10,7 @@ import type {
 import { PermissionRepository } from '@core/repositories/permission/permission.repository.js';
 import { toPublicUser } from '@core/common/functions/to-public-user.js';
 import { createUuidV7 } from '@core/common/functions/uuid.js';
+import type { IListUsersInput } from '@core/interfaces/user/IListUsersInput.js';
 
 function mapLanguage(value: string): LanguageCode {
   return value === 'en' || value === 'es' ? value : 'pt-BR';
@@ -82,16 +83,37 @@ export class UserRepository {
     return rows[0] ? mapUser(rows[0], this.permissions) : null;
   }
 
-  async list(): Promise<UserListItem[]> {
+  async list(input: IListUsersInput): Promise<{
+    users: UserListItem[];
+    total: number;
+  }> {
+    const search = input.search?.trim().toLowerCase();
+    const where = search
+      ? sql`(
+          lower(${users.username}) like ${`%${search}%`}
+          or lower(${users.email}) like ${`%${search}%`}
+        )`
+      : undefined;
     const rows = await this.db
       .select()
       .from(users)
-      .orderBy(sql`${users.created_at} DESC`, users.username);
-    return Promise.all(
-      rows.map(async (row) =>
-        toPublicUser(await mapUser(row, this.permissions))
-      )
-    );
+      .where(where)
+      .orderBy(desc(users.created_at), users.username)
+      .limit(input.limit)
+      .offset((input.page - 1) * input.limit);
+    const [count] = await this.db
+      .select({ total: sql<number>`count(*)::int` })
+      .from(users)
+      .where(where);
+
+    return {
+      users: await Promise.all(
+        rows.map(async (row) =>
+          toPublicUser(await mapUser(row, this.permissions))
+        )
+      ),
+      total: count?.total ?? 0,
+    };
   }
 
   async create(input: {

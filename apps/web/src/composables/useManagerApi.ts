@@ -7,6 +7,7 @@ import type {
   ManagedUser,
   PermissionRole,
   UserFormInput,
+  UsersListResponse,
 } from '@/types/user';
 import { localeFromLanguage } from '@/utils/locale';
 import type { DashboardSummary } from '@/types/dashboard';
@@ -29,6 +30,10 @@ export function useManagerApi() {
   const { locale, t } = useI18n();
   const user = ref<AuthenticatedUser | null>(null);
   const users = ref<ManagedUser[]>([]);
+  const usersTotal = ref(0);
+  const usersPage = ref(1);
+  const usersLimit = ref(20);
+  const usersSearch = ref('');
   const roles = ref<PermissionRole[]>([]);
   const countries = ref<Country[]>([]);
   const dashboardSummary = ref<DashboardSummary | null>(null);
@@ -41,6 +46,7 @@ export function useManagerApi() {
   const isLoadingUsers = ref(false);
   const isSavingUser = ref(false);
   const isDeletingUser = ref(false);
+  let usersRequestId = 0;
 
   function setUserLanguage(authenticatedUser: AuthenticatedUser) {
     locale.value = localeFromLanguage(authenticatedUser.language_code);
@@ -111,24 +117,53 @@ export function useManagerApi() {
     }
   }
 
-  async function loadUsers() {
+  async function loadUsers(
+    options: { page?: number; search?: string; limit?: number } = {}
+  ) {
+    const requestId = ++usersRequestId;
+    const page = options.page ?? usersPage.value;
+    const search = options.search ?? usersSearch.value;
+    const limit = options.limit ?? usersLimit.value;
+    const params = new URLSearchParams({
+      page: String(page),
+      limit: String(limit),
+    });
+    if (search.trim()) params.set('search', search.trim());
     isLoadingUsers.value = true;
     usersError.value = '';
     try {
-      const response = await fetch(`${apiUrl}/api/v1/users`, {
+      const response = await fetch(`${apiUrl}/api/v1/users?${params}`, {
         headers: authorizationHeaders(),
       });
       const data = (await response.json().catch(() => null)) as
-        ({ users?: ManagedUser[] } & ApiMessage) | null;
-      if (!response.ok || !data?.users) {
-        usersError.value = getMessage(data, t('load_users_failed'));
+        (Partial<UsersListResponse> & ApiMessage) | null;
+      if (
+        !response.ok ||
+        !data?.users ||
+        typeof data.total !== 'number' ||
+        typeof data.page !== 'number' ||
+        typeof data.limit !== 'number'
+      ) {
+        if (requestId === usersRequestId)
+          usersError.value = getMessage(data, t('load_users_failed'));
         return;
       }
+      const lastPage = Math.max(1, Math.ceil(data.total / data.limit));
+      if (data.total > 0 && data.page > lastPage) {
+        await loadUsers({ page: lastPage, search, limit: data.limit });
+        return;
+      }
+      if (requestId !== usersRequestId) return;
       users.value = data.users;
+      usersTotal.value = data.total;
+      usersPage.value = data.page;
+      usersLimit.value = data.limit;
+      usersSearch.value = search;
     } catch {
-      usersError.value = t('load_users_connection_failed');
+      if (requestId === usersRequestId)
+        usersError.value = t('load_users_connection_failed');
     } finally {
-      isLoadingUsers.value = false;
+      if (requestId === usersRequestId) isLoadingUsers.value = false;
     }
   }
   async function loadDashboard() {
@@ -206,15 +241,11 @@ export function useManagerApi() {
         saveUserError.value = getMessage(data, t('save_user_failed'));
         return false;
       }
-      users.value = targetUser
-        ? users.value.map((item) =>
-            item.id === data.user?.id ? data.user : item
-          )
-        : [data.user, ...users.value];
       if (data.user.id === user.value?.id) {
         user.value = { ...user.value, ...data.user };
         setUserLanguage(user.value);
       }
+      await loadUsers();
       return true;
     } catch {
       saveUserError.value = t('save_user_connection_failed');
@@ -239,7 +270,7 @@ export function useManagerApi() {
         usersError.value = getMessage(data, t('delete_user_failed'));
         return false;
       }
-      users.value = users.value.filter((item) => item.id !== managedUser.id);
+      await loadUsers();
       return true;
     } catch {
       usersError.value = t('delete_user_connection_failed');
@@ -253,10 +284,17 @@ export function useManagerApi() {
     sessionStorage.removeItem(tokenStorageKey);
     user.value = null;
     users.value = [];
+    usersTotal.value = 0;
+    usersPage.value = 1;
+    usersSearch.value = '';
   }
   return {
     user,
     users,
+    usersTotal,
+    usersPage,
+    usersLimit,
+    usersSearch,
     roles,
     countries,
     dashboardSummary,

@@ -12,6 +12,10 @@ const api = useManagerApi();
 const {
   user,
   users,
+  usersTotal,
+  usersPage,
+  usersLimit,
+  usersSearch,
   roles,
   countries,
   loginError,
@@ -90,6 +94,10 @@ onMounted(async () => {
       <UsersPage
         v-else
         :users="users"
+        :total="usersTotal"
+        :page="usersPage"
+        :limit="usersLimit"
+        :search="usersSearch"
         :roles="roles"
         :countries="countries"
         :error="usersError"
@@ -99,7 +107,7 @@ onMounted(async () => {
         :is-deleting="isDeletingUser"
         :save-user="saveUser"
         :delete-user="deleteUser"
-        @refresh="api.loadUsers"
+        @search="api.loadUsers"
       />
     </AppLayout>
   </v-app>

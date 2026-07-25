@@ -21,7 +21,22 @@ export class UserController {
     @inject(UserDeleterUseCase) private readonly deleter: UserDeleterUseCase
   ) {}
 
-  public listUsers = async () => ({ users: await this.lister.execute() });
+  public listUsers = async (request: FastifyRequest) => {
+    const query = request.query as {
+      page?: number;
+      limit?: number;
+      search?: string;
+    };
+    const page = query.page ?? 1;
+    const limit = query.limit ?? 20;
+    const result = await this.lister.execute({
+      page,
+      limit,
+      search: query.search,
+    });
+
+    return { ...result, page, limit };
+  };
 
   public createUser = async (request: FastifyRequest, reply: FastifyReply) => {
     const { fields, profilePicture } = await parseUserMultipart(request);
