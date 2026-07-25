@@ -1,4 +1,4 @@
-h1:4x+OeIMmxNYK9s8weAWzrKq1zNm/bKK4aDnLHLnHbog=
+h1:sP8pfrhZjWJ2zArc1+uJrnJjkKSrlHmFiMfrTzLdf6c=
 20260723230000.sql h1:dTkMan0kFpZE6RcVcAyUa+h/4ksAlqq3DR+U2UtIXo0=
 20260725090000_permission_roles.sql h1:jVehq3of4YnCkwwS1rT3HEZhmfSXjHVQODUKZPkfTOQ=
 20260725100000_user_country_required.sql h1:77RwjLez3iL6ErqzINtU0gXhMDqMkghs24bWXKwnVC8=
@@ -7,3 +7,4 @@ h1:4x+OeIMmxNYK9s8weAWzrKq1zNm/bKK4aDnLHLnHbog=
 20260725140000_questions_list.sql h1:2alCkhnsoYw4aHZoJXAbTi1Gr48n+Ehy7XS5NTgTJaE=
 20260725150000_questions_create.sql h1:h6UGIUqPp2i+iJkPx7NwsmCSpjWB9OkXMe8fOnf+CN8=
 20260725160000_questions_publish_validation.sql h1:aF3mjWdigTY0hfgRG0Yeh7tXqzs14Y7SQNE5qTCquQI=
+20260725170000_questions_four_answer_options.sql h1:LJXY1MvGe04YAEOzm1RwV99JbmgB2kpJDcpnfV/hTuo=

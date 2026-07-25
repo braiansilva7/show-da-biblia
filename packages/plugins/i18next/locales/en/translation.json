@@ -31,7 +31,7 @@
   "question_invalid_input": "Provide valid question data.",
   "question_not_found": "Question not found.",
   "question_category_not_found": "The selected category does not exist.",
-  "question_invalid_options": "A question must have exactly five options and one correct answer.",
+  "question_invalid_options": "A question must have exactly four options and one correct answer.",
   "question_invalid_translation": "Statement and explanation must be filled in together for each language.",
   "question_published_edit_forbidden": "Published questions cannot be edited.",
   "question_already_published": "This question is already published.",
@@ -40,7 +40,7 @@
   "question_publish_pending_category": "The category does not exist.",
   "question_publish_pending_difficulty": "The difficulty is invalid.",
   "question_publish_pending_question_translations": "Add statement and explanation in PT-BR, English, and Spanish.",
-  "question_publish_pending_answer_options": "Add exactly five answer options in positions 1 through 5.",
-  "question_publish_pending_answer_translations": "Add text for all five answer options in the three languages.",
+  "question_publish_pending_answer_options": "Add exactly four answer options in positions 1 through 4.",
+  "question_publish_pending_answer_translations": "Add text for all four answer options in the three languages.",
   "question_publish_pending_correct_answer": "Set exactly one correct answer."
 }

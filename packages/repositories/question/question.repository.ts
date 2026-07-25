@@ -146,7 +146,7 @@ export class QuestionRepository {
             ['pt-BR', 'en', 'es'].every((language) =>
               languages.includes(language)
             ) &&
-            answerOptionsCount === 5 &&
+            answerOptionsCount === 4 &&
             correctAnswersCount === 1,
         };
       }),

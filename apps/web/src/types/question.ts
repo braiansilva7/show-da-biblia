@@ -46,7 +46,7 @@ export type QuestionLanguage = 'pt-BR' | 'en' | 'es';
 export interface QuestionTranslationInput { statement: string; explanation: string }
 export interface AnswerTranslationInput { content: string }
 export interface QuestionOptionInput {
-  position: 1 | 2 | 3 | 4 | 5;
+  position: 1 | 2 | 3 | 4;
   is_correct: boolean;
   translations: Record<QuestionLanguage, AnswerTranslationInput>;
 }

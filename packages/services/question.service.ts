@@ -11,6 +11,7 @@ export class QuestionPublishValidationError extends Error {
 }
 
 const languages: QuestionLanguage[] = ['pt-BR', 'en', 'es'];
+const answerOptionPositions = [1, 2, 3, 4] as const;
 
 @injectable()
 export class QuestionService {
@@ -62,7 +63,7 @@ export class QuestionService {
 
   private async validate(input: IQuestionMutationInput) {
     if (!(await this.categories.findById(input.categoryId))) throw new Error('CATEGORY_NOT_FOUND');
-    if (input.options.length !== 5 || new Set(input.options.map((option) => option.position)).size !== 5 || ![1, 2, 3, 4, 5].every((position) => input.options.some((option) => option.position === position)) || input.options.filter((option) => option.is_correct).length !== 1) throw new Error('QUESTION_INVALID_OPTIONS');
+    if (input.options.length !== answerOptionPositions.length || new Set(input.options.map((option) => option.position)).size !== answerOptionPositions.length || !answerOptionPositions.every((position) => input.options.some((option) => option.position === position)) || input.options.filter((option) => option.is_correct).length !== 1) throw new Error('QUESTION_INVALID_OPTIONS');
     for (const translation of Object.values(input.translations)) if ((translation?.statement && !translation.explanation) || (!translation?.statement && translation?.explanation)) throw new Error('QUESTION_INVALID_TRANSLATION');
   }
 
@@ -76,7 +77,7 @@ export class QuestionService {
       return translation?.statement.trim() && translation.explanation.trim();
     })) pending.push('question_translations');
     const positions = current.options.map((option) => option.position);
-    if (current.options.length !== 5 || new Set(positions).size !== 5 || ![1, 2, 3, 4, 5].every((position) => positions.includes(position))) pending.push('answer_options');
+    if (current.options.length !== answerOptionPositions.length || new Set(positions).size !== answerOptionPositions.length || !answerOptionPositions.every((position) => positions.includes(position))) pending.push('answer_options');
     if (current.options.filter((option) => option.is_correct).length !== 1) pending.push('correct_answer');
     const optionIds = new Set(current.options.map((option) => option.id));
     const optionTranslations = current.optionTranslations as Array<{ answer_option_id: string; language_code: QuestionLanguage; content: string }>;
@@ -84,7 +85,7 @@ export class QuestionService {
       const translation = optionTranslations.find((item) => item.answer_option_id === option.id && item.language_code === language);
       return Boolean(translation?.content?.trim());
     }));
-    if (!completeTexts || optionTranslations.filter((translation) => optionIds.has(translation.answer_option_id)).length !== 15) pending.push('answer_translations');
+    if (!completeTexts || optionTranslations.filter((translation) => optionIds.has(translation.answer_option_id)).length !== answerOptionPositions.length * languages.length) pending.push('answer_translations');
     return pending;
   }
 }

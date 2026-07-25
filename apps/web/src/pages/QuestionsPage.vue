@@ -216,7 +216,7 @@ function confirmRemoval() {
                   >{{ $t(completeLabel(question)) }}</span
                 ><span class="question-completeness"
                   >{{ question.languages.join(', ') || '-' }} ·
-                  {{ question.answer_options_count }}/5 ·
+                  {{ question.answer_options_count }}/4 ·
                   {{ question.correct_answers_count }}/1</span
                 >
               </td>

@@ -14,7 +14,7 @@ export type AnswerTranslationsInput = {
   es?: AnswerTranslationInput;
 };
 export interface IQuestionOptionInput {
-  position: 1 | 2 | 3 | 4 | 5;
+  position: 1 | 2 | 3 | 4;
   is_correct: boolean;
   translations: AnswerTranslationsInput;
 }

@@ -8,7 +8,7 @@ const emit = defineEmits<{ save: [input: QuestionFormInput]; cancel: [] }>();
 const languages: QuestionLanguage[] = ['pt-BR', 'en', 'es'];
 const tab = ref<QuestionLanguage>('pt-BR');
 function blank(): QuestionFormInput {
-  return { category_id: '', difficulty_level: 1, translations: Object.fromEntries(languages.map((language) => [language, { statement: '', explanation: '' }])) as QuestionFormInput['translations'], options: [1,2,3,4,5].map((position) => ({ position: position as 1|2|3|4|5, is_correct: position === 1, translations: Object.fromEntries(languages.map((language) => [language, { content: '' }])) as QuestionFormInput['options'][number]['translations'] })) };
+  return { category_id: '', difficulty_level: 1, translations: Object.fromEntries(languages.map((language) => [language, { statement: '', explanation: '' }])) as QuestionFormInput['translations'], options: [1,2,3,4].map((position) => ({ position: position as 1|2|3|4, is_correct: position === 1, translations: Object.fromEntries(languages.map((language) => [language, { content: '' }])) as QuestionFormInput['options'][number]['translations'] })) };
 }
 const form = ref<QuestionFormInput>(blank());
 watch(() => props.question, (question) => {

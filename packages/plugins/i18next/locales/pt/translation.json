@@ -31,7 +31,7 @@
   "question_invalid_input": "Informe os dados válidos da questão.",
   "question_not_found": "Questão não encontrada.",
   "question_category_not_found": "A categoria informada não existe.",
-  "question_invalid_options": "A questão deve ter exatamente cinco alternativas e uma única resposta correta.",
+  "question_invalid_options": "A questão deve ter exatamente quatro alternativas e uma única resposta correta.",
   "question_invalid_translation": "Enunciado e explicação devem ser preenchidos juntos em cada idioma.",
   "question_published_edit_forbidden": "Questões publicadas não podem ser editadas.",
   "question_already_published": "Esta questão já está publicada.",
@@ -40,7 +40,7 @@
   "question_publish_pending_category": "Categoria inexistente.",
   "question_publish_pending_difficulty": "Dificuldade inválida.",
   "question_publish_pending_question_translations": "Inclua enunciado e explicação em PT-BR, inglês e espanhol.",
-  "question_publish_pending_answer_options": "Inclua exatamente cinco alternativas nas posições de 1 a 5.",
-  "question_publish_pending_answer_translations": "Inclua o texto das cinco alternativas nos três idiomas.",
+  "question_publish_pending_answer_options": "Inclua exatamente quatro alternativas nas posições de 1 a 4.",
+  "question_publish_pending_answer_translations": "Inclua o texto das quatro alternativas nos três idiomas.",
   "question_publish_pending_correct_answer": "Defina exatamente uma resposta correta."
 }

@@ -55,7 +55,7 @@ const optionTranslationsSchema = Type.Object({
   es: Type.Optional(answerTranslationSchema),
 });
 const mutationOptionSchema = Type.Object({
-  position: Type.Integer({ minimum: 1, maximum: 5 }),
+  position: Type.Integer({ minimum: 1, maximum: 4 }),
   is_correct: Type.Boolean(),
   translations: optionTranslationsSchema,
 });
@@ -63,7 +63,7 @@ const questionMutationBodySchema = Type.Object({
   category_id: Type.String({ format: 'uuid' }),
   difficulty_level: difficultySchema,
   translations: mutationTranslationsSchema,
-  options: Type.Array(mutationOptionSchema, { minItems: 5, maxItems: 5 }),
+  options: Type.Array(mutationOptionSchema, { minItems: 4, maxItems: 4 }),
 });
 const questionEditorSchema = Type.Object({
   id: Type.String({ format: 'uuid' }),
@@ -81,14 +81,14 @@ const questionEditorSchema = Type.Object({
   }),
   options: Type.Array(Type.Object({
     id: Type.String({ format: 'uuid' }),
-    position: Type.Integer({ minimum: 1, maximum: 5 }),
+    position: Type.Integer({ minimum: 1, maximum: 4 }),
     is_correct: Type.Boolean(),
     translations: Type.Object({
       'pt-BR': Type.Union([Type.Object({ content: Type.String() }), Type.Null()]),
       en: Type.Union([Type.Object({ content: Type.String() }), Type.Null()]),
       es: Type.Union([Type.Object({ content: Type.String() }), Type.Null()]),
     }),
-  }), { minItems: 5, maxItems: 5 }),
+  }), { minItems: 4, maxItems: 4 }),
 });
 const questionEditorResponseSchema = Type.Object({ question: questionEditorSchema });
 const questionIdParamsSchema = Type.Object({ id: Type.String({ format: 'uuid' }) });

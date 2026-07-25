@@ -31,7 +31,7 @@
   "question_invalid_input": "Proporcione datos válidos para la pregunta.",
   "question_not_found": "Pregunta no encontrada.",
   "question_category_not_found": "La categoría informada no existe.",
-  "question_invalid_options": "La pregunta debe tener exactamente cinco alternativas y una única respuesta correcta.",
+  "question_invalid_options": "La pregunta debe tener exactamente cuatro alternativas y una única respuesta correcta.",
   "question_invalid_translation": "El enunciado y la explicación deben completarse juntos en cada idioma.",
   "question_published_edit_forbidden": "Las preguntas publicadas no se pueden editar.",
   "question_already_published": "Esta pregunta ya está publicada.",
@@ -40,7 +40,7 @@
   "question_publish_pending_category": "La categoría no existe.",
   "question_publish_pending_difficulty": "La dificultad no es válida.",
   "question_publish_pending_question_translations": "Incluya enunciado y explicación en PT-BR, inglés y español.",
-  "question_publish_pending_answer_options": "Incluya exactamente cinco alternativas en las posiciones de 1 a 5.",
-  "question_publish_pending_answer_translations": "Incluya los textos de las cinco alternativas en los tres idiomas.",
+  "question_publish_pending_answer_options": "Incluya exactamente cuatro alternativas en las posiciones de 1 a 4.",
+  "question_publish_pending_answer_translations": "Incluya los textos de las cuatro alternativas en los tres idiomas.",
   "question_publish_pending_correct_answer": "Defina exactamente una respuesta correcta."
 }

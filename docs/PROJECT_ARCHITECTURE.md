@@ -173,6 +173,9 @@ erDiagram
   }
 ```
 
+Cada questão publicada possui exatamente quatro alternativas, nas posições de
+1 a 4, e somente uma delas deve ter `is_correct` como verdadeiro.
+
 ## Permissões
 
 O acesso não depende de `ADMIN` ou `PLAYER` fixos no usuário. Cada usuário
