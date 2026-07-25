@@ -32,7 +32,6 @@ export class QuestionService {
   async update(id: string, input: IQuestionMutationInput) {
     const current = await this.repository.findForEdit(id);
     if (!current) return null;
-    if (current.question.status === 'PUBLISHED') throw new Error('QUESTION_PUBLISHED_EDIT_FORBIDDEN');
     await this.validate(input);
     return this.repository.update(id, input);
   }
@@ -46,6 +45,13 @@ export class QuestionService {
     const pending = await this.publishPending(current);
     if (pending.length) throw new QuestionPublishValidationError(pending);
     return this.repository.publish(id);
+  }
+
+  async unpublish(id: string) {
+    const current = await this.repository.findForEdit(id);
+    if (!current) return null;
+    if (current.question.status !== 'PUBLISHED') throw new Error('QUESTION_NOT_PUBLISHED');
+    return this.repository.unpublish(id);
   }
 
   async remove(id: string) {

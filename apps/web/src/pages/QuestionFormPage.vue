@@ -36,8 +36,16 @@ function missing() { return !activeTranslation.value.statement || !activeTransla
         <v-textarea v-model="activeTranslation.statement" :label="$t('question_statement')" variant="outlined" rows="3" />
         <v-textarea v-model="activeTranslation.explanation" :label="$t('question_explanation')" variant="outlined" rows="3" />
         <h2>{{ $t('answer_options') }}</h2>
-        <div v-for="option in form.options" :key="option.position" class="option-row">
-          <v-radio-group :model-value="form.options.find((item) => item.is_correct)?.position" hide-details @update:model-value="markCorrect(Number($event))"><v-radio :value="option.position" :aria-label="$t('correct_answer')" /></v-radio-group>
+        <div v-for="option in form.options" :key="option.position" :class="['option-row', { 'option-row--correct': option.is_correct }]">
+          <input
+            :id="`correct-answer-${option.position}`"
+            class="correct-answer-control"
+            type="radio"
+            name="correct-answer"
+            :checked="option.is_correct"
+            :aria-label="$t('correct_answer')"
+            @change="markCorrect(option.position)"
+          />
           <v-text-field v-model="option.translations[tab].content" :label="$t('option_number', { number: option.position })" variant="outlined" hide-details />
         </div>
         <p v-if="error" class="form-error" role="alert">{{ error }}</p>
@@ -50,5 +58,5 @@ function missing() { return !activeTranslation.value.statement || !activeTransla
 
 <style scoped>
 .question-editor-grid { display:grid; grid-template-columns:minmax(0, 1.6fr) minmax(260px, .8fr); gap:1.5rem; }
-.question-editor { padding:1.5rem; }.form-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }.language-tabs { margin: .5rem 0 1rem; }.draft-warning { color:#b76a12; background:#ff9f4326; padding:.75rem; border-radius:.4rem; }.option-row { display:grid; grid-template-columns:3rem 1fr; align-items:center; margin:.6rem 0; }.option-row :deep(.v-selection-control) { justify-content:center; }.form-actions { display:flex; justify-content:flex-end; gap:.75rem; margin-top:1.5rem; }.question-preview { background:#fff; border:1px solid #e7e5ed; border-radius:.5rem; padding:1.5rem; height:max-content; }.question-preview li { margin:.75rem 0; } @media(max-width:959px){.question-editor-grid{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}}
+.question-editor { padding:1.5rem; }.form-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }.language-tabs { margin: .5rem 0 1rem; }.draft-warning { color:#b76a12; background:#ff9f4326; padding:.75rem; border-radius:.4rem; }.option-row { display:grid; grid-template-columns:1.5rem minmax(0, 1fr); align-items:center; gap:.55rem; margin:.6rem 0; padding:.2rem; border:1px solid transparent; border-radius:.4rem; }.option-row--correct { background:#28c76f0d; border-color:#28c76f4d; }.correct-answer-control { appearance:auto; accent-color:#28c76f; cursor:pointer; height:1.1rem; margin:0; padding:0; width:1.1rem; }.form-actions { display:flex; justify-content:flex-end; gap:.75rem; margin-top:1.5rem; }.question-preview { background:#fff; border:1px solid #e7e5ed; border-radius:.5rem; padding:1.5rem; height:max-content; }.question-preview li { margin:.75rem 0; } @media(max-width:959px){.question-editor-grid{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}}
 </style>

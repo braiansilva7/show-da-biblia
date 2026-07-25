@@ -35,6 +35,7 @@
   "question_invalid_translation": "Statement and explanation must be filled in together for each language.",
   "question_published_edit_forbidden": "Published questions cannot be edited.",
   "question_already_published": "This question is already published.",
+  "question_not_published": "This question is not published.",
   "question_publish_incomplete": "The question cannot be published because it has pending requirements.",
   "question_publish_pending_category": "The category does not exist.",
   "question_publish_pending_difficulty": "The difficulty is invalid.",

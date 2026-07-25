@@ -144,7 +144,7 @@ export const viewQuestionSchema = {
   response: { 200: questionEditorResponseSchema, ...editorErrors },
 };
 export const updateQuestionSchema = {
-  summary: 'Editar questão em rascunho ou arquivada', tags: [ETagSwagger.question], security: [{ authenticateJwt: [] }],
+  summary: 'Editar questão em qualquer estado', tags: [ETagSwagger.question], security: [{ authenticateJwt: [] }],
   params: questionIdParamsSchema, body: questionMutationBodySchema,
   response: { 200: questionEditorResponseSchema, ...editorErrors },
 };
@@ -157,6 +157,12 @@ export const publishQuestionSchema = {
     ...editorErrors,
     409: Type.Object({ message: Type.String(), pending: publicationPendingSchema }),
   },
+};
+export const unpublishQuestionSchema = {
+  summary: 'Despublicar questão',
+  description: 'Retorna uma questão publicada para o estado de rascunho.',
+  tags: [ETagSwagger.question], security: [{ authenticateJwt: [] }], params: questionIdParamsSchema,
+  response: { 200: questionEditorResponseSchema, ...editorErrors },
 };
 export const deleteQuestionSchema = {
   summary: 'Excluir ou arquivar questão',

@@ -457,9 +457,12 @@ td {
 }
 .row-actions {
   align-items: center;
-  display: flex;
-  gap: 0.25rem;
+  display: inline-flex;
+  flex-wrap: nowrap;
+  gap: 0.15rem;
+  justify-content: flex-start;
   white-space: nowrap;
+  width: max-content;
 }
 .row-action-button {
   color: #6a3e1c;

@@ -35,6 +35,7 @@
   "question_invalid_translation": "El enunciado y la explicación deben completarse juntos en cada idioma.",
   "question_published_edit_forbidden": "Las preguntas publicadas no se pueden editar.",
   "question_already_published": "Esta pregunta ya está publicada.",
+  "question_not_published": "Esta pregunta no está publicada.",
   "question_publish_incomplete": "La pregunta no se puede publicar porque tiene requisitos pendientes.",
   "question_publish_pending_category": "La categoría no existe.",
   "question_publish_pending_difficulty": "La dificultad no es válida.",

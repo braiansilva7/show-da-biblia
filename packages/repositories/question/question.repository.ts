@@ -189,6 +189,11 @@ export class QuestionRepository {
     return this.findForEdit(id);
   }
 
+  async unpublish(id: string) {
+    await this.db.update(questions).set({ status: 'DRAFT', published_at: null, updated_at: new Date().toISOString() }).where(eq(questions.id, id));
+    return this.findForEdit(id);
+  }
+
   async remove(id: string): Promise<'deleted' | 'archived'> {
     const usage = await this.db.execute<{ total: number }>(sql`SELECT count(*)::int AS total FROM session_questions WHERE question_id = ${id}`);
     if (Number(usage.rows[0]?.total ?? 0) > 0) {

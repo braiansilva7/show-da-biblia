@@ -55,6 +55,7 @@ const {
   questionFormError,
   isSavingQuestion,
   isPublishingQuestion,
+  isUnpublishingQuestion,
   isRemovingQuestion,
 } = api;
 const currentPage = ref<Page>('dashboard');
@@ -98,6 +99,7 @@ async function saveQuestion(input: QuestionFormInput) {
   if (await api.saveQuestion(input, editingQuestion.value)) await openQuestions();
 }
 async function publishQuestion(id: string) { await api.publishQuestion(id); }
+async function unpublishQuestion(id: string) { await api.unpublishQuestion(id); }
 async function removeQuestion(id: string) { await api.removeQuestion(id); }
 
 function navigate(page: Page) {
@@ -210,11 +212,13 @@ onMounted(async () => {
         :can-publish="canPublishQuestions"
         :can-delete="canDeleteQuestions"
         :is-publishing="isPublishingQuestion"
+        :is-unpublishing="isUnpublishingQuestion"
         :is-removing="isRemovingQuestion"
         @search="api.loadQuestions"
         @create="openQuestionForm()"
         @edit="openQuestionForm"
         @publish="publishQuestion"
+        @unpublish="unpublishQuestion"
         @remove="removeQuestion"
       />
       <QuestionFormPage

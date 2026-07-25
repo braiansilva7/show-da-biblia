@@ -2,7 +2,7 @@ import type { FastifyInstance } from 'fastify';
 import { container } from 'tsyringe';
 import { QuestionController } from '@/controllers/question/index.js';
 import { questionCreatePermissions, questionDeletePermissions, questionPublishPermissions, questionUpdatePermissions, questionViewPermissions } from '@/permissions/index.js';
-import { createQuestionSchema, deleteQuestionSchema, listQuestionsSchema, publishQuestionSchema, updateQuestionSchema, viewQuestionSchema } from '@core/schema/question/index.js';
+import { createQuestionSchema, deleteQuestionSchema, listQuestionsSchema, publishQuestionSchema, unpublishQuestionSchema, updateQuestionSchema, viewQuestionSchema } from '@core/schema/question/index.js';
 
 export default function questionRoutes(server: FastifyInstance) {
   const controller = container.resolve(QuestionController);
@@ -28,6 +28,10 @@ export default function questionRoutes(server: FastifyInstance) {
   });
   server.post('/questions/:id/publish', {
     schema: publishQuestionSchema, handler: controller.publish,
+    preHandler: [(request, reply) => server.authenticateJwt(request, reply, questionPublishPermissions)],
+  });
+  server.post('/questions/:id/unpublish', {
+    schema: unpublishQuestionSchema, handler: controller.unpublish,
     preHandler: [(request, reply) => server.authenticateJwt(request, reply, questionPublishPermissions)],
   });
   server.delete('/questions/:id', {

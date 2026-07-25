@@ -126,6 +126,7 @@ export function useManagerApi() {
   const questionFormError = ref('');
   const isSavingQuestion = ref(false);
   const isPublishingQuestion = ref(false);
+  const isUnpublishingQuestion = ref(false);
   const isRemovingQuestion = ref(false);
   let usersRequestId = 0;
   let categoriesRequestId = 0;
@@ -431,6 +432,17 @@ export function useManagerApi() {
     finally { isPublishingQuestion.value = false; }
   }
 
+  async function unpublishQuestion(id: string): Promise<boolean> {
+    questionsError.value = ''; isUnpublishingQuestion.value = true;
+    try {
+      const response = await fetch(`${apiUrl}/api/v1/questions/${id}/unpublish`, { method: 'POST', headers: authorizationHeaders() });
+      const data = (await response.json().catch(() => null)) as ApiMessage | null;
+      if (!response.ok) { questionsError.value = getMessage(data, t('unpublish_question_failed')); return false; }
+      await loadQuestions(); return true;
+    } catch { questionsError.value = t('unpublish_question_connection_failed'); return false; }
+    finally { isUnpublishingQuestion.value = false; }
+  }
+
   async function removeQuestion(id: string): Promise<boolean> {
     questionsError.value = ''; isRemovingQuestion.value = true;
     try {
@@ -657,6 +669,7 @@ export function useManagerApi() {
     questionFormError,
     isSavingQuestion,
     isPublishingQuestion,
+    isUnpublishingQuestion,
     isRemovingQuestion,
     login,
     restoreSession,
@@ -669,6 +682,7 @@ export function useManagerApi() {
     loadQuestion,
     saveQuestion,
     publishQuestion,
+    unpublishQuestion,
     removeQuestion,
     saveUser,
     deleteUser,

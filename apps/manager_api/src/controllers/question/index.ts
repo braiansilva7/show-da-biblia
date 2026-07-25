@@ -7,6 +7,7 @@ import { QuestionCreatorUseCase } from '@core/useCases/question/QuestionCreator.
 import { QuestionViewerUseCase } from '@core/useCases/question/QuestionViewer.usecase.js';
 import { QuestionUpdaterUseCase } from '@core/useCases/question/QuestionUpdater.usecase.js';
 import { QuestionPublisherUseCase } from '@core/useCases/question/QuestionPublisher.usecase.js';
+import { QuestionUnpublisherUseCase } from '@core/useCases/question/QuestionUnpublisher.usecase.js';
 import { QuestionRemoverUseCase } from '@core/useCases/question/QuestionRemover.usecase.js';
 import { QuestionPublishValidationError } from '@core/services/question.service.js';
 import type { IQuestionMutationInput, QuestionLanguage } from '@core/interfaces/question/IQuestionMutationInput.js';
@@ -69,6 +70,7 @@ export class QuestionController {
     @inject(QuestionViewerUseCase) private readonly viewer: QuestionViewerUseCase,
     @inject(QuestionUpdaterUseCase) private readonly updater: QuestionUpdaterUseCase,
     @inject(QuestionPublisherUseCase) private readonly publisher: QuestionPublisherUseCase,
+    @inject(QuestionUnpublisherUseCase) private readonly unpublisher: QuestionUnpublisherUseCase,
     @inject(QuestionRemoverUseCase) private readonly remover: QuestionRemoverUseCase
   ) {}
 
@@ -159,6 +161,16 @@ export class QuestionController {
     }
   };
 
+  unpublish = async (request: FastifyRequest, reply: FastifyReply) => {
+    const id = (request.params as { id?: string }).id;
+    if (!id) return reply.code(400).send({ message: request.t('question_invalid_input') });
+    try {
+      const question = await this.unpublisher.execute(id);
+      if (!question) return reply.code(404).send({ message: request.t('question_not_found') });
+      return { question: toEditorQuestion(question) };
+    } catch (error) { return this.mutationError(error, request, reply); }
+  };
+
   remove = async (request: FastifyRequest, reply: FastifyReply) => {
     const id = (request.params as { id?: string }).id;
     if (!id) return reply.code(400).send({ message: request.t('question_invalid_input') });
@@ -175,6 +187,7 @@ export class QuestionController {
         QUESTION_INVALID_TRANSLATION: [400, 'question_invalid_translation'],
         QUESTION_PUBLISHED_EDIT_FORBIDDEN: [409, 'question_published_edit_forbidden'],
         QUESTION_ALREADY_PUBLISHED: [409, 'question_already_published'],
+        QUESTION_NOT_PUBLISHED: [409, 'question_not_published'],
       };
       const message = messages[error.message];
       if (message) return reply.code(message[0]).send({ message: request.t(message[1]) });

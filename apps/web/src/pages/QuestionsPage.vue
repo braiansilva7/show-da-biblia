@@ -23,6 +23,7 @@ const props = defineProps<{
   canPublish: boolean;
   canDelete: boolean;
   isPublishing: boolean;
+  isUnpublishing: boolean;
   isRemoving: boolean;
 }>();
 const emit = defineEmits<{
@@ -36,6 +37,7 @@ const emit = defineEmits<{
   create: [];
   edit: [id: string];
   publish: [id: string];
+  unpublish: [id: string];
   remove: [id: string];
 }>();
 const { locale } = useI18n();
@@ -168,7 +170,9 @@ function confirmRemoval() {
               <th>{{ $t('author') }}</th>
               <th>{{ $t('completeness') }}</th>
               <th>{{ $t('registered_at') }}</th>
-              <th v-if="canUpdate || canPublish || canDelete">{{ $t('actions') }}</th>
+              <th v-if="canUpdate || canPublish || canDelete" class="actions-column">
+                {{ $t('actions') }}
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -217,10 +221,105 @@ function confirmRemoval() {
                 >
               </td>
               <td>{{ formatDate(question.created_at, locale) }}</td>
-              <td v-if="canUpdate || canPublish || canDelete" class="row-actions">
-                <v-tooltip v-if="canUpdate && question.status !== 'PUBLISHED'" :text="$t('edit_question')" location="top"><template #activator="{ props: tooltip }"><v-btn v-bind="tooltip" icon="mdi-pencil-outline" size="small" variant="text" :aria-label="$t('edit_question')" @click="emit('edit', question.id)" /></template></v-tooltip>
-                <v-tooltip v-if="canPublish && question.status !== 'PUBLISHED'" :text="$t('publish_question')" location="top"><template #activator="{ props: tooltip }"><v-btn v-bind="tooltip" icon="mdi-publish" size="small" variant="text" color="success" :loading="isPublishing" :aria-label="$t('publish_question')" @click="emit('publish', question.id)" /></template></v-tooltip>
-                <v-tooltip v-if="canDelete" :text="$t('remove_question')" location="top"><template #activator="{ props: tooltip }"><v-btn v-bind="tooltip" icon="mdi-delete-outline" size="small" variant="text" color="error" :aria-label="$t('remove_question')" @click="removalTarget = question" /></template></v-tooltip>
+              <td
+                v-if="canUpdate || canPublish || canDelete"
+                class="actions-column"
+              >
+                <div class="row-actions">
+                  <v-tooltip
+                    v-if="canUpdate"
+                    :text="$t('edit_question')"
+                    location="top"
+                  >
+                    <template #activator="{ props: tooltipProps }">
+                      <v-btn
+                        v-bind="tooltipProps"
+                        class="row-action-button"
+                        :aria-label="$t('edit_question')"
+                        icon
+                        type="button"
+                        variant="text"
+                        @click="emit('edit', question.id)"
+                      >
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                          <path d="M4 16.5V20h3.5L18 9.5 14.5 6 4 16.5Z" />
+                          <path d="m13.5 7 3.5 3.5" />
+                        </svg>
+                      </v-btn>
+                    </template>
+                  </v-tooltip>
+                  <v-tooltip
+                    v-if="canPublish && question.status !== 'PUBLISHED'"
+                    :text="$t('publish_question')"
+                    location="top"
+                  >
+                    <template #activator="{ props: tooltipProps }">
+                      <v-btn
+                        v-bind="tooltipProps"
+                        class="row-action-button"
+                        :aria-label="$t('publish_question')"
+                        icon
+                        type="button"
+                        variant="text"
+                        :loading="isPublishing"
+                        @click="emit('publish', question.id)"
+                      >
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                          <path d="M12 16V6" />
+                          <path d="m8 10 4-4 4 4" />
+                          <path d="M5 18h14" />
+                        </svg>
+                      </v-btn>
+                    </template>
+                  </v-tooltip>
+                  <v-tooltip
+                    v-if="canPublish && question.status === 'PUBLISHED'"
+                    :text="$t('unpublish_question')"
+                    location="top"
+                  >
+                    <template #activator="{ props: tooltipProps }">
+                      <v-btn
+                        v-bind="tooltipProps"
+                        class="row-action-button"
+                        :aria-label="$t('unpublish_question')"
+                        icon
+                        type="button"
+                        variant="text"
+                        :loading="isUnpublishing"
+                        @click="emit('unpublish', question.id)"
+                      >
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                          <path d="M12 8v10" />
+                          <path d="m8 14 4 4 4-4" />
+                          <path d="M5 6h14" />
+                        </svg>
+                      </v-btn>
+                    </template>
+                  </v-tooltip>
+                  <v-tooltip
+                    v-if="canDelete"
+                    :text="$t('remove_question')"
+                    location="top"
+                  >
+                    <template #activator="{ props: tooltipProps }">
+                      <v-btn
+                        v-bind="tooltipProps"
+                        class="row-action-button danger-action"
+                        :aria-label="$t('remove_question')"
+                        icon
+                        type="button"
+                        variant="text"
+                        @click="removalTarget = question"
+                      >
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                          <path
+                            d="M5 7h14M10 11v5M14 11v5M9 7l1-2h4l1 2M7 7l1 13h8l1-13"
+                          />
+                        </svg>
+                      </v-btn>
+                    </template>
+                  </v-tooltip>
+                </div>
               </td>
             </tr>
           </tbody>
@@ -291,7 +390,17 @@ function confirmRemoval() {
   background: #79758626;
   color: #5d596c;
 }
-.row-actions { white-space: nowrap; }
+.actions-column {
+  width: 1%;
+  white-space: nowrap;
+}
+.questions-table .row-actions {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  gap: 0.15rem;
+  justify-content: flex-start;
+  width: max-content;
+}
 @media (max-width: 959px) {
   .question-filters {
     grid-template-columns: repeat(2, minmax(0, 1fr));
