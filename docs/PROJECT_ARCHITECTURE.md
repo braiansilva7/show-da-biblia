@@ -114,6 +114,7 @@ erDiagram
     varchar email UK
     uuid country_id FK
     varchar language_code
+    varchar profile_picture_url
     boolean active
   }
   PERMISSION_ROLES {
@@ -178,6 +179,22 @@ Catálogo inicial:
 
 Os papéis de sistema são Administrador e Jogador. Eles são protegidos contra
 remoção e alteração.
+
+## Cadastro de usuário, país e foto
+
+Todo usuário possui obrigatoriamente um `country_id`, chave estrangeira para
+`countries.id`, e um `language_code`, que define o idioma do jogo (`pt-BR`,
+`en` ou `es`). O país representa a origem do usuário e não o idioma escolhido.
+
+O Manager API disponibiliza `GET /api/v1/countries` para carregar somente os
+países ativos no formulário administrativo. Criação e atualização validam que o
+país informado existe e está ativo.
+
+A foto é opcional e é recebida no campo multipart `profile_picture`. O backend
+aceita JPEG, PNG, WEBP e GIF, com limite de 5 MB, armazena o objeto no MinIO em
+`users/profile-pictures/<uuid-v7>.<extensão>` e salva apenas a URL pública em
+`users.profile_picture_url`. Ao substituir ou excluir um usuário, o objeto
+anterior é removido do MinIO.
 
 ## UUIDs e migrations
 

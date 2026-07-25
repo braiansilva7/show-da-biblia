@@ -35,6 +35,19 @@ export class UserController {
     try {
       return reply.code(201).send({ user: await this.creator.execute(input) });
     } catch (error) {
+      if (
+        error instanceof Error &&
+        error.message === 'INVALID_PROFILE_PICTURE'
+      ) {
+        return reply
+          .code(400)
+          .send({ message: request.t('profile_picture_invalid') });
+      }
+      if (error instanceof Error && error.message === 'COUNTRY_NOT_FOUND') {
+        return reply
+          .code(400)
+          .send({ message: request.t('country_not_found') });
+      }
       if (postgresErrorCode(error) === '23505') {
         return reply
           .code(409)
@@ -69,6 +82,19 @@ export class UserController {
         return reply.code(404).send({ message: request.t('user_not_found') });
       return { user: result.user };
     } catch (error) {
+      if (
+        error instanceof Error &&
+        error.message === 'INVALID_PROFILE_PICTURE'
+      ) {
+        return reply
+          .code(400)
+          .send({ message: request.t('profile_picture_invalid') });
+      }
+      if (error instanceof Error && error.message === 'COUNTRY_NOT_FOUND') {
+        return reply
+          .code(400)
+          .send({ message: request.t('country_not_found') });
+      }
       if (postgresErrorCode(error) === '23505') {
         return reply
           .code(409)

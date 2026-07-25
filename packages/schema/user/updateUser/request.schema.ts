@@ -8,9 +8,7 @@ export const updateUserRequestSchema = Type.Object(
     password: Type.Optional(Type.String({ minLength: 8, maxLength: 256 })),
     permission_role_id: Type.Optional(Type.String({ format: 'uuid' })),
     language_code: Type.Optional(languageCodeSchema),
-    country_id: Type.Optional(
-      Type.Union([Type.String({ format: 'uuid' }), Type.Null()])
-    ),
+    country_id: Type.Optional(Type.String({ format: 'uuid' })),
     active: Type.Optional(Type.Boolean()),
   },
   { minProperties: 1 }

@@ -16,7 +16,9 @@ export const users = pgTable(
     username: varchar('username', { length: 120 }).notNull().unique(),
     email: varchar('email', { length: 320 }).notNull().unique(),
     password_hash: varchar('password_hash', { length: 512 }).notNull(),
-    country_id: uuid('country_id').references(() => countries.id),
+    country_id: uuid('country_id')
+      .notNull()
+      .references(() => countries.id),
     language_code: varchar('language_code', { length: 5 }).notNull(),
     profile_picture_url: varchar('profile_picture_url', { length: 2048 }),
     total_score: integer('total_score').default(0).notNull(),

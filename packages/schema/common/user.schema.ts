@@ -23,7 +23,7 @@ export const publicUserSchema = Type.Object({
     })
   ),
   permissions: Type.Array(permissionActionSchema),
-  country_id: Type.Union([Type.String({ format: 'uuid' }), Type.Null()]),
+  country_id: Type.String({ format: 'uuid' }),
   language_code: languageCodeSchema,
   profile_picture_url: Type.Union([Type.String(), Type.Null()]),
   total_score: Type.Integer(),

@@ -8,6 +8,7 @@ import type {
   PermissionRole,
   UserFormInput,
   LanguageCode,
+  Country,
 } from '@/types/user';
 import { formatDate } from '@/utils/formatters';
 import { localeFromLanguage } from '@/utils/locale';
@@ -15,6 +16,7 @@ import { localeFromLanguage } from '@/utils/locale';
 const props = defineProps<{
   users: ManagedUser[];
   roles: PermissionRole[];
+  countries: Country[];
   error: string;
   isLoading: boolean;
   isSaving: boolean;
@@ -33,6 +35,9 @@ const editingUser = ref<ManagedUser | null>(null);
 const userPendingDeletion = ref<ManagedUser | null>(null);
 function languageLabel(language: LanguageCode) {
   return t(`language_${localeFromLanguage(language)}`);
+}
+function initials(name: string) {
+  return name.slice(0, 1).toUpperCase();
 }
 function createUser() {
   editingUser.value = null;
@@ -104,8 +109,21 @@ async function confirmDelete() {
           <tbody>
             <tr v-for="managedUser in users" :key="managedUser.id">
               <td>
-                <strong>{{ managedUser.username }}</strong
-                ><span>{{ managedUser.email }}</span>
+                <div class="user-summary">
+                  <img
+                    v-if="managedUser.profile_picture_url"
+                    :src="managedUser.profile_picture_url"
+                    :alt="managedUser.username"
+                    class="user-avatar"
+                  />
+                  <span v-else class="user-avatar user-avatar-fallback">{{
+                    initials(managedUser.username)
+                  }}</span>
+                  <div>
+                    <strong>{{ managedUser.username }}</strong
+                    ><span>{{ managedUser.email }}</span>
+                  </div>
+                </div>
               </td>
               <td>
                 <span class="tag role-tag">{{
@@ -149,6 +167,7 @@ async function confirmDelete() {
       :model-value="isFormOpen"
       :user="editingUser"
       :roles="roles"
+      :countries="countries"
       :error="saveError"
       :is-saving="isSaving"
       @update:model-value="

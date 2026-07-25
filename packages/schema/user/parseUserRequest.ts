@@ -81,6 +81,7 @@ export function parseCreateUserInput(
   const languageCode = parseLanguage(
     fields.language_code ?? fields.languageCode
   );
+  const countryIdRaw = asString(fields.country_id ?? fields.countryId);
   if (
     !username ||
     username.length < 3 ||
@@ -88,13 +89,15 @@ export function parseCreateUserInput(
     !password ||
     password.length < 8 ||
     !permissionRoleId ||
-    !languageCode
+    !languageCode ||
+    !countryIdRaw
   ) {
     return null;
   }
 
-  const countryIdRaw = asString(fields.country_id ?? fields.countryId);
   const active = asBoolean(fields.active);
+
+  if (countryIdRaw === '') return null;
 
   return {
     username,
@@ -102,7 +105,7 @@ export function parseCreateUserInput(
     password,
     permissionRoleId,
     languageCode,
-    countryId: countryIdRaw === '' ? null : countryIdRaw,
+    countryId: countryIdRaw,
     active,
     profilePicture,
   };
@@ -128,13 +131,14 @@ export function parseUpdateUserInput(
       : undefined;
   const active = asBoolean(fields.active);
 
+  if (countryIdRaw === '') return null;
+
   if (username !== undefined) input.username = username;
   if (email !== undefined) input.email = email;
   if (password !== undefined) input.password = password;
   if (permissionRoleId !== undefined) input.permissionRoleId = permissionRoleId;
   if (languageCode !== undefined) input.languageCode = languageCode;
-  if (countryIdRaw !== undefined)
-    input.countryId = countryIdRaw === '' ? null : countryIdRaw;
+  if (countryIdRaw !== undefined) input.countryId = countryIdRaw;
   if (active !== undefined) input.active = active;
   if (profilePicture) input.profilePicture = profilePicture;
 

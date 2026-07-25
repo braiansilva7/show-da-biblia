@@ -378,17 +378,38 @@ td {
   color: #5d596c;
   font-size: 0.875rem;
 }
-td:first-child strong,
-td:first-child span {
+.user-summary strong,
+.user-summary > div > span {
   display: block;
 }
-td:first-child strong {
+.user-summary strong {
   color: #2f2b3d;
   margin-bottom: 0.25rem;
 }
-td:first-child span {
+.user-summary > div > span {
   color: #797586;
   font-size: 0.78rem;
+}
+.user-summary {
+  align-items: center;
+  display: flex;
+  gap: 0.75rem;
+}
+.user-avatar {
+  border-radius: 50%;
+  flex: 0 0 36px;
+  height: 36px;
+  object-fit: cover;
+  width: 36px;
+}
+.user-avatar-fallback {
+  align-items: center;
+  background: #7367f024;
+  color: #665bd5;
+  display: inline-flex;
+  font-size: 0.8rem;
+  font-weight: 700;
+  justify-content: center;
 }
 .tag {
   border-radius: 4px;

@@ -36,6 +36,15 @@ async function swaggerPlugin(fastify: FastifyInstance) {
           name: ETagSwagger.user,
           description: 'Endpoints relacionados ao gerenciamento de usuários.',
         },
+        {
+          name: ETagSwagger.role,
+          description: 'Endpoints relacionados ao gerenciamento de roles.',
+        },
+        {
+          name: ETagSwagger.country,
+          description:
+            'Endpoints de consulta dos países disponíveis no cadastro.',
+        },
       ],
     },
   });

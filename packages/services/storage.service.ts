@@ -4,8 +4,8 @@ import {
   DeleteObjectCommand,
 } from '@aws-sdk/client-s3';
 import { injectable } from 'tsyringe';
-import { randomUUID } from 'node:crypto';
 import { s3Environment } from '@core/config/environments.js';
+import { createUuidV7 } from '@core/common/functions/uuid.js';
 import type { IUploadProfilePictureInput } from '@core/interfaces/storage/IUploadProfilePictureInput.js';
 
 @injectable()
@@ -23,11 +23,18 @@ export class StorageService {
   async uploadProfilePicture(
     input: IUploadProfilePictureInput
   ): Promise<string> {
+    if (
+      !['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(
+        input.mimeType
+      )
+    ) {
+      throw new Error('INVALID_PROFILE_PICTURE');
+    }
     const extension =
       this.extensionFromMime(input.mimeType) ??
       this.extensionFromName(input.originalName) ??
       'bin';
-    const key = `users/profile-pictures/${randomUUID()}.${extension}`;
+    const key = `users/profile-pictures/${createUuidV7()}.${extension}`;
 
     await this.client.send(
       new PutObjectCommand({

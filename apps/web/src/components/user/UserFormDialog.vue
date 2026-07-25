@@ -1,11 +1,18 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
-import type { ManagedUser, PermissionRole, UserFormInput } from '@/types/user';
+import ImageCropDialog from '@/components/common/ImageCropDialog.vue';
+import type {
+  Country,
+  ManagedUser,
+  PermissionRole,
+  UserFormInput,
+} from '@/types/user';
 
 const props = defineProps<{
   modelValue: boolean;
   user: ManagedUser | null;
   roles: PermissionRole[];
+  countries: Country[];
   error: string;
   isSaving: boolean;
 }>();
@@ -15,6 +22,22 @@ const emit = defineEmits<{
 }>();
 const form = ref<UserFormInput>(emptyForm());
 const isEditing = computed(() => props.user !== null);
+const isCropOpen = ref(false);
+const cropSource = ref('');
+const profilePicturePreview = ref('');
+let localPreviewUrl = '';
+
+function revokeLocalPreview() {
+  if (!localPreviewUrl) return;
+  URL.revokeObjectURL(localPreviewUrl);
+  localPreviewUrl = '';
+}
+
+function closeCrop() {
+  isCropOpen.value = false;
+  if (cropSource.value) URL.revokeObjectURL(cropSource.value);
+  cropSource.value = '';
+}
 function emptyForm(): UserFormInput {
   return {
     username: '',
@@ -22,22 +45,29 @@ function emptyForm(): UserFormInput {
     password: '',
     permission_role_id:
       props.roles.find((role) => role.code === 'PLAYER')?.id ?? '',
+    country_id: '',
     language_code: 'pt-BR',
     active: true,
+    profile_picture: null,
   };
 }
 watch(
   () => [props.modelValue, props.user] as const,
   ([visible, user]) => {
     if (!visible) return;
+    revokeLocalPreview();
+    closeCrop();
+    profilePicturePreview.value = user?.profile_picture_url ?? '';
     form.value = user
       ? {
           username: user.username,
           email: user.email,
           password: '',
           permission_role_id: user.permission_role_id,
+          country_id: user.country_id,
           language_code: user.language_code,
           active: user.active,
+          profile_picture: null,
         }
       : emptyForm();
   },
@@ -45,6 +75,22 @@ watch(
 );
 function submit() {
   emit('submit', form.value);
+}
+
+function selectProfilePicture(event: Event) {
+  const input = event.target as HTMLInputElement;
+  const file = input.files?.[0];
+  input.value = '';
+  if (!file) return;
+  cropSource.value = URL.createObjectURL(file);
+  isCropOpen.value = true;
+}
+
+function applyCrop(file: File) {
+  revokeLocalPreview();
+  localPreviewUrl = URL.createObjectURL(file);
+  profilePicturePreview.value = localPreviewUrl;
+  form.value.profile_picture = file;
 }
 </script>
 
@@ -65,6 +111,29 @@ function submit() {
             <p>{{ $t('user_form_subtitle') }}</p>
           </header>
           <p v-if="error" class="form-error" role="alert">{{ error }}</p>
+          <label class="profile-picture-field"
+            ><span>{{ $t('profile_picture') }}</span
+            ><span class="profile-picture-picker">
+              <img
+                v-if="profilePicturePreview"
+                :src="profilePicturePreview"
+                :alt="$t('profile_picture')"
+                class="profile-picture-preview"
+              />
+              <span v-else class="profile-picture-placeholder">{{
+                $t('profile_picture')
+              }}</span>
+              <span class="profile-picture-button">{{
+                $t(profilePicturePreview ? 'change_picture' : 'choose_picture')
+              }}</span>
+              <input
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                class="profile-picture-input"
+                type="file"
+                @change="selectProfilePicture"
+              />
+            </span>
+          </label>
           <label
             ><span>{{ $t('username') }}</span
             ><input
@@ -110,6 +179,19 @@ function submit() {
               </select></label
             >
           </div>
+          <label
+            ><span>{{ $t('country_of_origin') }}</span
+            ><select v-model="form.country_id" required>
+              <option disabled value="">{{ $t('select_country') }}</option>
+              <option
+                v-for="country in countries"
+                :key="country.id"
+                :value="country.id"
+              >
+                {{ country.name }} ({{ country.iso_code }})
+              </option>
+            </select></label
+          >
           <label v-if="isEditing"
             ><span>{{ $t('status') }}</span
             ><select v-model="form.active">
@@ -135,4 +217,64 @@ function submit() {
       ></v-card
     >
   </v-dialog>
+  <ImageCropDialog
+    v-model="isCropOpen"
+    :source="cropSource"
+    @crop="applyCrop"
+    @update:model-value="
+      (visible) => {
+        if (!visible) closeCrop();
+      }
+    "
+  />
 </template>
+
+<style scoped>
+.profile-picture-picker {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-top: 0.45rem;
+}
+.profile-picture-field {
+  margin-bottom: 1.25rem;
+}
+.profile-picture-preview,
+.profile-picture-placeholder {
+  align-items: center;
+  background: #f4f3f8;
+  border: 1px solid #e7e5ef;
+  border-radius: 50%;
+  display: flex;
+  height: 72px;
+  justify-content: center;
+  object-fit: cover;
+  overflow: hidden;
+  width: 72px;
+}
+.profile-picture-placeholder {
+  color: #797586;
+  font-size: 0.7rem;
+  text-align: center;
+}
+.profile-picture-button {
+  background: #7367f0;
+  border-radius: 4px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  padding: 0.45rem 0.7rem;
+  position: relative;
+  text-transform: uppercase;
+}
+.profile-picture-input {
+  cursor: pointer;
+  inset: 0;
+  opacity: 0;
+  position: absolute;
+  width: 100%;
+}
+</style>

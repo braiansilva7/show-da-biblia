@@ -13,6 +13,7 @@ const {
   user,
   users,
   roles,
+  countries,
   loginError,
   usersError,
   saveUserError,
@@ -29,7 +30,7 @@ const canManageUsers = computed(
 async function openUsers() {
   if (!canManageUsers.value) return;
   currentPage.value = 'users';
-  await Promise.all([api.loadUsers(), api.loadRoles()]);
+  await Promise.all([api.loadUsers(), api.loadRoles(), api.loadCountries()]);
 }
 
 function navigate(page: Page) {
@@ -77,6 +78,7 @@ onMounted(() => void api.restoreSession());
         v-else
         :users="users"
         :roles="roles"
+        :countries="countries"
         :error="usersError"
         :is-loading="isLoadingUsers"
         :is-saving="isSavingUser"

@@ -117,7 +117,11 @@ export class PermissionRepository {
   }) {
     const [role] = await this.db
       .insert(permissionRoles)
-      .values({ id: createUuidV7(), name: input.name, description: input.description ?? null })
+      .values({
+        id: createUuidV7(),
+        name: input.name,
+        description: input.description ?? null,
+      })
       .returning();
     await this.setActions(role.id, input.permissions);
     return this.find(role.id);

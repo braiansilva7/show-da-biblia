@@ -8,12 +8,14 @@ import type { ICreateUserInput } from '@core/interfaces/user/ICreateUserInput.js
 import type { IUpdateUserInput } from '@core/interfaces/user/IUpdateUserInput.js';
 import { UserRepository } from '@core/repositories/user/user.repository.js';
 import { StorageService } from '@core/services/storage.service.js';
+import { CountryService } from '@core/services/country.service.js';
 
 @injectable()
 export class UserService {
   constructor(
     @inject(UserRepository) private readonly userRepository: UserRepository,
-    @inject(StorageService) private readonly storageService: StorageService
+    @inject(StorageService) private readonly storageService: StorageService,
+    @inject(CountryService) private readonly countryService: CountryService
   ) {}
 
   list(): Promise<UserListItem[]> {
@@ -29,6 +31,9 @@ export class UserService {
   }
 
   async create(input: ICreateUserInput): Promise<UserListItem> {
+    if (!(await this.countryService.existsActiveById(input.countryId))) {
+      throw new Error('COUNTRY_NOT_FOUND');
+    }
     let profilePictureUrl: string | null = null;
     if (input.profilePicture) {
       profilePictureUrl = await this.storageService.uploadProfilePicture(
@@ -49,22 +54,28 @@ export class UserService {
   }
 
   async update(id: string, input: IUpdateUserInput, authenticatedUser: User) {
+    const current = await this.userRepository.findById(id);
+    if (!current) return { user: null };
     if (
       id === authenticatedUser.id &&
-      (input.active === false || input.permissionRoleId !== undefined)
+      (input.active === false ||
+        (input.permissionRoleId !== undefined &&
+          input.permissionRoleId !== current.permissionRoleId))
     ) {
       return { error: 'SELF_ADMIN_CHANGE' as const };
     }
-
-    const current = await this.userRepository.findById(id);
-    if (!current) return { user: null };
+    if (
+      input.countryId !== undefined &&
+      !(await this.countryService.existsActiveById(input.countryId))
+    ) {
+      throw new Error('COUNTRY_NOT_FOUND');
+    }
 
     let profilePictureUrl = current.profilePictureUrl;
     if (input.profilePicture) {
       profilePictureUrl = await this.storageService.uploadProfilePicture(
         input.profilePicture
       );
-      await this.storageService.deleteByUrl(current.profilePictureUrl);
     }
 
     const user = await this.userRepository.update(id, {
@@ -79,6 +90,9 @@ export class UserService {
       profilePictureUrl: input.profilePicture ? profilePictureUrl : undefined,
       active: input.active,
     });
+
+    if (user && input.profilePicture)
+      await this.storageService.deleteByUrl(current.profilePictureUrl);
 
     return { user };
   }

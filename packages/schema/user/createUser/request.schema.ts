@@ -7,9 +7,7 @@ export const createUserRequestSchema = Type.Object({
   password: Type.String({ minLength: 8, maxLength: 256 }),
   permission_role_id: Type.String({ format: 'uuid' }),
   language_code: languageCodeSchema,
-  country_id: Type.Optional(
-    Type.Union([Type.String({ format: 'uuid' }), Type.Null()])
-  ),
+  country_id: Type.String({ format: 'uuid' }),
   active: Type.Optional(Type.Boolean()),
 });
 

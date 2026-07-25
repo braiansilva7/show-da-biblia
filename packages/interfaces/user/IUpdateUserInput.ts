@@ -7,7 +7,7 @@ export interface IUpdateUserInput {
   password?: string;
   permissionRoleId?: string;
   languageCode?: LanguageCode;
-  countryId?: string | null;
+  countryId?: string;
   active?: boolean;
   profilePicture?: IProfilePicture | null;
 }

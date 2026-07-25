@@ -19,6 +19,12 @@ export interface PermissionRole {
   permissions?: PermissionAction[];
 }
 
+export interface Country {
+  id: string;
+  iso_code: string;
+  name: string;
+}
+
 export interface AuthenticatedUser {
   id: string;
   username: string;
@@ -32,7 +38,7 @@ export interface AuthenticatedUser {
 export interface ManagedUser extends AuthenticatedUser {
   active: boolean;
   created_at: string;
-  country_id?: string | null;
+  country_id: string;
   profile_picture_url?: string | null;
   total_score?: number;
 }
@@ -42,6 +48,8 @@ export interface UserFormInput {
   email: string;
   password: string;
   permission_role_id: string;
+  country_id: string;
   language_code: LanguageCode;
   active: boolean;
+  profile_picture: File | null;
 }

@@ -9,7 +9,7 @@ export type User = {
   permissionRoleId: string;
   permissionRole?: PermissionRole;
   permissions: PermissionAction[];
-  countryId: string | null;
+  countryId: string;
   languageCode: LanguageCode;
   profilePictureUrl: string | null;
   totalScore: number;
@@ -31,7 +31,7 @@ export type PublicUser = {
     active: boolean;
   };
   permissions: PermissionAction[];
-  country_id: string | null;
+  country_id: string;
   language_code: LanguageCode;
   profile_picture_url: string | null;
   total_score: number;

@@ -83,7 +83,7 @@ export class UserRepository {
     passwordHash: string;
     permissionRoleId: string;
     languageCode: LanguageCode;
-    countryId?: string | null;
+    countryId: string;
     profilePictureUrl?: string | null;
     active?: boolean;
   }): Promise<UserListItem> {
@@ -95,7 +95,7 @@ export class UserRepository {
         email: input.email.toLowerCase(),
         password_hash: input.passwordHash,
         language_code: input.languageCode,
-        country_id: input.countryId ?? null,
+        country_id: input.countryId,
         profile_picture_url: input.profilePictureUrl ?? null,
         active: input.active ?? true,
       })
@@ -112,7 +112,7 @@ export class UserRepository {
       passwordHash: string;
       permissionRoleId: string;
       languageCode: LanguageCode;
-      countryId: string | null;
+      countryId: string;
       profilePictureUrl: string | null;
       active: boolean;
     }>

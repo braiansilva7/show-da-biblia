@@ -3,6 +3,7 @@ import { useI18n } from 'vue-i18n';
 import type { ApiMessage, LoginResponse } from '@/types/api';
 import type {
   AuthenticatedUser,
+  Country,
   ManagedUser,
   PermissionRole,
   UserFormInput,
@@ -28,6 +29,7 @@ export function useManagerApi() {
   const user = ref<AuthenticatedUser | null>(null);
   const users = ref<ManagedUser[]>([]);
   const roles = ref<PermissionRole[]>([]);
+  const countries = ref<Country[]>([]);
   const loginError = ref('');
   const usersError = ref('');
   const saveUserError = ref('');
@@ -135,6 +137,16 @@ export function useManagerApi() {
     if (response.ok && data?.roles) roles.value = data.roles;
   }
 
+  async function loadCountries() {
+    const response = await fetch(`${apiUrl}/api/v1/countries`, {
+      headers: authorizationHeaders(),
+    });
+    const data = (await response.json().catch(() => null)) as {
+      countries?: Country[];
+    } | null;
+    if (response.ok && data?.countries) countries.value = data.countries;
+  }
+
   async function saveUser(
     input: UserFormInput,
     targetUser: ManagedUser | null
@@ -142,10 +154,16 @@ export function useManagerApi() {
     saveUserError.value = '';
     isSavingUser.value = true;
     try {
-      const payload = {
-        ...input,
-        ...(targetUser && !input.password ? { password: undefined } : {}),
-      };
+      const payload = new FormData();
+      payload.set('username', input.username);
+      payload.set('email', input.email);
+      payload.set('permission_role_id', input.permission_role_id);
+      payload.set('country_id', input.country_id);
+      payload.set('language_code', input.language_code);
+      payload.set('active', String(input.active));
+      if (input.password) payload.set('password', input.password);
+      if (input.profile_picture)
+        payload.set('profile_picture', input.profile_picture);
       const response = await fetch(
         targetUser
           ? `${apiUrl}/api/v1/users/${targetUser.id}`
@@ -153,10 +171,9 @@ export function useManagerApi() {
         {
           method: targetUser ? 'PATCH' : 'POST',
           headers: {
-            'Content-Type': 'application/json',
             ...authorizationHeaders(),
           },
-          body: JSON.stringify(payload),
+          body: payload,
         }
       );
       const data = (await response.json().catch(() => null)) as
@@ -213,6 +230,7 @@ export function useManagerApi() {
     user,
     users,
     roles,
+    countries,
     loginError,
     usersError,
     saveUserError,
@@ -224,6 +242,7 @@ export function useManagerApi() {
     restoreSession,
     loadUsers,
     loadRoles,
+    loadCountries,
     saveUser,
     deleteUser,
     logout,
