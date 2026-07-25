@@ -259,7 +259,7 @@ function applyCrop(file: File) {
   text-align: center;
 }
 .profile-picture-button {
-  background: #7367f0;
+  background: #7f4f24;
   border-radius: 4px;
   color: #fff;
   cursor: pointer;

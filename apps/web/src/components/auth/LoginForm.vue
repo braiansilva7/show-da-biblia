@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import bibleIllustration from '@/assets/images/illustrations/bible.png';
 
 defineProps<{ error: string; isSubmitting: boolean }>();
 const emit = defineEmits<{
@@ -22,9 +23,7 @@ function submit() {
     >
     <section class="auth-wrapper">
       <aside class="auth-visual" aria-hidden="true">
-        <div class="auth-illustration">
-          <span></span><span></span><span></span>
-        </div>
+        <img :src="bibleIllustration" alt="" class="auth-illustration" />
       </aside>
       <section class="auth-card-v2" aria-labelledby="login-title">
         <form class="auth-card" @submit.prevent="submit">

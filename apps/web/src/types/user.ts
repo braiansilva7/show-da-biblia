@@ -33,6 +33,7 @@ export interface AuthenticatedUser {
   permission_role?: PermissionRole;
   permissions: PermissionAction[];
   language_code: LanguageCode;
+  profile_picture_url?: string | null;
 }
 
 export interface ManagedUser extends AuthenticatedUser {

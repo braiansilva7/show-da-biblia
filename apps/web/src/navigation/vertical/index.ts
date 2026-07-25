@@ -12,12 +12,12 @@ const verticalNavigation: NavigationItem[] = [
   {
     page: 'dashboard',
     title: 'home',
-    icon: '⌂',
+    icon: 'mdi-home-variant-outline',
   },
   {
     page: 'users',
     title: 'users',
-    icon: '♙',
+    icon: 'mdi-account-group-outline',
     permissions: ['users.view'],
   },
 ];

@@ -31,6 +31,9 @@ export class UserService {
   }
 
   async create(input: ICreateUserInput): Promise<UserListItem> {
+    if (await this.userRepository.existsByUsername(input.username)) {
+      throw new Error('USERNAME_ALREADY_EXISTS');
+    }
     if (!(await this.countryService.existsActiveById(input.countryId))) {
       throw new Error('COUNTRY_NOT_FOUND');
     }
@@ -56,6 +59,12 @@ export class UserService {
   async update(id: string, input: IUpdateUserInput, authenticatedUser: User) {
     const current = await this.userRepository.findById(id);
     if (!current) return { user: null };
+    if (
+      input.username !== undefined &&
+      (await this.userRepository.existsByUsername(input.username, id))
+    ) {
+      throw new Error('USERNAME_ALREADY_EXISTS');
+    }
     if (
       id === authenticatedUser.id &&
       (input.active === false ||

@@ -16,7 +16,7 @@ const vuetify = createVuetify({
       showDaBibliaTheme: {
         dark: false,
         colors: {
-          primary: '#7367f0',
+          primary: '#7f4f24',
           error: '#ea5455',
           success: '#28c76f',
         },

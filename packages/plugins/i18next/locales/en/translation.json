@@ -13,6 +13,7 @@
   "country_not_found": "The selected country of origin does not exist or is inactive.",
   "profile_picture_invalid": "The user photo must be a JPEG, PNG, WEBP, or GIF file.",
   "user_already_exists": "A user with this username or email already exists.",
+  "username_already_exists": "This username is already in use.",
   "user_update_invalid_input": "Provide at least one valid field to update.",
   "user_self_admin_change_forbidden": "You cannot deactivate your own account or remove its administrator role.",
   "user_not_found": "User not found.",

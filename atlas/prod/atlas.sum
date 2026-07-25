@@ -1,4 +1,5 @@
-h1:opOoFf0vLqcfDwPrdc8RnRZhC40+fddszBbovGIbh4w=
+h1:GFvSC5LTQ8BhSjM1BwRhOrMarjE4kHb36Ijl/Obg5F4=
 20260723230000.sql h1:dTkMan0kFpZE6RcVcAyUa+h/4ksAlqq3DR+U2UtIXo0=
 20260725090000_permission_roles.sql h1:jVehq3of4YnCkwwS1rT3HEZhmfSXjHVQODUKZPkfTOQ=
 20260725100000_user_country_required.sql h1:77RwjLez3iL6ErqzINtU0gXhMDqMkghs24bWXKwnVC8=
+20260725120000_username_case_insensitive_unique.sql h1:xNN3O1MO+dS6JXYYXmCo5lUX5Ta2MMRNf8+XuZndfA4=

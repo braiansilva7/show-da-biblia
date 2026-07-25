@@ -8,6 +8,9 @@ import type { AuthenticatedUser } from '@/types/user';
 const props = defineProps<{ user: AuthenticatedUser; currentPage: Page }>();
 const emit = defineEmits<{ navigate: [page: Page]; logout: [] }>();
 const { t } = useI18n();
+function initials(name: string) {
+  return name.slice(0, 1).toUpperCase();
+}
 const navigationItems = computed(() =>
   verticalNavigation.filter(
     (item) =>
@@ -33,7 +36,7 @@ const navigationItems = computed(() =>
           :class="{ active: currentPage === item.page }"
           variant="text"
           @click="emit('navigate', item.page)"
-          ><span aria-hidden="true">{{ item.icon }}</span>
+          ><v-icon :icon="item.icon" size="20" aria-hidden="true" />
           {{ $t(item.title) }}</v-btn
         >
       </nav>
@@ -52,7 +55,16 @@ const navigationItems = computed(() =>
           >{{ $t('app_name') }}</v-btn
         >
         <div class="topbar-user">
-          <div>
+          <img
+            v-if="user.profile_picture_url"
+            :src="user.profile_picture_url"
+            :alt="user.username"
+            class="topbar-avatar"
+          />
+          <span v-else class="topbar-avatar topbar-avatar-fallback">{{
+            initials(user.username)
+          }}</span>
+          <div class="topbar-user-details">
             <strong>{{ user.username }}</strong
             ><span>{{ user.email }}</span>
           </div>

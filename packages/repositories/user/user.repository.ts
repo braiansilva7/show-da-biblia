@@ -1,5 +1,5 @@
 import { inject, injectable } from 'tsyringe';
-import { eq, sql } from 'drizzle-orm';
+import { and, eq, ne, sql } from 'drizzle-orm';
 import type { AppDatabase } from '@core/plugins/database/index.js';
 import { users } from '@core/models/user/user.model.js';
 import type {
@@ -54,6 +54,23 @@ export class UserRepository {
       .where(sql`lower(${users.email}) = ${email.toLowerCase()}`)
       .limit(1);
     return rows[0] ? mapUser(rows[0], this.permissions) : null;
+  }
+
+  async existsByUsername(
+    username: string,
+    excludingUserId?: string
+  ): Promise<boolean> {
+    const usernameCondition = sql`lower(${users.username}) = ${username.toLowerCase()}`;
+    const rows = await this.db
+      .select({ id: users.id })
+      .from(users)
+      .where(
+        excludingUserId
+          ? and(usernameCondition, ne(users.id, excludingUserId))
+          : usernameCondition
+      )
+      .limit(1);
+    return rows.length > 0;
   }
 
   async findById(id: string): Promise<User | null> {

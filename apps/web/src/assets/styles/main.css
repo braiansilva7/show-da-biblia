@@ -52,8 +52,8 @@ select {
 }
 input:focus,
 select:focus {
-  border-color: #7367f0;
-  box-shadow: 0 0 0 3px #7367f026;
+  border-color: #7f4f24;
+  box-shadow: 0 0 0 3px #7f4f2426;
 }
 .auth-page {
   min-height: 100dvh;
@@ -76,7 +76,7 @@ select:focus {
 }
 .auth-logo-mark {
   align-items: center;
-  background: #7367f0;
+  background: #7f4f24;
   border-radius: 8px;
   color: #fff;
   display: inline-flex;
@@ -97,50 +97,20 @@ select:focus {
 .auth-visual {
   align-items: center;
   background:
-    radial-gradient(circle at 50% 80%, #7367f02e, transparent 38%), #f8f7fa;
+    radial-gradient(circle at 50% 80%, #7f4f242e, transparent 38%), #f8f7fa;
   display: flex;
   justify-content: center;
   padding: 6.25rem;
 }
 .auth-illustration {
-  align-items: end;
-  background: #fff;
-  border: 1px solid #e7e5ef;
-  border-radius: 10px;
+  border-radius: 12px;
   box-shadow: 0 9px 28px #2f2b3d1a;
-  display: flex;
-  gap: 16px;
+  display: block;
   height: min(32vw, 340px);
-  justify-content: center;
   max-width: 613px;
-  padding: 40px;
-  position: relative;
   width: 100%;
-}
-.auth-illustration:before {
-  border: 12px solid #7367f0;
-  border-bottom: 0;
-  border-radius: 12px 12px 0 0;
-  content: '';
-  height: 54%;
-  left: 22%;
-  position: absolute;
-  right: 22%;
-  top: 19%;
-}
-.auth-illustration span {
-  background: #7367f0;
-  border-radius: 5px 5px 0 0;
-  height: 31%;
-  width: 15%;
-  z-index: 1;
-}
-.auth-illustration span:nth-child(2) {
-  background: #a8a3f7;
-  height: 50%;
-}
-.auth-illustration span:nth-child(3) {
-  height: 40%;
+  object-fit: cover;
+  object-position: center;
 }
 .auth-card-v2 {
   align-items: center;
@@ -173,7 +143,7 @@ select:focus {
 .password-toggle {
   background: transparent;
   border: 0;
-  color: #7367f0;
+  color: #7f4f24;
   font-size: 0.75rem;
   font-weight: 600;
   padding: 8px;
@@ -213,25 +183,29 @@ select:focus {
 .navigation {
   display: grid;
   gap: 0.35rem;
-  margin-top: 3rem;
+  margin-top: 2.5rem;
 }
 .navigation button {
+  align-items: center;
   background: transparent;
   border: 0;
-  border-radius: 6px;
+  border-radius: 8px;
   color: #5d596c;
   display: flex;
   font-size: 0.95rem;
   gap: 0.75rem;
+  justify-content: flex-start;
+  min-height: 44px;
   padding: 0.72rem 0.85rem;
   text-align: left;
+  width: 100%;
 }
 .navigation button:hover {
-  background: #f4f3fe;
+  background: #f7efe7;
 }
 .navigation button.active {
-  background: #7367f029;
-  color: #665bd5;
+  background: #7f4f2429;
+  color: #6a3e1c;
   font-weight: 600;
 }
 .sidebar-footer {
@@ -264,7 +238,23 @@ select:focus {
   display: flex;
   gap: 1rem;
 }
-.topbar-user div {
+.topbar-avatar {
+  border-radius: 50%;
+  flex: 0 0 40px;
+  height: 40px;
+  object-fit: cover;
+  width: 40px;
+}
+.topbar-avatar-fallback {
+  align-items: center;
+  background: #7f4f2424;
+  color: #6a3e1c;
+  display: inline-flex;
+  font-size: 0.85rem;
+  font-weight: 700;
+  justify-content: center;
+}
+.topbar-user-details {
   display: grid;
   text-align: right;
 }
@@ -286,7 +276,7 @@ select:focus {
   padding: 2.25rem;
 }
 .eyebrow {
-  color: #7367f0;
+  color: #7f4f24;
   font-size: 0.73rem;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -404,8 +394,8 @@ td {
 }
 .user-avatar-fallback {
   align-items: center;
-  background: #7367f024;
-  color: #665bd5;
+  background: #7f4f2424;
+  color: #6a3e1c;
   display: inline-flex;
   font-size: 0.8rem;
   font-weight: 700;
@@ -419,8 +409,8 @@ td {
   padding: 0.28rem 0.5rem;
 }
 .role-tag {
-  background: #7367f024;
-  color: #665bd5;
+  background: #7f4f2424;
+  color: #6a3e1c;
 }
 .active-tag {
   background: #28c76f26;
@@ -436,7 +426,7 @@ td {
 .row-actions button {
   background: transparent;
   border: 0;
-  color: #665bd5;
+  color: #6a3e1c;
   font-size: 0.8rem;
   font-weight: 600;
   padding: 0.25rem 0.35rem;
@@ -506,7 +496,7 @@ td {
     align-items: stretch;
     flex-direction: column;
   }
-  .topbar-user div {
+  .topbar-user-details {
     display: none;
   }
   .form-grid {
