@@ -20,6 +20,18 @@ const verticalNavigation: NavigationItem[] = [
     icon: 'mdi-account-group-outline',
     permissions: ['users.view'],
   },
+  {
+    page: 'categories',
+    title: 'categories',
+    icon: 'mdi-shape-outline',
+    permissions: ['categories.view'],
+  },
+  {
+    page: 'questions',
+    title: 'questions',
+    icon: 'mdi-help-circle-outline',
+    permissions: ['questions.view'],
+  },
 ];
 
 export default verticalNavigation;

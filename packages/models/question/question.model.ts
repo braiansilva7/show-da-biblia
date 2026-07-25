@@ -9,12 +9,15 @@ import {
 } from 'drizzle-orm/pg-core';
 import { categories } from '@core/models/category/category.model.js';
 import { users } from '@core/models/user/user.model.js';
+import type { DifficultyLevel } from '@core/common/types/difficulty.js';
 
 export const questions = pgTable(
   'questions',
   {
     id: uuid('id').primaryKey().notNull(),
-    difficulty_level: smallint('difficulty_level').notNull(),
+    difficulty_level: smallint('difficulty_level')
+      .$type<DifficultyLevel>()
+      .notNull(),
     category_id: uuid('category_id')
       .references(() => categories.id)
       .notNull(),
