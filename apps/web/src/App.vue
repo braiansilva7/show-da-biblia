@@ -21,6 +21,9 @@ const {
   isLoadingUsers,
   isSavingUser,
   isDeletingUser,
+  dashboardSummary,
+  dashboardError,
+  isLoadingDashboard,
 } = api;
 const currentPage = ref<Page>('dashboard');
 const canManageUsers = computed(
@@ -35,7 +38,11 @@ async function openUsers() {
 
 function navigate(page: Page) {
   if (page === 'users') void openUsers();
-  else currentPage.value = page;
+  else {
+    currentPage.value = page;
+    if (user.value?.permissions.includes('dashboard.view'))
+      void api.loadDashboard();
+  }
 }
 
 async function saveUser(input: UserFormInput, target: ManagedUser | null) {
@@ -50,7 +57,10 @@ function logout() {
   currentPage.value = 'dashboard';
 }
 
-onMounted(() => void api.restoreSession());
+onMounted(async () => {
+  await api.restoreSession();
+  if (user.value?.permissions.includes('dashboard.view')) await api.loadDashboard();
+});
 </script>
 
 <template>
@@ -71,7 +81,10 @@ onMounted(() => void api.restoreSession());
       <DashboardPage
         v-if="currentPage === 'dashboard'"
         :user="user"
-        :can-manage-users="canManageUsers"
+        :summary="dashboardSummary"
+        :error="dashboardError"
+        :is-loading="isLoadingDashboard"
+        :reload="api.loadDashboard"
         @open-users="openUsers"
       />
       <UsersPage

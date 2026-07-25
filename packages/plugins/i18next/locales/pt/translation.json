@@ -5,6 +5,7 @@
   "auth_unauthorized_user": "Usuário não autorizado.",
   "auth_admin_access_only": "Acesso restrito a administradores.",
   "auth_permission_denied": "Você não tem permissão para executar esta ação.",
+  "dashboard_summary_unavailable": "Não foi possível carregar o resumo administrativo.",
   "permission_role_not_found": "Papel de permissão não encontrado.",
   "permission_role_invalid_input": "Informe os dados válidos do papel e suas permissões.",
   "permission_role_system_protected": "Papéis do sistema não podem ser alterados.",

@@ -9,6 +9,7 @@ import type {
   UserFormInput,
 } from '@/types/user';
 import { localeFromLanguage } from '@/utils/locale';
+import type { DashboardSummary } from '@/types/dashboard';
 
 const apiUrl = (
   import.meta.env.VITE_API_URL ?? 'http://localhost:3000'
@@ -30,6 +31,9 @@ export function useManagerApi() {
   const users = ref<ManagedUser[]>([]);
   const roles = ref<PermissionRole[]>([]);
   const countries = ref<Country[]>([]);
+  const dashboardSummary = ref<DashboardSummary | null>(null);
+  const dashboardError = ref('');
+  const isLoadingDashboard = ref(false);
   const loginError = ref('');
   const usersError = ref('');
   const saveUserError = ref('');
@@ -127,6 +131,26 @@ export function useManagerApi() {
       isLoadingUsers.value = false;
     }
   }
+  async function loadDashboard() {
+    isLoadingDashboard.value = true;
+    dashboardError.value = '';
+    try {
+      const response = await fetch(`${apiUrl}/api/v1/dashboard/summary`, {
+        headers: authorizationHeaders(),
+      });
+      const data = (await response.json().catch(() => null)) as
+        ({ summary?: DashboardSummary } & ApiMessage) | null;
+      if (!response.ok || !data?.summary) {
+        dashboardError.value = getMessage(data, t('load_dashboard_failed'));
+        return;
+      }
+      dashboardSummary.value = data.summary;
+    } catch {
+      dashboardError.value = t('load_dashboard_connection_failed');
+    } finally {
+      isLoadingDashboard.value = false;
+    }
+  }
   async function loadRoles() {
     const response = await fetch(`${apiUrl}/api/v1/permission-roles`, {
       headers: authorizationHeaders(),
@@ -187,6 +211,10 @@ export function useManagerApi() {
             item.id === data.user?.id ? data.user : item
           )
         : [data.user, ...users.value];
+      if (data.user.id === user.value?.id) {
+        user.value = { ...user.value, ...data.user };
+        setUserLanguage(user.value);
+      }
       return true;
     } catch {
       saveUserError.value = t('save_user_connection_failed');
@@ -231,6 +259,9 @@ export function useManagerApi() {
     users,
     roles,
     countries,
+    dashboardSummary,
+    dashboardError,
+    isLoadingDashboard,
     loginError,
     usersError,
     saveUserError,
@@ -241,6 +272,7 @@ export function useManagerApi() {
     login,
     restoreSession,
     loadUsers,
+    loadDashboard,
     loadRoles,
     loadCountries,
     saveUser,

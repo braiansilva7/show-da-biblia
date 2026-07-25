@@ -5,6 +5,7 @@
   "auth_unauthorized_user": "Unauthorized user.",
   "auth_admin_access_only": "Access is restricted to administrators.",
   "auth_permission_denied": "You do not have permission to perform this action.",
+  "dashboard_summary_unavailable": "Unable to load the administrative summary.",
   "permission_role_not_found": "Permission role not found.",
   "permission_role_invalid_input": "Provide valid role data and permissions.",
   "permission_role_system_protected": "System roles cannot be changed.",

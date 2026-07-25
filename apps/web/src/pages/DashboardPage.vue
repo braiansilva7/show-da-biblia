@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { AuthenticatedUser } from '@/types/user';
-defineProps<{ user: AuthenticatedUser; canManageUsers: boolean }>();
-const emit = defineEmits<{ openUsers: [] }>();
+import type { DashboardSummary } from '@/types/dashboard';
+defineProps<{ user: AuthenticatedUser; summary: DashboardSummary | null; error: string; isLoading: boolean; reload: () => Promise<void> }>();
 </script>
 
 <template>
@@ -9,19 +9,15 @@ const emit = defineEmits<{ openUsers: [] }>();
     <p class="eyebrow">{{ $t('dashboard_eyebrow') }}</p>
     <h1>{{ $t('dashboard_greeting', { name: user.username }) }}</h1>
     <p class="page-subtitle">{{ $t('dashboard_subtitle') }}</p>
-    <article v-if="canManageUsers" class="quick-action-card">
-      <div>
-        <p class="eyebrow">{{ $t('administration') }}</p>
-        <h2>{{ $t('manage_users_title') }}</h2>
-        <p>{{ $t('manage_users_description') }}</p>
-      </div>
-      <v-btn
-        color="primary"
-        type="button"
-        variant="flat"
-        @click="emit('openUsers')"
-        >{{ $t('open_users') }}</v-btn
-      >
-    </article>
+    <p v-if="error" class="form-error" role="alert">{{ error }} <v-btn variant="text" size="small" @click="reload">{{ $t('retry') }}</v-btn></p>
+    <p v-else-if="isLoading" class="empty-state">{{ $t('loading_dashboard') }}</p>
+    <div v-else-if="summary" class="dashboard-metrics">
+      <article class="metric-card"><span>{{ $t('active_users') }}</span><strong>{{ summary.activeUsers }}</strong></article>
+      <article class="metric-card"><span>{{ $t('published_questions') }}</span><strong>{{ summary.publishedQuestions }}</strong></article>
+      <article class="metric-card"><span>{{ $t('questions_easy') }}</span><strong>{{ summary.questionsByDifficulty.easy }}</strong></article>
+      <article class="metric-card"><span>{{ $t('questions_medium') }}</span><strong>{{ summary.questionsByDifficulty.medium }}</strong></article>
+      <article class="metric-card"><span>{{ $t('questions_hard') }}</span><strong>{{ summary.questionsByDifficulty.hard }}</strong></article>
+    </div>
+    <p v-else class="empty-state">{{ $t('dashboard_empty') }}</p>
   </section>
 </template>

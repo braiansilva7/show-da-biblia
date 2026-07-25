@@ -45,6 +45,10 @@ async function swaggerPlugin(fastify: FastifyInstance) {
           description:
             'Endpoints de consulta dos países disponíveis no cadastro.',
         },
+        {
+          name: ETagSwagger.dashboard,
+          description: 'Indicadores administrativos do jogo.',
+        },
       ],
     },
   });

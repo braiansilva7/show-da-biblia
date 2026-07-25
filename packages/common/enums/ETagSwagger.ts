@@ -4,4 +4,5 @@ export enum ETagSwagger {
   user = 'Usuários',
   country = 'Países',
   role = 'Papéis e permissões',
+  dashboard = 'Dashboard',
 }
