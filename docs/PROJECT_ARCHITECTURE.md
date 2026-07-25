@@ -75,6 +75,16 @@ As interfaces ficam em `packages/interfaces`; schemas em
 
 ## Modelo de dados
 
+### Visão visual
+
+O diagrama abaixo é uma visão estática do banco. As setas apontam da tabela
+filha (que guarda a chave estrangeira) para a tabela referenciada. Ele pode ser
+aberto diretamente em qualquer navegador, sem depender de suporte a Mermaid.
+
+![Diagrama relacional do banco de dados do Show da Bíblia](assets/database-schema.svg)
+
+### Diagrama detalhado (Mermaid)
+
 ```mermaid
 erDiagram
   COUNTRIES ||--o{ USERS : "country_id"

@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1120" viewBox="0 0 1600 1120" role="img" aria-labelledby="title description">
+  <title id="title">Modelo relacional do banco de dados — Show da Bíblia</title>
+  <desc id="description">Diagrama das tabelas de administração, conteúdo e jogo, com suas relações por chave estrangeira.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#7f4f24"/></marker>
+    <style>
+      .background { fill: #fafafa; }
+      .heading { font: 700 26px 'Segoe UI', Arial, sans-serif; fill: #2f2b3d; }
+      .subtitle { font: 14px 'Segoe UI', Arial, sans-serif; fill: #5d596c; }
+      .group { fill: #f2ede8; stroke: #d6c5b3; stroke-width: 1.5; }
+      .group-title { font: 700 17px 'Segoe UI', Arial, sans-serif; fill: #754516; letter-spacing: .7px; }
+      .table { fill: #ffffff; stroke: #cbc6d2; stroke-width: 1.2; }
+      .table-title { font: 700 13px 'Segoe UI', Arial, sans-serif; fill: #ffffff; }
+      .field { font: 12px 'Segoe UI', Arial, sans-serif; fill: #423d50; }
+      .key { font-weight: 700; fill: #7f4f24; }
+      .relation { fill: none; stroke: #7f4f24; stroke-width: 1.35; marker-end: url(#arrow); opacity: .88; }
+      .relation-label { font: 11px 'Segoe UI', Arial, sans-serif; fill: #754516; }
+      .legend { font: 12px 'Segoe UI', Arial, sans-serif; fill: #5d596c; }
+    </style>
+  </defs>
+  <rect class="background" width="1600" height="1120"/>
+  <text x="42" y="48" class="heading">Banco de dados — Show da Bíblia</text>
+  <text x="42" y="74" class="subtitle">Chaves principais e relacionamentos. PK = chave primária · FK = chave estrangeira · UK = único.</text>
+
+  <rect class="group" x="30" y="100" width="430" height="920" rx="12"/>
+  <text x="52" y="132" class="group-title">ADMINISTRAÇÃO E ACESSO</text>
+  <rect class="group" x="490" y="100" width="495" height="920" rx="12"/>
+  <text x="512" y="132" class="group-title">CONTEÚDO DAS QUESTÕES</text>
+  <rect class="group" x="1015" y="100" width="555" height="920" rx="12"/>
+  <text x="1037" y="132" class="group-title">PARTIDAS, JOKERS E PONTUAÇÃO</text>
+
+  <!-- Administração -->
+  <g transform="translate(55 160)"><rect class="table" width="180" height="84" rx="6"/><rect x="0" width="180" height="28" rx="6" fill="#7f4f24"/><text x="12" y="19" class="table-title">countries</text><text x="12" y="49" class="field key">id · PK</text><text x="12" y="67" class="field">iso_code · UK</text></g>
+  <g transform="translate(265 160)"><rect class="table" width="170" height="120" rx="6"/><rect width="170" height="28" rx="6" fill="#7f4f24"/><text x="12" y="19" class="table-title">users</text><text x="12" y="49" class="field key">id · PK</text><text x="12" y="67" class="field">country_id · FK</text><text x="12" y="85" class="field">language_code</text><text x="12" y="103" class="field">active</text></g>
+  <g transform="translate(55 325)"><rect class="table" width="180" height="102" rx="6"/><rect width="180" height="28" rx="6" fill="#7f4f24"/><text x="12" y="19" class="table-title">permission_roles</text><text x="12" y="49" class="field key">id · PK</text><text x="12" y="67" class="field">code · UK</text><text x="12" y="85" class="field">is_system</text></g>
+  <g transform="translate(265 325)"><rect class="table" width="170" height="84" rx="6"/><rect width="170" height="28" rx="6" fill="#7f4f24"/><text x="12" y="19" class="table-title">permissions</text><text x="12" y="49" class="field key">action · PK</text></g>
+  <g transform="translate(55 470)"><rect class="table" width="180" height="84" rx="6"/><rect width="180" height="28" rx="6" fill="#7f4f24"/><text x="12" y="19" class="table-title">permission_assignments</text><text x="12" y="49" class="field key">user_id · PK/FK</text><text x="12" y="67" class="field">permission_role_id · FK</text></g>
+  <g transform="translate(265 470)"><rect class="table" width="170" height="84" rx="6"/><rect width="170" height="28" rx="6" fill="#7f4f24"/><text x="12" y="19" class="table-title">permission_role_actions</text><text x="12" y="49" class="field key">permission_role_id · FK</text><text x="12" y="67" class="field key">action · FK</text></g>
+  <g transform="translate(55 650)"><rect class="table" width="180" height="102" rx="6"/><rect width="180" height="28" rx="6" fill="#7f4f24"/><text x="12" y="19" class="table-title">player_progress</text><text x="12" y="49" class="field key">id · PK</text><text x="12" y="67" class="field">user_id · FK/UK</text><text x="12" y="85" class="field">highest_unlocked_level</text></g>
+
+  <!-- Conteúdo -->
+  <g transform="translate(520 160)"><rect class="table" width="200" height="84" rx="6"/><rect width="200" height="28" rx="6" fill="#365fbc"/><text x="12" y="19" class="table-title">categories</text><text x="12" y="49" class="field key">id · PK</text><text x="12" y="67" class="field">name · UK</text></g>
+  <g transform="translate(755 160)"><rect class="table" width="200" height="120" rx="6"/><rect width="200" height="28" rx="6" fill="#365fbc"/><text x="12" y="19" class="table-title">questions</text><text x="12" y="49" class="field key">id · PK</text><text x="12" y="67" class="field">category_id · FK</text><text x="12" y="85" class="field">created_by_user_id · FK</text><text x="12" y="103" class="field">status · difficulty_level</text></g>
+  <g transform="translate(520 335)"><rect class="table" width="200" height="102" rx="6"/><rect width="200" height="28" rx="6" fill="#365fbc"/><text x="12" y="19" class="table-title">question_translations</text><text x="12" y="49" class="field key">id · PK</text><text x="12" y="67" class="field">question_id · FK</text><text x="12" y="85" class="field">language_code · UK*</text></g>
+  <g transform="translate(755 335)"><rect class="table" width="200" height="102" rx="6"/><rect width="200" height="28" rx="6" fill="#365fbc"/><text x="12" y="19" class="table-title">answer_options</text><text x="12" y="49" class="field key">id · PK</text><text x="12" y="67" class="field">question_id · FK</text><text x="12" y="85" class="field">position · is_correct</text></g>
+  <g transform="translate(635 500)"><rect class="table" width="210" height="102" rx="6"/><rect width="210" height="28" rx="6" fill="#365fbc"/><text x="12" y="19" class="table-title">answer_option_translations</text><text x="12" y="49" class="field key">id · PK</text><text x="12" y="67" class="field">answer_option_id · FK</text><text x="12" y="85" class="field">language_code · UK*</text></g>
+
+  <!-- Jogo -->
+  <g transform="translate(1045 160)"><rect class="table" width="210" height="120" rx="6"/><rect width="210" height="28" rx="6" fill="#2f8b67"/><text x="12" y="19" class="table-title">game_sessions</text><text x="12" y="49" class="field key">id · PK</text><text x="12" y="67" class="field">user_id · FK</text><text x="12" y="85" class="field">language_code · status</text><text x="12" y="103" class="field">score · current_level</text></g>
+  <g transform="translate(1310 160)"><rect class="table" width="225" height="138" rx="6"/><rect width="225" height="28" rx="6" fill="#2f8b67"/><text x="12" y="19" class="table-title">session_questions</text><text x="12" y="49" class="field key">id · PK</text><text x="12" y="67" class="field">game_session_id · FK</text><text x="12" y="85" class="field">question_id · FK</text><text x="12" y="103" class="field">selected_answer_option_id · FK</text><text x="12" y="121" class="field">is_correct · earned_points</text></g>
+  <g transform="translate(1045 360)"><rect class="table" width="210" height="102" rx="6"/><rect width="210" height="28" rx="6" fill="#2f8b67"/><text x="12" y="19" class="table-title">joker_types</text><text x="12" y="49" class="field key">id · PK</text><text x="12" y="67" class="field">code · UK</text><text x="12" y="85" class="field">reveals_correct_answer</text></g>
+  <g transform="translate(1310 360)"><rect class="table" width="225" height="102" rx="6"/><rect width="225" height="28" rx="6" fill="#2f8b67"/><text x="12" y="19" class="table-title">session_jokers</text><text x="12" y="49" class="field key">id · PK</text><text x="12" y="67" class="field">game_session_id · FK</text><text x="12" y="85" class="field">joker_type_id · FK</text></g>
+  <g transform="translate(1045 540)"><rect class="table" width="210" height="102" rx="6"/><rect width="210" height="28" rx="6" fill="#2f8b67"/><text x="12" y="19" class="table-title">joker_usages</text><text x="12" y="49" class="field key">id · PK</text><text x="12" y="67" class="field">session_question_id · FK</text><text x="12" y="85" class="field">joker_type_id · FK</text></g>
+  <g transform="translate(1310 540)"><rect class="table" width="225" height="84" rx="6"/><rect width="225" height="28" rx="6" fill="#2f8b67"/><text x="12" y="19" class="table-title">joker_eliminated_options</text><text x="12" y="49" class="field">joker_usage_id · FK</text><text x="12" y="67" class="field">answer_option_id · FK</text></g>
+  <g transform="translate(1175 720)"><rect class="table" width="225" height="120" rx="6"/><rect width="225" height="28" rx="6" fill="#2f8b67"/><text x="12" y="19" class="table-title">score_events</text><text x="12" y="49" class="field key">id · PK</text><text x="12" y="67" class="field">user_id · FK</text><text x="12" y="85" class="field">game_session_id · FK</text><text x="12" y="103" class="field">session_question_id · FK</text></g>
+
+  <!-- Relações: seta sai da tabela que possui a FK -->
+  <path class="relation" d="M265 210 H235"/><text class="relation-label" x="237" y="200">country_id</text>
+  <path class="relation" d="M265 510 H235"/><path class="relation" d="M145 470 V427"/><path class="relation" d="M265 510 V409"/><path class="relation" d="M350 470 V409"/>
+  <path class="relation" d="M145 650 V280 H350"/><text class="relation-label" x="150" y="310">user_id</text>
+  <path class="relation" d="M755 210 H720"/><path class="relation" d="M755 228 H435"/><text class="relation-label" x="585" y="218">category_id · created_by_user_id</text>
+  <path class="relation" d="M620 335 V280 H820"/><path class="relation" d="M855 335 V280"/><path class="relation" d="M740 500 V437 H855"/>
+  <path class="relation" d="M1045 220 H435"/><text class="relation-label" x="1010" y="210">user_id</text>
+  <path class="relation" d="M1310 225 H1255"/><path class="relation" d="M1310 245 H955"/><path class="relation" d="M1422 360 V385 H955"/>
+  <path class="relation" d="M1310 392 V280 H1150"/><path class="relation" d="M1310 410 H1255"/>
+  <path class="relation" d="M1045 590 V298 H1422"/><path class="relation" d="M1148 540 V462"/>
+  <path class="relation" d="M1310 582 H1255"/><path class="relation" d="M1422 540 V437 H855"/>
+  <path class="relation" d="M1175 780 H1000 V220 H435"/><path class="relation" d="M1288 720 V280"/>
+  <text x="55" y="1065" class="legend">* A unicidade é composta pela chave estrangeira e pelo idioma. A estrutura completa e as cardinalidades estão no diagrama Mermaid abaixo.</text>
+</svg>
