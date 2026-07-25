@@ -456,17 +456,27 @@ td {
   color: #c73d3e;
 }
 .row-actions {
+  align-items: center;
+  display: flex;
+  gap: 0.25rem;
   white-space: nowrap;
 }
-.row-actions button {
-  background: transparent;
-  border: 0;
+.row-action-button {
   color: #6a3e1c;
-  font-size: 0.8rem;
-  font-weight: 600;
-  padding: 0.25rem 0.35rem;
+  height: 32px;
+  min-width: 32px;
+  width: 32px;
 }
-.row-actions .danger-action {
+.row-action-button svg {
+  fill: none;
+  height: 18px;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+  width: 18px;
+}
+.row-action-button.danger-action {
   color: #c73d3e;
 }
 .modal-card {

@@ -185,21 +185,41 @@ async function confirmDelete() {
               </td>
               <td>{{ formatDate(managedUser.created_at, locale) }}</td>
               <td class="row-actions">
-                <v-btn
-                  type="button"
-                  variant="text"
-                  size="small"
-                  @click="editUser(managedUser)"
-                  >{{ $t('edit') }}</v-btn
-                ><v-btn
-                  class="danger-action"
-                  color="error"
-                  type="button"
-                  variant="text"
-                  size="small"
-                  @click="userPendingDeletion = managedUser"
-                  >{{ $t('delete') }}</v-btn
-                >
+                <v-tooltip :text="$t('edit')" location="top">
+                  <template #activator="{ props: tooltipProps }">
+                    <v-btn
+                      v-bind="tooltipProps"
+                      class="row-action-button"
+                      :aria-label="$t('edit')"
+                      icon
+                      type="button"
+                      variant="text"
+                      @click="editUser(managedUser)"
+                    >
+                      <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M4 16.5V20h3.5L18 9.5 14.5 6 4 16.5Z" />
+                        <path d="m13.5 7 3.5 3.5" />
+                      </svg>
+                    </v-btn>
+                  </template>
+                </v-tooltip>
+                <v-tooltip :text="$t('delete')" location="top">
+                  <template #activator="{ props: tooltipProps }">
+                    <v-btn
+                      v-bind="tooltipProps"
+                      class="row-action-button danger-action"
+                      :aria-label="$t('delete')"
+                      icon
+                      type="button"
+                      variant="text"
+                      @click="userPendingDeletion = managedUser"
+                    >
+                      <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M5 7h14M10 11v5M14 11v5M9 7l1-2h4l1 2M7 7l1 13h8l1-13" />
+                      </svg>
+                    </v-btn>
+                  </template>
+                </v-tooltip>
               </td>
             </tr>
           </tbody>
