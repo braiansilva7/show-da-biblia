@@ -1,0 +1,26 @@
+export const ptBR = {
+  appName: 'Show da Bíblia',
+  loading: 'Preparando sua jornada...',
+  accessTitle: 'Sua jornada começa aqui',
+  accessDescription: 'Entre para explorar a fundação do Show da Bíblia.',
+  enter: 'Continuar',
+  homeTitle: 'Olá, jogador!',
+  homeDescription: 'As partidas estarão disponíveis em breve.',
+  startGame: 'Iniciar partida',
+  rankingsTitle: 'Rankings',
+  rankingsDescription: 'A classificação dos jogadores aparecerá aqui.',
+  profileTitle: 'Perfil',
+  profileDescription:
+    'As configurações do jogador estarão disponíveis em breve.',
+  gameTitle: 'Partida',
+  gameDescription: 'A experiência de jogo será conectada à API em breve.',
+  resultTitle: 'Resultado',
+  resultDescription: 'O resumo da partida aparecerá aqui.',
+  backHome: 'Voltar ao início',
+  tabHome: 'Início',
+  tabRankings: 'Rankings',
+  tabProfile: 'Perfil',
+  unavailableTitle: 'Em preparação',
+  unavailableDescription:
+    'Esta parte do aplicativo ainda está sendo construída.',
+} as const;

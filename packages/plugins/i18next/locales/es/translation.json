@@ -42,5 +42,16 @@
   "question_publish_pending_question_translations": "Incluya enunciado y explicación en PT-BR, inglés y español.",
   "question_publish_pending_answer_options": "Incluya exactamente cuatro alternativas en las posiciones de 1 a 4.",
   "question_publish_pending_answer_translations": "Incluya los textos de las cuatro alternativas en los tres idiomas.",
-  "question_publish_pending_correct_answer": "Defina exactamente una respuesta correcta."
+  "question_publish_pending_correct_answer": "Defina exactamente una respuesta correcta.",
+  "game_session_not_found": "Partida no encontrada.",
+  "game_session_not_in_progress": "La partida no está en curso.",
+  "game_session_skips_exhausted": "Los saltos de esta partida se agotaron.",
+  "game_session_question_not_found": "La pregunta no pertenece a esta partida.",
+  "game_session_question_not_pending": "La pregunta ya no está pendiente.",
+  "game_session_no_next_question": "No hay otra pregunta disponible en esta dificultad.",
+  "game_joker_type_not_found": "Tipo de carta comodín no válido.",
+  "game_joker_not_available": "Esta carta comodín no está disponible en la partida.",
+  "game_joker_already_used": "Esta carta ya se usó en esta pregunta.",
+  "game_joker_insufficient_options": "No hay suficientes alternativas incorrectas para usar esta carta."
+  ,"game_session_already_active":"Ya hay una partida en curso.","game_session_not_finishable":"La partida aún no puede finalizarse.","game_answer_invalid":"La alternativa no pertenece a la pregunta actual."
 }

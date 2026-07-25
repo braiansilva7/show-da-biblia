@@ -42,5 +42,16 @@
   "question_publish_pending_question_translations": "Inclua enunciado e explicação em PT-BR, inglês e espanhol.",
   "question_publish_pending_answer_options": "Inclua exatamente quatro alternativas nas posições de 1 a 4.",
   "question_publish_pending_answer_translations": "Inclua o texto das quatro alternativas nos três idiomas.",
-  "question_publish_pending_correct_answer": "Defina exatamente uma resposta correta."
+  "question_publish_pending_correct_answer": "Defina exatamente uma resposta correta.",
+  "game_session_not_found": "Partida não encontrada.",
+  "game_session_not_in_progress": "A partida não está em andamento.",
+  "game_session_skips_exhausted": "Os pulos desta partida se esgotaram.",
+  "game_session_question_not_found": "A questão não pertence a esta partida.",
+  "game_session_question_not_pending": "A questão não está mais pendente.",
+  "game_session_no_next_question": "Não há outra questão disponível nesta dificuldade.",
+  "game_joker_type_not_found": "Tipo de carta coringa inválido.",
+  "game_joker_not_available": "Esta carta coringa não está disponível na partida.",
+  "game_joker_already_used": "Esta carta já foi usada nesta questão.",
+  "game_joker_insufficient_options": "Não há alternativas incorretas suficientes para usar esta carta."
+  ,"game_session_already_active":"Já existe uma partida em andamento.","game_session_not_finishable":"A partida ainda não pode ser finalizada.","game_answer_invalid":"A alternativa não pertence à questão atual."
 }

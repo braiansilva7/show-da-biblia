@@ -42,5 +42,16 @@
   "question_publish_pending_question_translations": "Add statement and explanation in PT-BR, English, and Spanish.",
   "question_publish_pending_answer_options": "Add exactly four answer options in positions 1 through 4.",
   "question_publish_pending_answer_translations": "Add text for all four answer options in the three languages.",
-  "question_publish_pending_correct_answer": "Set exactly one correct answer."
+  "question_publish_pending_correct_answer": "Set exactly one correct answer.",
+  "game_session_not_found": "Game session not found.",
+  "game_session_not_in_progress": "The game session is not in progress.",
+  "game_session_skips_exhausted": "No skips remain in this game session.",
+  "game_session_question_not_found": "The question does not belong to this game session.",
+  "game_session_question_not_pending": "The question is no longer pending.",
+  "game_session_no_next_question": "No other question is available at this difficulty.",
+  "game_joker_type_not_found": "Invalid joker card type.",
+  "game_joker_not_available": "This joker card is not available in the game session.",
+  "game_joker_already_used": "This joker card has already been used for this question.",
+  "game_joker_insufficient_options": "There are not enough incorrect options to use this joker card."
+  ,"game_session_already_active":"There is already a game in progress.","game_session_not_finishable":"The game cannot be finished yet.","game_answer_invalid":"The answer option does not belong to the current question."
 }

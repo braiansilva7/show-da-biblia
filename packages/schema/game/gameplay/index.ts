@@ -1,0 +1,10 @@
+import { Type, type Static } from '@sinclair/typebox';
+import { ETagSwagger } from '@core/common/enums/ETagSwagger.js';
+import { errorMessageSchema } from '@core/schema/common/user.schema.js';
+const id=Type.String({format:'uuid'}); export const answerBody=Type.Object({session_question_id:id,answer_option_id:id}); export type AnswerBody=Static<typeof answerBody>;
+const params=Type.Object({sessionId:id}); const rankQuery=Type.Object({page:Type.Optional(Type.Integer({minimum:1,default:1})),page_size:Type.Optional(Type.Integer({minimum:1,maximum:100,default:20}))});
+const error={400:errorMessageSchema,401:errorMessageSchema,404:errorMessageSchema,409:errorMessageSchema};
+export const startGameSchema={tags:[ETagSwagger.game],summary:'Iniciar partida',security:[{authenticateJwt:[]}],response:{201:Type.Object({session:Type.Object({id, current_level:Type.Integer(),score:Type.Integer(),skips_remaining:Type.Integer(),status:Type.String()}),question:Type.Any()}),...error}};
+export const answerGameSchema={tags:[ETagSwagger.game],summary:'Responder questão',security:[{authenticateJwt:[]}],params,body:answerBody,response:{200:Type.Any(),...error}};
+export const finishGameSchema={tags:[ETagSwagger.game],summary:'Finalizar partida',security:[{authenticateJwt:[]}],params,response:{200:Type.Any(),...error}};
+export const rankingSchema={tags:[ETagSwagger.game],summary:'Consultar ranking',security:[{authenticateJwt:[]}],querystring:rankQuery,response:{200:Type.Any(),...error}};

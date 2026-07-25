@@ -31,6 +31,7 @@ export const gameSessions = pgTable(
       withTimezone: true,
       mode: 'string',
     }),
+    end_reason: varchar('end_reason', { length: 20 }),
   },
   (table) => [
     index('game_sessions_user_status_started_at_idx').on(
@@ -69,5 +70,12 @@ export const sessionQuestions = pgTable(
     }),
     skipped_at: timestamp('skipped_at', { withTimezone: true, mode: 'string' }),
   },
-  (table) => [index('session_questions_question_id_idx').on(table.question_id)]
+  (table) => [
+    index('session_questions_question_id_idx').on(table.question_id),
+    index('session_questions_game_session_status_order_idx').on(
+      table.game_session_id,
+      table.status,
+      table.order_number
+    ),
+  ]
 );

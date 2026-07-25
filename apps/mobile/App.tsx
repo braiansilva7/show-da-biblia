@@ -1,36 +1,29 @@
-import { SafeAreaView, StatusBar, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { StatusBar } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { AppSessionProvider } from './context/AppSessionContext';
+import { LocalizationProvider } from './context/LocalizationContext';
+import { RootNavigator } from './navigation/RootNavigator';
+import { BootScreen } from './screens/BootScreen';
 
 export default function App() {
+  const [booting, setBooting] = useState(true);
+  useEffect(() => {
+    const timer = setTimeout(() => setBooting(false), 0);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
-    <SafeAreaView style={styles.screen}>
-      <View style={styles.content}>
-        <Text style={styles.title}>Show da Bíblia</Text>
-        <Text style={styles.subtitle}>O jogo está em preparação.</Text>
-      </View>
-      <StatusBar barStyle="dark-content" />
-    </SafeAreaView>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <LocalizationProvider>
+          <AppSessionProvider>
+            {booting ? <BootScreen /> : <RootNavigator />}
+            <StatusBar barStyle="dark-content" />
+          </AppSessionProvider>
+        </LocalizationProvider>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }
-
-const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: '#fffaf2',
-  },
-  content: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 24,
-  },
-  title: {
-    color: '#7f4f24',
-    fontSize: 32,
-    fontWeight: '700',
-  },
-  subtitle: {
-    color: '#5f4a32',
-    fontSize: 16,
-    marginTop: 12,
-  },
-});

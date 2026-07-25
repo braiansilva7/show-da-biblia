@@ -7,4 +7,5 @@ export enum ETagSwagger {
   dashboard = 'Dashboard',
   category = 'Categorias',
   question = 'Questões',
+  game = 'Partidas',
 }

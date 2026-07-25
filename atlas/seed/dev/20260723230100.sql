@@ -12,8 +12,7 @@ VALUES
   (1, 'ELIMINATE_1', 1, FALSE, TRUE),
   (2, 'ELIMINATE_2', 2, FALSE, TRUE),
   (3, 'ELIMINATE_3', 3, FALSE, TRUE),
-  (4, 'ELIMINATE_4', 4, FALSE, TRUE),
-  (5, 'REVEAL', 0, TRUE, TRUE)
+  (5, 'REVEAL_ANSWER', 0, TRUE, TRUE)
 ON CONFLICT (id) DO UPDATE
 SET code = EXCLUDED.code,
     eliminated_wrong_answers = EXCLUDED.eliminated_wrong_answers,

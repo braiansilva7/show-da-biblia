@@ -7,6 +7,7 @@ import {
   uuid,
   varchar,
 } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
 import { categories } from '@core/models/category/category.model.js';
 import { users } from '@core/models/user/user.model.js';
 import type { DifficultyLevel } from '@core/common/types/difficulty.js';
@@ -39,6 +40,9 @@ export const questions = pgTable(
   (table) => [
     index('questions_category_id_idx').on(table.category_id),
     index('questions_created_by_user_id_idx').on(table.created_by_user_id),
+    index('questions_published_by_difficulty_idx')
+      .on(table.difficulty_level, table.published_at, table.id)
+      .where(sql`${table.status} = 'PUBLISHED'`),
   ]
 );
 

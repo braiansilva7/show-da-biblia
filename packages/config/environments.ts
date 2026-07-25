@@ -20,6 +20,18 @@ function port(value: string | undefined, fallback = '3000'): number {
   return parsed;
 }
 
+function nonNegativeInteger(
+  name: string,
+  value: string | undefined,
+  fallback: number
+): number {
+  const parsed = Number(value ?? fallback);
+  if (!Number.isInteger(parsed) || parsed < 0) {
+    throw new Error(`A variável de ambiente ${name} deve ser um inteiro não negativo.`);
+  }
+  return parsed;
+}
+
 export const databaseEnvironment = {
   databaseUrl: required('DATABASE_URL'),
 };
@@ -45,5 +57,15 @@ export function managerApiEnvironment() {
     jwtSecret: required('JWT_SECRET'),
     jwtSecretExpiresIn: required('JWT_SECRET_EXPIRES_IN'),
     corsOrigin: required('CORS_ORIGIN'),
+    jokerEliminationQuantity: nonNegativeInteger(
+      'GAME_JOKER_ELIMINATION_QUANTITY',
+      process.env.GAME_JOKER_ELIMINATION_QUANTITY,
+      1
+    ),
+    jokerRevealQuantity: nonNegativeInteger(
+      'GAME_JOKER_REVEAL_QUANTITY',
+      process.env.GAME_JOKER_REVEAL_QUANTITY,
+      1
+    ),
   };
 }

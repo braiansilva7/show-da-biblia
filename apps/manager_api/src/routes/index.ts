@@ -6,6 +6,7 @@ import countryRoutes from './country.route.js';
 import dashboardRoutes from './dashboard.route.js';
 import categoryRoutes from './category.route.js';
 import questionRoutes from './question.route.js';
+import gameSessionRoutes from './game-session.route.js';
 
 export default function routes(server: FastifyInstance) {
   server.register(authRoutes);
@@ -14,5 +15,6 @@ export default function routes(server: FastifyInstance) {
   server.register(dashboardRoutes);
   server.register(categoryRoutes);
   server.register(questionRoutes);
+  server.register(gameSessionRoutes);
   server.register(permissionRoleRoutes);
 }

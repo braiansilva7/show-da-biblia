@@ -32,6 +32,7 @@ export const scoreEvents = pgTable(
       .notNull(),
   },
   (table) => [
+    index('score_events_session_question_event_type_key').on(table.session_question_id, table.event_type),
     index('score_events_user_created_at_idx').on(
       table.user_id,
       table.created_at

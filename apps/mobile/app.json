@@ -3,6 +3,7 @@
     "name": "Show da Bíblia",
     "slug": "show-da-biblia",
     "version": "0.1.0",
+    "scheme": "showdabiblia",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "ios": {

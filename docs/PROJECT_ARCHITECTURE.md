@@ -40,6 +40,20 @@ show-da-biblia/
 │   │       ├── types/             # Contratos TypeScript
 │   │       └── utils/             # Funções puras e formatadores
 │   └── mobile/
+│       ├── api/               # Adaptadores HTTP por recurso mobile
+│       ├── assets/            # Recursos visuais do aplicativo
+│       ├── components/        # Componentes React Native reutilizáveis
+│       ├── constants/         # Configuração e valores globais
+│       ├── context/           # Estado transversal de sessão e localização
+│       ├── locales/           # Catálogos pt-BR, en e es
+│       ├── navigation/        # Navegadores e contratos de rota
+│       ├── screens/           # Telas e fluxos do jogador
+│       ├── services/          # Operações de domínio mobile
+│       ├── storage/           # Persistência local encapsulada
+│       ├── theme/             # Tokens visuais compartilhados
+│       ├── types/             # Contratos TypeScript do app
+│       ├── utils/             # Funções puras
+│       └── __tests__/         # Testes de módulos e contratos
 ├── packages/
 │   ├── common/                    # Enums, tipos e funções comuns
 │   ├── config/                    # Leitura e validação de ambiente
@@ -208,6 +222,46 @@ aceita JPEG, PNG, WEBP e GIF, com limite de 5 MB, armazena o objeto no MinIO em
 `users/profile-pictures/<uuid-v7>.<extensão>` e salva apenas a URL pública em
 `users.profile_picture_url`. Ao substituir ou excluir um usuário, o objeto
 anterior é removido do MinIO.
+
+## Progresso e partidas
+
+Ao receber o papel de sistema `PLAYER`, o usuário ganha automaticamente um
+único registro em `player_progress`, iniciado no nível 1 com os contadores em
+zero. O registro é preservado caso o papel seja alterado depois, para não perder
+o histórico do jogador.
+
+As partidas começam com três pulos. As consultas de questões por partida e
+status usam o índice `(game_session_id, status, order_number)`; o índice parcial
+de questões pendentes continua atendendo a busca da próxima questão.
+
+O pulo de uma questão marca o item atual como `SKIPPED`, reduz um pulo e cria
+uma nova questão pendente da mesma dificuldade, sem repetir uma questão já
+registrada na partida. A operação não altera pontuação nem cria eventos de
+score; se não houver outra questão válida, a partida permanece inalterada.
+
+## Coringas
+
+Os coringas usam exclusivamente `joker_types`, `session_jokers`,
+`joker_usages` e `joker_eliminated_options`. Ao iniciar uma partida, o
+inicializador configurável atribui uma carta de eliminação sorteada entre
+`ELIMINATE_1`, `ELIMINATE_2` e `ELIMINATE_3`, além de `REVEAL_ANSWER`.
+As quantidades são definidas pelas variáveis `GAME_JOKER_ELIMINATION_QUANTITY`
+e `GAME_JOKER_REVEAL_QUANTITY`, ambas com padrão `1`.
+
+O uso só é permitido para a questão pendente da própria partida. Eliminações
+registram apenas alternativas incorretas ainda não removidas; a revelação
+retorna a alternativa correta sem expor o campo interno `is_correct`. Cada
+uso reduz `quantity_available`, aumenta `quantity_used` e registra sua
+rastreabilidade na mesma transação.
+
+## Pontuação e ranking
+
+Cada acerto vale um ponto. A partida possui três níveis de dez acertos; erro
+ou expiração de um minuto encerra a sessão. `score_events` mantém a auditoria
+dos pontos e `users.total_score` é apenas o cache derivado da maior pontuação
+de uma partida finalizada. O ranking é calculado sem tabelas paralelas, com
+uma melhor partida por jogador ativo, filtrando país por `country_id` quando
+nacional e desempate pelo menor tempo total.
 
 ## UUIDs e migrations
 

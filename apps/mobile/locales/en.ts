@@ -1,0 +1,26 @@
+import type { TranslationDictionary } from './index';
+
+export const en: TranslationDictionary = {
+  appName: 'Bible Show',
+  loading: 'Preparing your journey...',
+  accessTitle: 'Your journey starts here',
+  accessDescription: 'Enter to explore the Bible Show foundation.',
+  enter: 'Continue',
+  homeTitle: 'Hello, player!',
+  homeDescription: 'Games will be available soon.',
+  startGame: 'Start game',
+  rankingsTitle: 'Rankings',
+  rankingsDescription: 'Player rankings will appear here.',
+  profileTitle: 'Profile',
+  profileDescription: 'Player settings will be available soon.',
+  gameTitle: 'Game',
+  gameDescription: 'The game experience will connect to the API soon.',
+  resultTitle: 'Result',
+  resultDescription: 'Your game summary will appear here.',
+  backHome: 'Back to home',
+  tabHome: 'Home',
+  tabRankings: 'Rankings',
+  tabProfile: 'Profile',
+  unavailableTitle: 'In progress',
+  unavailableDescription: 'This part of the app is still being built.',
+};
