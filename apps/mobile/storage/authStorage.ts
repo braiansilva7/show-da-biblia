@@ -1,12 +1,59 @@
-import type { Player } from '../types/game';
+import * as SecureStore from 'expo-secure-store';
+import { Platform } from 'react-native';
+import type { AuthSession } from '../types/auth';
 
-export type StoredAuthSession = { token: string; player: Player };
+const TOKEN_KEY = 'show-da-biblia.auth.token';
+const USER_KEY = 'show-da-biblia.auth.user';
 
-/** Deliberately inert until the login API and secure persistence are introduced. */
+function isWebStorageAvailable() {
+  return Platform.OS === 'web' && typeof localStorage !== 'undefined';
+}
+
+async function readValue(key: string): Promise<string | null> {
+  if (isWebStorageAvailable()) return localStorage.getItem(key);
+  return SecureStore.getItemAsync(key);
+}
+
+async function writeValue(key: string, value: string): Promise<void> {
+  if (isWebStorageAvailable()) {
+    localStorage.setItem(key, value);
+    return;
+  }
+  await SecureStore.setItemAsync(key, value);
+}
+
+async function removeValue(key: string): Promise<void> {
+  if (isWebStorageAvailable()) {
+    localStorage.removeItem(key);
+    return;
+  }
+  await SecureStore.deleteItemAsync(key);
+}
+
 export const authStorage = {
-  async read(): Promise<StoredAuthSession | null> {
-    return null;
+  async getToken() {
+    return readValue(TOKEN_KEY);
   },
-  async save(_: StoredAuthSession): Promise<void> {},
-  async clear(): Promise<void> {},
+  async read(): Promise<AuthSession | null> {
+    const [accessToken, rawUser] = await Promise.all([
+      readValue(TOKEN_KEY),
+      readValue(USER_KEY),
+    ]);
+    if (!accessToken || !rawUser) return null;
+    try {
+      return { accessToken, user: JSON.parse(rawUser) as AuthSession['user'] };
+    } catch {
+      await this.clear();
+      return null;
+    }
+  },
+  async save(session: AuthSession) {
+    await Promise.all([
+      writeValue(TOKEN_KEY, session.accessToken),
+      writeValue(USER_KEY, JSON.stringify(session.user)),
+    ]);
+  },
+  async clear() {
+    await Promise.all([removeValue(TOKEN_KEY), removeValue(USER_KEY)]);
+  },
 };

@@ -2,9 +2,19 @@
   "auth_credentials_required": "El correo electrónico y la contraseña son obligatorios.",
   "auth_invalid_credentials": "Credenciales no válidas.",
   "auth_invalid_or_expired_token": "Token no válido o vencido.",
+  "internal_server_error": "No fue posible completar tu solicitud ahora. Inténtalo de nuevo más tarde.",
+  "forgot_password_code_sent": "Si existe una cuenta para este correo, enviaremos un código de recuperación.",
+  "forgot_password_rate_limited": "Demasiadas solicitudes. Espera unos minutos e inténtalo de nuevo.",
+  "forgot_password_delivery_unavailable": "No fue posible enviar el código ahora. Inténtalo más tarde.",
+  "forgot_password_code_invalid": "El código no es válido.",
+  "forgot_password_code_expired": "El código ha caducado. Solicita uno nuevo.",
+  "forgot_password_too_many_attempts": "Excediste el límite de intentos. Solicita un código nuevo.",
+  "forgot_password_passwords_do_not_match": "Las contraseñas no coinciden.",
   "auth_unauthorized_user": "Usuario no autorizado.",
   "auth_admin_access_only": "El acceso está restringido a administradores.",
   "auth_permission_denied": "No tienes permiso para realizar esta acción.",
+  "auth_register_invalid_input": "Indique un nombre de usuario, correo válido, contraseña de al menos 8 caracteres, idioma y país.",
+  "auth_register_unavailable": "El registro de jugadores no está disponible temporalmente.",
   "dashboard_summary_unavailable": "No fue posible cargar el resumen administrativo.",
   "permission_role_not_found": "No se encontró el rol de permisos.",
   "permission_role_invalid_input": "Indique datos y permisos válidos para el rol.",
@@ -52,6 +62,8 @@
   "game_joker_type_not_found": "Tipo de carta comodín no válido.",
   "game_joker_not_available": "Esta carta comodín no está disponible en la partida.",
   "game_joker_already_used": "Esta carta ya se usó en esta pregunta.",
-  "game_joker_insufficient_options": "No hay suficientes alternativas incorrectas para usar esta carta."
-  ,"game_session_already_active":"Ya hay una partida en curso.","game_session_not_finishable":"La partida aún no puede finalizarse.","game_answer_invalid":"La alternativa no pertenece a la pregunta actual."
+  "game_joker_insufficient_options": "No hay suficientes alternativas incorrectas para usar esta carta.",
+  "game_session_already_active": "Ya hay una partida en curso.",
+  "game_session_not_finishable": "La partida aún no puede finalizarse.",
+  "game_answer_invalid": "La alternativa no pertenece a la pregunta actual."
 }

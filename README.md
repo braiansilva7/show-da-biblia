@@ -19,6 +19,9 @@ MinIO console: `http://localhost:9003` (credenciais em `S3_ACCESS_KEY` / `S3_SEC
 - `GET /health`
 - `POST /api/v1/auth/login`
 - `GET /api/v1/auth/me`
+- `PATCH /api/v1/auth/me`
+- `POST /api/v1/auth/register`
+- `GET /api/v1/public/countries`
 - `GET|POST /api/v1/users`
 - `PATCH|DELETE /api/v1/users/:id`
 

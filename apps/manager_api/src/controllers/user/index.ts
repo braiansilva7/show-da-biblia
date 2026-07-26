@@ -83,7 +83,10 @@ export class UserController {
           .code(400)
           .send({ message: request.t('country_not_found') });
       }
-      if (error instanceof Error && error.message === 'USERNAME_ALREADY_EXISTS') {
+      if (
+        error instanceof Error &&
+        error.message === 'USERNAME_ALREADY_EXISTS'
+      ) {
         return reply
           .code(409)
           .send({ message: request.t('username_already_exists') });
@@ -145,7 +148,10 @@ export class UserController {
           .code(400)
           .send({ message: request.t('country_not_found') });
       }
-      if (error instanceof Error && error.message === 'USERNAME_ALREADY_EXISTS') {
+      if (
+        error instanceof Error &&
+        error.message === 'USERNAME_ALREADY_EXISTS'
+      ) {
         return reply
           .code(409)
           .send({ message: request.t('username_already_exists') });

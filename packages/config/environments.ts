@@ -27,7 +27,9 @@ function nonNegativeInteger(
 ): number {
   const parsed = Number(value ?? fallback);
   if (!Number.isInteger(parsed) || parsed < 0) {
-    throw new Error(`A variável de ambiente ${name} deve ser um inteiro não negativo.`);
+    throw new Error(
+      `A variável de ambiente ${name} deve ser um inteiro não negativo.`
+    );
   }
   return parsed;
 }
@@ -45,6 +47,29 @@ export const s3Environment = {
   publicBaseUrl:
     process.env.S3_PUBLIC_BASE_URL?.trim() || required('S3_ENDPOINT'),
 };
+
+export function smtpEnvironment() {
+  return {
+    host: required('SMTP_HOST'),
+    port: port(process.env.SMTP_PORT, '587'),
+    user: required('SMTP_USER'),
+    password: required('SMTP_PASSWORD'),
+    from: required('SMTP_FROM'),
+    secure: process.env.SMTP_SECURE?.trim() === 'true',
+  };
+}
+
+/**
+ * A chave exclusiva permite rotacionar códigos de recuperação sem rotacionar
+ * sessões. Em instalações existentes, JWT_SECRET mantém o fluxo seguro até a
+ * variável dedicada ser configurada.
+ */
+export function passwordResetEnvironment() {
+  return {
+    codeSecret:
+      process.env.PASSWORD_RESET_CODE_SECRET?.trim() || required('JWT_SECRET'),
+  };
+}
 
 export function managerApiEnvironment() {
   const appEnvironment = required('APP_ENVIRONMENT');

@@ -316,7 +316,8 @@ export class GameSessionRepository {
           LIMIT 1
         `);
         revealedAnswerOptionId = correctAnswer.rows[0]?.id;
-        if (!revealedAnswerOptionId) throw new Error('GAME_JOKER_TYPE_NOT_FOUND');
+        if (!revealedAnswerOptionId)
+          throw new Error('GAME_JOKER_TYPE_NOT_FOUND');
       } else {
         const incorrectAnswers = await tx.execute<{ id: string }>(sql`
           SELECT ao.id
@@ -335,7 +336,9 @@ export class GameSessionRepository {
         `);
         if (incorrectAnswers.rows.length !== jokerType.eliminated_wrong_answers)
           throw new Error('GAME_JOKER_INSUFFICIENT_OPTIONS');
-        eliminatedAnswerOptionIds.push(...incorrectAnswers.rows.map((row) => row.id));
+        eliminatedAnswerOptionIds.push(
+          ...incorrectAnswers.rows.map((row) => row.id)
+        );
       }
 
       await tx.execute(sql`

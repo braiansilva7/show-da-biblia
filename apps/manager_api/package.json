@@ -7,6 +7,7 @@
     "dev": "tsx watch --tsconfig tsconfig.json src/server.ts",
     "build": "tsc -p tsconfig.json && tsc-alias -p tsconfig.json -f -fe .js",
     "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "tsx --test --tsconfig tsconfig.json ../../packages/services/password-reset.service.test.ts",
     "start": "node dist/apps/manager_api/src/server.js"
   },
   "dependencies": {

@@ -2,9 +2,19 @@
   "auth_credentials_required": "Email and password are required.",
   "auth_invalid_credentials": "Invalid credentials.",
   "auth_invalid_or_expired_token": "Invalid or expired token.",
+  "internal_server_error": "We could not complete your request right now. Please try again later.",
+  "forgot_password_code_sent": "If an account exists for this email, we will send a recovery code.",
+  "forgot_password_rate_limited": "Too many requests. Please wait a few minutes and try again.",
+  "forgot_password_delivery_unavailable": "We could not send the code right now. Please try again later.",
+  "forgot_password_code_invalid": "The code is invalid.",
+  "forgot_password_code_expired": "The code has expired. Request a new code.",
+  "forgot_password_too_many_attempts": "You exceeded the attempt limit. Request a new code.",
+  "forgot_password_passwords_do_not_match": "Passwords do not match.",
   "auth_unauthorized_user": "Unauthorized user.",
   "auth_admin_access_only": "Access is restricted to administrators.",
   "auth_permission_denied": "You do not have permission to perform this action.",
+  "auth_register_invalid_input": "Provide a username, valid email, password with at least 8 characters, language, and country.",
+  "auth_register_unavailable": "Player registration is temporarily unavailable.",
   "dashboard_summary_unavailable": "Unable to load the administrative summary.",
   "permission_role_not_found": "Permission role not found.",
   "permission_role_invalid_input": "Provide valid role data and permissions.",
@@ -52,6 +62,8 @@
   "game_joker_type_not_found": "Invalid joker card type.",
   "game_joker_not_available": "This joker card is not available in the game session.",
   "game_joker_already_used": "This joker card has already been used for this question.",
-  "game_joker_insufficient_options": "There are not enough incorrect options to use this joker card."
-  ,"game_session_already_active":"There is already a game in progress.","game_session_not_finishable":"The game cannot be finished yet.","game_answer_invalid":"The answer option does not belong to the current question."
+  "game_joker_insufficient_options": "There are not enough incorrect options to use this joker card.",
+  "game_session_already_active": "There is already a game in progress.",
+  "game_session_not_finishable": "The game cannot be finished yet.",
+  "game_answer_invalid": "The answer option does not belong to the current question."
 }

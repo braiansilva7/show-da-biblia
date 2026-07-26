@@ -27,6 +27,7 @@ async function mapUser(
     username: row.username,
     email: row.email,
     passwordHash: row.password_hash,
+    sessionVersion: row.session_version,
     permissionRoleId: permissionRole.id,
     permissionRole,
     permissions: permissionRole.permissions,
@@ -178,6 +179,19 @@ export class UserRepository {
     if (input.permissionRoleId !== undefined)
       await this.permissions.assign(id, input.permissionRoleId);
     return toPublicUser(await mapUser(row, this.permissions));
+  }
+
+  async resetPassword(id: string, passwordHash: string): Promise<User | null> {
+    const [row] = await this.db
+      .update(users)
+      .set({
+        password_hash: passwordHash,
+        session_version: sql`${users.session_version} + 1`,
+        updated_at: new Date().toISOString(),
+      })
+      .where(eq(users.id, id))
+      .returning();
+    return row ? mapUser(row, this.permissions) : null;
   }
 
   async delete(id: string): Promise<boolean> {

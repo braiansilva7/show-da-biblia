@@ -5,7 +5,8 @@ import type { IProfilePicture } from '@core/interfaces/user/IProfilePicture.js';
 import type { IUpdateUserInput } from '@core/interfaces/user/IUpdateUserInput.js';
 
 const languageCodes = new Set(['pt-BR', 'en', 'es']);
-const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const uuidPattern =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 function hasField(fields: Record<string, unknown>, ...names: string[]) {
   return names.some((name) => fields[name] !== undefined);

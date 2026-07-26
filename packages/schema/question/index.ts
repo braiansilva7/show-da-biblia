@@ -75,23 +75,42 @@ const questionEditorSchema = Type.Object({
   updated_at: Type.String(),
   published_at: Type.Union([Type.String(), Type.Null()]),
   translations: Type.Object({
-    'pt-BR': Type.Union([Type.Object({ statement: Type.String(), explanation: Type.String() }), Type.Null()]),
-    en: Type.Union([Type.Object({ statement: Type.String(), explanation: Type.String() }), Type.Null()]),
-    es: Type.Union([Type.Object({ statement: Type.String(), explanation: Type.String() }), Type.Null()]),
+    'pt-BR': Type.Union([
+      Type.Object({ statement: Type.String(), explanation: Type.String() }),
+      Type.Null(),
+    ]),
+    en: Type.Union([
+      Type.Object({ statement: Type.String(), explanation: Type.String() }),
+      Type.Null(),
+    ]),
+    es: Type.Union([
+      Type.Object({ statement: Type.String(), explanation: Type.String() }),
+      Type.Null(),
+    ]),
   }),
-  options: Type.Array(Type.Object({
-    id: Type.String({ format: 'uuid' }),
-    position: Type.Integer({ minimum: 1, maximum: 4 }),
-    is_correct: Type.Boolean(),
-    translations: Type.Object({
-      'pt-BR': Type.Union([Type.Object({ content: Type.String() }), Type.Null()]),
-      en: Type.Union([Type.Object({ content: Type.String() }), Type.Null()]),
-      es: Type.Union([Type.Object({ content: Type.String() }), Type.Null()]),
+  options: Type.Array(
+    Type.Object({
+      id: Type.String({ format: 'uuid' }),
+      position: Type.Integer({ minimum: 1, maximum: 4 }),
+      is_correct: Type.Boolean(),
+      translations: Type.Object({
+        'pt-BR': Type.Union([
+          Type.Object({ content: Type.String() }),
+          Type.Null(),
+        ]),
+        en: Type.Union([Type.Object({ content: Type.String() }), Type.Null()]),
+        es: Type.Union([Type.Object({ content: Type.String() }), Type.Null()]),
+      }),
     }),
-  }), { minItems: 4, maxItems: 4 }),
+    { minItems: 4, maxItems: 4 }
+  ),
 });
-const questionEditorResponseSchema = Type.Object({ question: questionEditorSchema });
-const questionIdParamsSchema = Type.Object({ id: Type.String({ format: 'uuid' }) });
+const questionEditorResponseSchema = Type.Object({
+  question: questionEditorSchema,
+});
+const questionIdParamsSchema = Type.Object({
+  id: Type.String({ format: 'uuid' }),
+});
 const publicationPendingSchema = Type.Array(Type.String());
 
 export const listQuestionsSchema = {
@@ -132,41 +151,69 @@ export const listQuestionsSchema = {
   },
 };
 
-const editorErrors = { 400: errorMessageSchema, 401: errorMessageSchema, 403: errorMessageSchema, 404: errorMessageSchema, 409: errorMessageSchema };
+const editorErrors = {
+  400: errorMessageSchema,
+  401: errorMessageSchema,
+  403: errorMessageSchema,
+  404: errorMessageSchema,
+  409: errorMessageSchema,
+};
 export const createQuestionSchema = {
-  summary: 'Criar questão em rascunho', tags: [ETagSwagger.question], security: [{ authenticateJwt: [] }],
+  summary: 'Criar questão em rascunho',
+  tags: [ETagSwagger.question],
+  security: [{ authenticateJwt: [] }],
   body: questionMutationBodySchema,
   response: { 201: questionEditorResponseSchema, ...editorErrors },
 };
 export const viewQuestionSchema = {
-  summary: 'Consultar questão para edição', tags: [ETagSwagger.question], security: [{ authenticateJwt: [] }],
+  summary: 'Consultar questão para edição',
+  tags: [ETagSwagger.question],
+  security: [{ authenticateJwt: [] }],
   params: questionIdParamsSchema,
   response: { 200: questionEditorResponseSchema, ...editorErrors },
 };
 export const updateQuestionSchema = {
-  summary: 'Editar questão em qualquer estado', tags: [ETagSwagger.question], security: [{ authenticateJwt: [] }],
-  params: questionIdParamsSchema, body: questionMutationBodySchema,
+  summary: 'Editar questão em qualquer estado',
+  tags: [ETagSwagger.question],
+  security: [{ authenticateJwt: [] }],
+  params: questionIdParamsSchema,
+  body: questionMutationBodySchema,
   response: { 200: questionEditorResponseSchema, ...editorErrors },
 };
 export const publishQuestionSchema = {
   summary: 'Validar e publicar questão',
   description: 'Publica uma questão completa em rascunho ou arquivada.',
-  tags: [ETagSwagger.question], security: [{ authenticateJwt: [] }], params: questionIdParamsSchema,
+  tags: [ETagSwagger.question],
+  security: [{ authenticateJwt: [] }],
+  params: questionIdParamsSchema,
   response: {
     200: questionEditorResponseSchema,
     ...editorErrors,
-    409: Type.Object({ message: Type.String(), pending: publicationPendingSchema }),
+    409: Type.Object({
+      message: Type.String(),
+      pending: publicationPendingSchema,
+    }),
   },
 };
 export const unpublishQuestionSchema = {
   summary: 'Despublicar questão',
   description: 'Retorna uma questão publicada para o estado de rascunho.',
-  tags: [ETagSwagger.question], security: [{ authenticateJwt: [] }], params: questionIdParamsSchema,
+  tags: [ETagSwagger.question],
+  security: [{ authenticateJwt: [] }],
+  params: questionIdParamsSchema,
   response: { 200: questionEditorResponseSchema, ...editorErrors },
 };
 export const deleteQuestionSchema = {
   summary: 'Excluir ou arquivar questão',
-  description: 'Exclui uma questão sem histórico ou a arquiva quando há partidas vinculadas.',
-  tags: [ETagSwagger.question], security: [{ authenticateJwt: [] }], params: questionIdParamsSchema,
-  response: { 200: Type.Object({ action: Type.Union([Type.Literal('deleted'), Type.Literal('archived')]) }), ...editorErrors },
+  description:
+    'Exclui uma questão sem histórico ou a arquiva quando há partidas vinculadas.',
+  tags: [ETagSwagger.question],
+  security: [{ authenticateJwt: [] }],
+  params: questionIdParamsSchema,
+  response: {
+    200: Type.Object({
+      action: Type.Union([Type.Literal('deleted'), Type.Literal('archived')]),
+    }),
+    ...editorErrors,
+  },
 };

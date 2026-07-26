@@ -4,7 +4,9 @@ import { CategoryService } from '@core/services/category.service.js';
 
 @injectable()
 export class CategoryListerUseCase {
-  constructor(@inject(CategoryService) private readonly service: CategoryService) {}
+  constructor(
+    @inject(CategoryService) private readonly service: CategoryService
+  ) {}
   execute(input: IListCategoriesInput) {
     return this.service.list(input);
   }

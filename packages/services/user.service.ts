@@ -10,13 +10,17 @@ import type { IListUsersInput } from '@core/interfaces/user/IListUsersInput.js';
 import { UserRepository } from '@core/repositories/user/user.repository.js';
 import { StorageService } from '@core/services/storage.service.js';
 import { CountryService } from '@core/services/country.service.js';
+import { PermissionRepository } from '@core/repositories/permission/permission.repository.js';
+import type { IRegisterPlayerInput } from '@core/interfaces/auth/IRegisterPlayerInput.js';
 
 @injectable()
 export class UserService {
   constructor(
     @inject(UserRepository) private readonly userRepository: UserRepository,
     @inject(StorageService) private readonly storageService: StorageService,
-    @inject(CountryService) private readonly countryService: CountryService
+    @inject(CountryService) private readonly countryService: CountryService,
+    @inject(PermissionRepository)
+    private readonly permissionRepository: PermissionRepository
   ) {}
 
   list(input: IListUsersInput) {
@@ -57,6 +61,18 @@ export class UserService {
     });
   }
 
+  async registerPlayer(input: IRegisterPlayerInput): Promise<UserListItem> {
+    const playerRole = await this.permissionRepository.findByCode('PLAYER');
+    if (!playerRole || !playerRole.active)
+      throw new Error('PLAYER_ROLE_NOT_FOUND');
+
+    return this.create({
+      ...input,
+      permissionRoleId: playerRole.id,
+      active: true,
+    });
+  }
+
   async update(id: string, input: IUpdateUserInput, authenticatedUser: User) {
     const current = await this.userRepository.findById(id);
     if (!current) return { user: null };
@@ -84,9 +100,8 @@ export class UserService {
     let profilePictureUrl: string | null | undefined;
     let uploadedProfilePictureUrl: string | null = null;
     if (input.profilePicture) {
-      uploadedProfilePictureUrl = await this.storageService.uploadProfilePicture(
-        input.profilePicture
-      );
+      uploadedProfilePictureUrl =
+        await this.storageService.uploadProfilePicture(input.profilePicture);
       profilePictureUrl = uploadedProfilePictureUrl;
     } else if (input.removeProfilePicture) {
       profilePictureUrl = null;
@@ -128,6 +143,10 @@ export class UserService {
     if (deleted)
       await this.storageService.deleteByUrl(current.profilePictureUrl);
     return { deleted };
+  }
+
+  async resetPassword(id: string, password: string): Promise<User | null> {
+    return this.userRepository.resetPassword(id, await hashPassword(password));
   }
 }
 

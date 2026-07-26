@@ -6,8 +6,18 @@ import type { Pool } from 'pg';
 
 declare module '@fastify/jwt' {
   interface FastifyJWT {
-    payload: { user_id: string; module: 'manager' };
-    user: { user_id: string; module: 'manager' };
+    payload: {
+      user_id: string;
+      module: 'manager';
+      session_version: number;
+      token_purpose?: 'password_reset';
+    };
+    user: {
+      user_id: string;
+      module: 'manager';
+      session_version: number;
+      token_purpose?: 'password_reset';
+    };
   }
 }
 
@@ -21,6 +31,10 @@ declare module 'fastify' {
       request: FastifyRequest,
       reply: FastifyReply,
       allowedPermissions: PermissionAction[]
+    ) => Promise<void>;
+    authenticatePasswordReset: (
+      request: FastifyRequest,
+      reply: FastifyReply
     ) => Promise<void>;
     DatabaseRw: AppDatabase;
     DatabaseRo: AppDatabase;

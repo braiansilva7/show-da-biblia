@@ -7,10 +7,19 @@ import type {
 } from '@core/common/types/question.js';
 import type { IListQuestionsInput } from '@core/interfaces/question/IListQuestionsInput.js';
 import type { AppDatabase } from '@core/plugins/database/index.js';
-import { questions, questionTranslations } from '@core/models/question/question.model.js';
-import { answerOptions, answerOptionTranslations } from '@core/models/answer/answer.model.js';
+import {
+  questions,
+  questionTranslations,
+} from '@core/models/question/question.model.js';
+import {
+  answerOptions,
+  answerOptionTranslations,
+} from '@core/models/answer/answer.model.js';
 import { createUuidV7 } from '@core/common/functions/uuid.js';
-import type { IQuestionMutationInput, QuestionLanguage } from '@core/interfaces/question/IQuestionMutationInput.js';
+import type {
+  IQuestionMutationInput,
+  QuestionLanguage,
+} from '@core/interfaces/question/IQuestionMutationInput.js';
 import type { DifficultyLevel } from '@core/common/types/difficulty.js';
 
 type QuestionRow = Omit<
@@ -156,20 +165,49 @@ export class QuestionRepository {
   }
 
   async findForEdit(id: string) {
-    const [question] = await this.db.select().from(questions).where(eq(questions.id, id)).limit(1);
+    const [question] = await this.db
+      .select()
+      .from(questions)
+      .where(eq(questions.id, id))
+      .limit(1);
     if (!question) return null;
-    const translations = await this.db.select().from(questionTranslations).where(eq(questionTranslations.question_id, id));
-    const options = await this.db.select().from(answerOptions).where(eq(answerOptions.question_id, id)).orderBy(answerOptions.position);
+    const translations = await this.db
+      .select()
+      .from(questionTranslations)
+      .where(eq(questionTranslations.question_id, id));
+    const options = await this.db
+      .select()
+      .from(answerOptions)
+      .where(eq(answerOptions.question_id, id))
+      .orderBy(answerOptions.position);
     const optionTranslations = options.length
-      ? await this.db.execute<Record<string, unknown>>(sql`SELECT * FROM answer_option_translations WHERE answer_option_id IN (${sql.join(options.map((option) => sql`${option.id}`), sql`, `)})`)
+      ? await this.db.execute<Record<string, unknown>>(
+          sql`SELECT * FROM answer_option_translations WHERE answer_option_id IN (${sql.join(
+            options.map((option) => sql`${option.id}`),
+            sql`, `
+          )})`
+        )
       : { rows: [] as Record<string, unknown>[] };
-    return { question, translations, options, optionTranslations: optionTranslations.rows };
+    return {
+      question,
+      translations,
+      options,
+      optionTranslations: optionTranslations.rows,
+    };
   }
 
   async create(input: IQuestionMutationInput, userId: string) {
     const id = await this.db.transaction(async (tx) => {
       const id = createUuidV7();
-      await tx.insert(questions).values({ id, category_id: input.categoryId, difficulty_level: input.difficultyLevel, created_by_user_id: userId, status: 'DRAFT' });
+      await tx
+        .insert(questions)
+        .values({
+          id,
+          category_id: input.categoryId,
+          difficulty_level: input.difficultyLevel,
+          created_by_user_id: userId,
+          status: 'DRAFT',
+        });
       await this.saveTranslations(tx, id, input);
       return id;
     });
@@ -178,26 +216,55 @@ export class QuestionRepository {
 
   async update(id: string, input: IQuestionMutationInput) {
     await this.db.transaction(async (tx) => {
-      await tx.update(questions).set({ category_id: input.categoryId, difficulty_level: input.difficultyLevel }).where(eq(questions.id, id));
+      await tx
+        .update(questions)
+        .set({
+          category_id: input.categoryId,
+          difficulty_level: input.difficultyLevel,
+        })
+        .where(eq(questions.id, id));
       await this.saveTranslations(tx, id, input);
     });
     return this.findForEdit(id);
   }
 
   async publish(id: string) {
-    await this.db.update(questions).set({ status: 'PUBLISHED', published_at: new Date().toISOString(), updated_at: new Date().toISOString() }).where(eq(questions.id, id));
+    await this.db
+      .update(questions)
+      .set({
+        status: 'PUBLISHED',
+        published_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .where(eq(questions.id, id));
     return this.findForEdit(id);
   }
 
   async unpublish(id: string) {
-    await this.db.update(questions).set({ status: 'DRAFT', published_at: null, updated_at: new Date().toISOString() }).where(eq(questions.id, id));
+    await this.db
+      .update(questions)
+      .set({
+        status: 'DRAFT',
+        published_at: null,
+        updated_at: new Date().toISOString(),
+      })
+      .where(eq(questions.id, id));
     return this.findForEdit(id);
   }
 
   async remove(id: string): Promise<'deleted' | 'archived'> {
-    const usage = await this.db.execute<{ total: number }>(sql`SELECT count(*)::int AS total FROM session_questions WHERE question_id = ${id}`);
+    const usage = await this.db.execute<{ total: number }>(
+      sql`SELECT count(*)::int AS total FROM session_questions WHERE question_id = ${id}`
+    );
     if (Number(usage.rows[0]?.total ?? 0) > 0) {
-      await this.db.update(questions).set({ status: 'ARCHIVED', published_at: null, updated_at: new Date().toISOString() }).where(eq(questions.id, id));
+      await this.db
+        .update(questions)
+        .set({
+          status: 'ARCHIVED',
+          published_at: null,
+          updated_at: new Date().toISOString(),
+        })
+        .where(eq(questions.id, id));
       return 'archived';
     }
     await this.db.delete(questions).where(eq(questions.id, id));
@@ -205,7 +272,10 @@ export class QuestionRepository {
   }
 
   /** Shared game selector: drafts and archived questions are never eligible. */
-  async listPublishedForGame(categoryId: string, difficultyLevel: DifficultyLevel) {
+  async listPublishedForGame(
+    categoryId: string,
+    difficultyLevel: DifficultyLevel
+  ) {
     return this.db.execute<{ id: string }>(sql`
       SELECT id FROM questions
       WHERE status = 'PUBLISHED'
@@ -215,26 +285,93 @@ export class QuestionRepository {
     `);
   }
 
-  private async saveTranslations(tx: any, questionId: string, input: IQuestionMutationInput) {
+  private async saveTranslations(
+    tx: any,
+    questionId: string,
+    input: IQuestionMutationInput
+  ) {
     const languages: QuestionLanguage[] = ['pt-BR', 'en', 'es'];
     for (const language of languages) {
       const value = input.translations[language];
       if (value?.statement && value.explanation) {
-        await tx.insert(questionTranslations).values({ id: createUuidV7(), question_id: questionId, language_code: language, statement: value.statement, explanation: value.explanation }).onConflictDoUpdate({ target: [questionTranslations.question_id, questionTranslations.language_code], set: { statement: value.statement, explanation: value.explanation } });
-      } else await tx.delete(questionTranslations).where(sql`${questionTranslations.question_id} = ${questionId} AND ${questionTranslations.language_code} = ${language}`);
+        await tx
+          .insert(questionTranslations)
+          .values({
+            id: createUuidV7(),
+            question_id: questionId,
+            language_code: language,
+            statement: value.statement,
+            explanation: value.explanation,
+          })
+          .onConflictDoUpdate({
+            target: [
+              questionTranslations.question_id,
+              questionTranslations.language_code,
+            ],
+            set: { statement: value.statement, explanation: value.explanation },
+          });
+      } else
+        await tx
+          .delete(questionTranslations)
+          .where(
+            sql`${questionTranslations.question_id} = ${questionId} AND ${questionTranslations.language_code} = ${language}`
+          );
     }
-    const existing = await tx.select().from(answerOptions).where(eq(answerOptions.question_id, questionId));
-    await tx.update(answerOptions).set({ is_correct: false }).where(eq(answerOptions.question_id, questionId));
-    const byPosition = new Map<number, { id: string }>((existing as { id: string; position: number }[]).map((option) => [option.position, option]));
+    const existing = await tx
+      .select()
+      .from(answerOptions)
+      .where(eq(answerOptions.question_id, questionId));
+    await tx
+      .update(answerOptions)
+      .set({ is_correct: false })
+      .where(eq(answerOptions.question_id, questionId));
+    const byPosition = new Map<number, { id: string }>(
+      (existing as { id: string; position: number }[]).map((option) => [
+        option.position,
+        option,
+      ])
+    );
     for (const option of input.options) {
       const current = byPosition.get(option.position);
       const optionId = current?.id ?? createUuidV7();
-      if (current) await tx.update(answerOptions).set({ is_correct: option.is_correct }).where(eq(answerOptions.id, optionId));
-      else await tx.insert(answerOptions).values({ id: optionId, question_id: questionId, position: option.position, is_correct: option.is_correct });
+      if (current)
+        await tx
+          .update(answerOptions)
+          .set({ is_correct: option.is_correct })
+          .where(eq(answerOptions.id, optionId));
+      else
+        await tx
+          .insert(answerOptions)
+          .values({
+            id: optionId,
+            question_id: questionId,
+            position: option.position,
+            is_correct: option.is_correct,
+          });
       for (const language of languages) {
         const content = option.translations[language]?.content;
-        if (content) await tx.insert(answerOptionTranslations).values({ id: createUuidV7(), answer_option_id: optionId, language_code: language, content }).onConflictDoUpdate({ target: [answerOptionTranslations.answer_option_id, answerOptionTranslations.language_code], set: { content } });
-        else await tx.delete(answerOptionTranslations).where(sql`${answerOptionTranslations.answer_option_id} = ${optionId} AND ${answerOptionTranslations.language_code} = ${language}`);
+        if (content)
+          await tx
+            .insert(answerOptionTranslations)
+            .values({
+              id: createUuidV7(),
+              answer_option_id: optionId,
+              language_code: language,
+              content,
+            })
+            .onConflictDoUpdate({
+              target: [
+                answerOptionTranslations.answer_option_id,
+                answerOptionTranslations.language_code,
+              ],
+              set: { content },
+            });
+        else
+          await tx
+            .delete(answerOptionTranslations)
+            .where(
+              sql`${answerOptionTranslations.answer_option_id} = ${optionId} AND ${answerOptionTranslations.language_code} = ${language}`
+            );
       }
     }
   }

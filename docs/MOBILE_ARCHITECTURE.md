@@ -37,10 +37,37 @@ a prévia de sessão, vê abas de Início, Rankings e Perfil. Partida é uma tel
 empilhada e Resultado é apresentado como modal. Os parâmetros ficam em
 `navigation/types.ts`; novas rotas devem ser declaradas ali antes do uso.
 
-`AppSessionContext` é provisório e mantido somente em memória. Quando a API de
-autenticação estiver pronta, `storage/authStorage` deve usar armazenamento
-seguro para token e `api/client` deve centralizar cabeçalhos, timeout e o
-tratamento de respostas não autorizadas.
+`AppSessionContext` recupera a sessão guardada em `expo-secure-store` e a
+valida com `GET /auth/me`. `api/client` centraliza o bearer token e, em 401 ou
+403, remove a sessão antes de redirecionar ao login. A aplicação não interpreta
+permissões nem reproduz regras de jogo.
+
+Antes do login, `ForgotPassword` conduz a recuperação em três etapas: e-mail,
+código de seis dígitos e nova senha. O token temporário devolvido após a
+validação do código fica somente na memória da tela; ele nunca é persistido no
+`expo-secure-store`. Ao concluir, o fluxo retorna ao Login.
+
+## Autenticação e perfil
+
+O app usa somente os contratos documentados no Swagger:
+
+- `GET /public/countries` para o cadastro e seleção de país;
+- `POST /auth/register` para criar uma conta de jogador; o servidor atribui o
+  papel `PLAYER` e retorna a sessão;
+- `POST /auth/login`, `GET /auth/me` e `PATCH /auth/me` para entrar, recuperar
+  e editar a própria conta.
+- `POST /auth/forgot-password/send-code`,
+  `POST /auth/forgot-password/verify-code` e
+  `POST /auth/forgot-password/reset-password` para recuperar a senha.
+
+O backend envia o código por SMTP, armazena apenas seu hash e expira-o em dez
+minutos. A troca de senha incrementa `session_version`; todos os JWTs emitidos
+antes dela deixam de ser válidos. O token temporário de recuperação não é aceito
+pelas rotas autenticadas comuns.
+
+Cadastro e edição enviam `country_id`, `language_code` (`pt-BR`, `en` ou `es`)
+e, opcionalmente, `profile_picture` multipart. O Mobile nunca envia papel,
+permissão ou credenciais do MinIO; para a foto, usa apenas `profile_picture_url`.
 
 ## Idiomas e contratos
 

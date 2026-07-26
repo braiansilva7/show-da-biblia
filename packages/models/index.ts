@@ -1,5 +1,6 @@
 export * from './country/country.model.js';
 export * from './user/user.model.js';
+export * from './auth/passwordResetCode.model.js';
 export * from './category/category.model.js';
 export * from './question/question.model.js';
 export * from './answer/answer.model.js';

@@ -58,12 +58,12 @@ show-da-biblia/
 │   ├── common/                    # Enums, tipos e funções comuns
 │   ├── config/                    # Leitura e validação de ambiente
 │   ├── interfaces/                # Interfaces de entrada compartilhadas
-│   ├── middlewares/               # JWT e autorização
+│   ├── middlewares/               # JWT, autorização e token de recuperação
 │   ├── models/                    # Definição Drizzle das tabelas
 │   ├── plugins/                   # Banco, i18n, S3, CORS e multipart
 │   ├── repositories/              # Persistência por domínio
 │   ├── schema/                    # Contratos Fastify e Swagger
-│   ├── services/                  # Regras reutilizáveis de domínio
+│   ├── services/                  # Regras reutilizáveis, SMTP e recuperação
 │   └── useCases/                  # Casos de uso por operação
 ├── atlas/
 │   ├── prod/                      # Migrations de estrutura

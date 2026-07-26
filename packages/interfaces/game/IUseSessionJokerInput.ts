@@ -1,8 +1,5 @@
 export type JokerTypeCode =
-  | 'ELIMINATE_1'
-  | 'ELIMINATE_2'
-  | 'ELIMINATE_3'
-  | 'REVEAL_ANSWER';
+  'ELIMINATE_1' | 'ELIMINATE_2' | 'ELIMINATE_3' | 'REVEAL_ANSWER';
 
 export interface IUseSessionJokerInput {
   sessionId: string;

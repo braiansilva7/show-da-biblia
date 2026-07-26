@@ -110,6 +110,9 @@ export class PermissionRepository {
   async find(roleId: string) {
     return (await this.list()).find((role) => role.id === roleId) ?? null;
   }
+  async findByCode(code: string) {
+    return (await this.list()).find((role) => role.code === code) ?? null;
+  }
   async create(input: {
     name: string;
     description?: string | null;

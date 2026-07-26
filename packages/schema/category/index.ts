@@ -27,7 +27,9 @@ export const listCategoriesSchema = {
   security: [{ authenticateJwt: [] }],
   querystring: Type.Object({
     page: Type.Optional(Type.Integer({ minimum: 1, default: 1 })),
-    limit: Type.Optional(Type.Integer({ minimum: 1, maximum: 100, default: 20 })),
+    limit: Type.Optional(
+      Type.Integer({ minimum: 1, maximum: 100, default: 20 })
+    ),
     search: Type.Optional(Type.String({ minLength: 1, maxLength: 120 })),
   }),
   response: {
@@ -48,10 +50,17 @@ export const createCategorySchema = {
   security: [{ authenticateJwt: [] }],
   body: Type.Object({
     name: Type.String({ minLength: 1, maxLength: 120 }),
-    description: Type.Optional(Type.Union([Type.String({ maxLength: 1000 }), Type.Null()])),
+    description: Type.Optional(
+      Type.Union([Type.String({ maxLength: 1000 }), Type.Null()])
+    ),
     active: Type.Optional(Type.Boolean()),
   }),
-  response: { 201: categoryResponseSchema, 400: errorMessageSchema, 409: errorMessageSchema, ...authenticatedErrors },
+  response: {
+    201: categoryResponseSchema,
+    400: errorMessageSchema,
+    409: errorMessageSchema,
+    ...authenticatedErrors,
+  },
 };
 
 export const updateCategorySchema = {
@@ -63,12 +72,20 @@ export const updateCategorySchema = {
   body: Type.Object(
     {
       name: Type.Optional(Type.String({ minLength: 1, maxLength: 120 })),
-      description: Type.Optional(Type.Union([Type.String({ maxLength: 1000 }), Type.Null()])),
+      description: Type.Optional(
+        Type.Union([Type.String({ maxLength: 1000 }), Type.Null()])
+      ),
       active: Type.Optional(Type.Boolean()),
     },
     { minProperties: 1 }
   ),
-  response: { 200: categoryResponseSchema, 400: errorMessageSchema, 404: errorMessageSchema, 409: errorMessageSchema, ...authenticatedErrors },
+  response: {
+    200: categoryResponseSchema,
+    400: errorMessageSchema,
+    404: errorMessageSchema,
+    409: errorMessageSchema,
+    ...authenticatedErrors,
+  },
 };
 
 export const deleteCategorySchema = {
@@ -77,5 +94,10 @@ export const deleteCategorySchema = {
   tags: [ETagSwagger.category],
   security: [{ authenticateJwt: [] }],
   params: categoryIdParamsSchema,
-  response: { 204: Type.Null(), 404: errorMessageSchema, 409: errorMessageSchema, ...authenticatedErrors },
+  response: {
+    204: Type.Null(),
+    404: errorMessageSchema,
+    409: errorMessageSchema,
+    ...authenticatedErrors,
+  },
 };

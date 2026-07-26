@@ -5,10 +5,21 @@ import { theme } from '../theme';
 export function Screen({
   children,
   style,
-}: PropsWithChildren<{ style?: ViewStyle }>) {
+  backgroundColor,
+}: PropsWithChildren<{ style?: ViewStyle; backgroundColor?: string }>) {
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={[styles.content, style]}>{children}</View>
+    <SafeAreaView
+      style={[styles.safeArea, backgroundColor ? { backgroundColor } : null]}
+    >
+      <View
+        style={[
+          styles.content,
+          backgroundColor ? { backgroundColor } : null,
+          style,
+        ]}
+      >
+        {children}
+      </View>
     </SafeAreaView>
   );
 }

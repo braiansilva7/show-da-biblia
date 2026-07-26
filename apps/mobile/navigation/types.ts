@@ -7,7 +7,9 @@ export type AppTabParamList = {
 };
 
 export type RootStackParamList = {
-  Access: undefined;
+  Login: { resetSuccess?: boolean } | undefined;
+  Register: undefined;
+  ForgotPassword: undefined;
   AppTabs: NavigatorScreenParams<AppTabParamList>;
   Game: undefined;
   Result: { sessionId?: string };

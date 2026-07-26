@@ -1,27 +1,99 @@
 import {
   createContext,
+  useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
   type PropsWithChildren,
 } from 'react';
+import { authApi } from '../api/authApi';
+import { authStorage } from '../storage/authStorage';
+import type {
+  AuthSession,
+  MobileUser,
+  RegisterInput,
+  UpdateProfileInput,
+} from '../types/auth';
+import { subscribeToSessionExpiration } from '../utils/authEvents';
+import { useLocalization } from './LocalizationContext';
 
 type AppSessionValue = {
-  isAuthenticated: boolean;
-  enterPreview: () => void;
-  leavePreview: () => void;
+  booting: boolean;
+  user: MobileUser | null;
+  sessionMessage: string | null;
+  login: (email: string, password: string) => Promise<void>;
+  register: (input: RegisterInput) => Promise<void>;
+  updateProfile: (input: UpdateProfileInput) => Promise<void>;
+  logout: () => Promise<void>;
+  clearSessionMessage: () => void;
 };
 const AppSessionContext = createContext<AppSessionValue | null>(null);
 
 export function AppSessionProvider({ children }: PropsWithChildren) {
-  const [isAuthenticated, setAuthenticated] = useState(false);
+  const { setLocale } = useLocalization();
+  const [booting, setBooting] = useState(true);
+  const [user, setUser] = useState<MobileUser | null>(null);
+  const [sessionMessage, setSessionMessage] = useState<string | null>(null);
+  const accept = useCallback(
+    async (session: AuthSession) => {
+      await authStorage.save(session);
+      setUser(session.user);
+      setLocale(session.user.languageCode);
+    },
+    [setLocale]
+  );
+  const logout = useCallback(async () => {
+    await authStorage.clear();
+    setUser(null);
+  }, []);
+  useEffect(() => {
+    void (async () => {
+      const stored = await authStorage.read();
+      if (stored) {
+        try {
+          const recovered = await authApi.me();
+          await authStorage.save({
+            accessToken: stored.accessToken,
+            user: recovered,
+          });
+          setUser(recovered);
+          setLocale(recovered.languageCode);
+        } catch {
+          await authStorage.clear();
+        }
+      }
+      setBooting(false);
+    })();
+    return subscribeToSessionExpiration(() => {
+      setUser(null);
+      setSessionMessage('expired');
+    });
+  }, []);
   const value = useMemo(
     () => ({
-      isAuthenticated,
-      enterPreview: () => setAuthenticated(true),
-      leavePreview: () => setAuthenticated(false),
+      booting,
+      user,
+      sessionMessage,
+      login: async (email: string, password: string) =>
+        accept(await authApi.login(email, password)),
+      register: async (input: RegisterInput) =>
+        accept(await authApi.register(input)),
+      updateProfile: async (input: UpdateProfileInput) => {
+        const updated = await authApi.updateProfile(input);
+        const stored = await authStorage.read();
+        if (stored)
+          await authStorage.save({
+            accessToken: stored.accessToken,
+            user: updated,
+          });
+        setUser(updated);
+        setLocale(updated.languageCode);
+      },
+      logout,
+      clearSessionMessage: () => setSessionMessage(null),
     }),
-    [isAuthenticated]
+    [accept, booting, logout, sessionMessage, user]
   );
   return (
     <AppSessionContext.Provider value={value}>
@@ -29,7 +101,6 @@ export function AppSessionProvider({ children }: PropsWithChildren) {
     </AppSessionContext.Provider>
   );
 }
-
 export function useAppSession(): AppSessionValue {
   const value = useContext(AppSessionContext);
   if (!value)

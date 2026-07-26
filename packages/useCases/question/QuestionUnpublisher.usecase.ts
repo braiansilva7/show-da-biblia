@@ -3,6 +3,10 @@ import { QuestionService } from '@core/services/question.service.js';
 
 @injectable()
 export class QuestionUnpublisherUseCase {
-  constructor(@inject(QuestionService) private readonly service: QuestionService) {}
-  execute(id: string) { return this.service.unpublish(id); }
+  constructor(
+    @inject(QuestionService) private readonly service: QuestionService
+  ) {}
+  execute(id: string) {
+    return this.service.unpublish(id);
+  }
 }

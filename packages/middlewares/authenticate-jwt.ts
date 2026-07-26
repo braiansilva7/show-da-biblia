@@ -13,6 +13,7 @@ export function registerAuthenticateJwt(server: FastifyInstance) {
     ) => {
       try {
         await request.jwtVerify();
+        if (request.user.token_purpose === 'password_reset') throw new Error();
       } catch {
         reply
           .code(401)
@@ -24,6 +25,10 @@ export function registerAuthenticateJwt(server: FastifyInstance) {
       const user = await userRepository.findById(request.user.user_id);
       if (!user || !user.active) {
         reply.code(401).send({ message: request.t('auth_unauthorized_user') });
+        return;
+      }
+      if (request.user.session_version !== user.sessionVersion) {
+        reply.code(401).send({ message: request.t('auth_invalid_or_expired_token') });
         return;
       }
       if (

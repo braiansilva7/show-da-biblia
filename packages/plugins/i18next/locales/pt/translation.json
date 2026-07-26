@@ -2,9 +2,19 @@
   "auth_credentials_required": "E-mail e senha são obrigatórios.",
   "auth_invalid_credentials": "Credenciais inválidas.",
   "auth_invalid_or_expired_token": "Token inválido ou expirado.",
+  "internal_server_error": "Não foi possível concluir sua solicitação agora. Tente novamente mais tarde.",
+  "forgot_password_code_sent": "Se houver uma conta para este e-mail, enviaremos um código de recuperação.",
+  "forgot_password_rate_limited": "Muitas solicitações. Aguarde alguns minutos e tente novamente.",
+  "forgot_password_delivery_unavailable": "Não foi possível enviar o código agora. Tente novamente mais tarde.",
+  "forgot_password_code_invalid": "O código informado é inválido.",
+  "forgot_password_code_expired": "O código expirou. Solicite um novo código.",
+  "forgot_password_too_many_attempts": "Você excedeu o limite de tentativas. Solicite um novo código.",
+  "forgot_password_passwords_do_not_match": "As senhas não coincidem.",
   "auth_unauthorized_user": "Usuário não autorizado.",
   "auth_admin_access_only": "Acesso restrito a administradores.",
   "auth_permission_denied": "Você não tem permissão para executar esta ação.",
+  "auth_register_invalid_input": "Informe nome de usuário, e-mail válido, senha de ao menos 8 caracteres, idioma e país.",
+  "auth_register_unavailable": "O cadastro de jogadores está temporariamente indisponível.",
   "dashboard_summary_unavailable": "Não foi possível carregar o resumo administrativo.",
   "permission_role_not_found": "Papel de permissão não encontrado.",
   "permission_role_invalid_input": "Informe os dados válidos do papel e suas permissões.",
@@ -52,6 +62,8 @@
   "game_joker_type_not_found": "Tipo de carta coringa inválido.",
   "game_joker_not_available": "Esta carta coringa não está disponível na partida.",
   "game_joker_already_used": "Esta carta já foi usada nesta questão.",
-  "game_joker_insufficient_options": "Não há alternativas incorretas suficientes para usar esta carta."
-  ,"game_session_already_active":"Já existe uma partida em andamento.","game_session_not_finishable":"A partida ainda não pode ser finalizada.","game_answer_invalid":"A alternativa não pertence à questão atual."
+  "game_joker_insufficient_options": "Não há alternativas incorretas suficientes para usar esta carta.",
+  "game_session_already_active": "Já existe uma partida em andamento.",
+  "game_session_not_finishable": "A partida ainda não pode ser finalizada.",
+  "game_answer_invalid": "A alternativa não pertence à questão atual."
 }

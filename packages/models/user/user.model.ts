@@ -16,6 +16,7 @@ export const users = pgTable(
     username: varchar('username', { length: 120 }).notNull().unique(),
     email: varchar('email', { length: 320 }).notNull().unique(),
     password_hash: varchar('password_hash', { length: 512 }).notNull(),
+    session_version: integer('session_version').notNull().default(1),
     country_id: uuid('country_id')
       .notNull()
       .references(() => countries.id),

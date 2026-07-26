@@ -1,7 +1,10 @@
 import type { DifficultyLevel } from '@core/common/types/difficulty.js';
 
 export type QuestionLanguage = 'pt-BR' | 'en' | 'es';
-export type QuestionTranslationInput = { statement?: string; explanation?: string };
+export type QuestionTranslationInput = {
+  statement?: string;
+  explanation?: string;
+};
 export type AnswerTranslationInput = { content?: string };
 export type QuestionTranslationsInput = {
   'pt-BR'?: QuestionTranslationInput;

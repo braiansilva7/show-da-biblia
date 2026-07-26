@@ -1,11 +1,12 @@
 import 'reflect-metadata';
-import Fastify from 'fastify';
+import Fastify, { type FastifyError } from 'fastify';
 import { managerApiEnvironment } from '@core/config/environments.js';
 import { registerCors } from '@core/plugins/cors.js';
 import { registerJwt } from '@core/plugins/jwt.js';
 import { registerDatabase } from '@core/plugins/database/index.js';
 import { registerMultipart } from '@core/plugins/multipart/index.js';
 import { registerAuthenticateJwt } from '@core/middlewares/authenticate-jwt.js';
+import { registerAuthenticatePasswordReset } from '@core/middlewares/authenticate-password-reset.js';
 import i18nextPlugin from '@core/plugins/i18next/index.js';
 import healthRoutes from '@/routes/health.route.js';
 import routes from '@/routes/index.js';
@@ -20,7 +21,18 @@ export async function buildServer() {
   await app.register(registerJwt);
   await app.register(i18nextPlugin);
   await app.register(swaggerPlugin);
+  app.setErrorHandler((error: FastifyError, request, reply) => {
+    request.log.error(error);
+    if (reply.sent) return;
+    if (error.statusCode && error.statusCode < 500) {
+      return reply.code(error.statusCode).send({ message: error.message });
+    }
+    return reply
+      .code(500)
+      .send({ message: request.t('internal_server_error') });
+  });
   registerAuthenticateJwt(app);
+  registerAuthenticatePasswordReset(app);
   await app.register(healthRoutes);
   await app.register(routes, { prefix: '/api/v1' });
 

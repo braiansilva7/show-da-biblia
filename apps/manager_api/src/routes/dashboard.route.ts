@@ -9,7 +9,9 @@ export default function dashboardRoutes(server: FastifyInstance) {
   server.get('/dashboard/summary', {
     schema: dashboardSummarySchema,
     handler: controller.summary,
-    preHandler: [(request, reply) =>
-      server.authenticateJwt(request, reply, dashboardViewPermissions)],
+    preHandler: [
+      (request, reply) =>
+        server.authenticateJwt(request, reply, dashboardViewPermissions),
+    ],
   });
 }

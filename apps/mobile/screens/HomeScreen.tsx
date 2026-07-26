@@ -2,6 +2,7 @@ import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { StyleSheet, Text, View } from 'react-native';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { Screen } from '../components/Screen';
+import { useAppSession } from '../context/AppSessionContext';
 import { useLocalization } from '../context/LocalizationContext';
 import type { AppTabParamList } from '../navigation/types';
 import { theme } from '../theme';
@@ -10,10 +11,13 @@ export function HomeScreen({
   navigation,
 }: BottomTabScreenProps<AppTabParamList, 'Home'>) {
   const { t } = useLocalization();
+  const { user } = useAppSession();
   return (
     <Screen>
       <View style={styles.content}>
-        <Text style={styles.title}>{t('homeTitle')}</Text>
+        <Text style={styles.title}>
+          {t('homeTitle').replace('{{name}}', user?.username ?? '')}
+        </Text>
         <Text style={styles.description}>{t('homeDescription')}</Text>
         <PrimaryButton
           label={t('startGame')}

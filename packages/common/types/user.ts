@@ -6,6 +6,7 @@ export type User = {
   username: string;
   email: string;
   passwordHash: string;
+  sessionVersion: number;
   permissionRoleId: string;
   permissionRole?: PermissionRole;
   permissions: PermissionAction[];
