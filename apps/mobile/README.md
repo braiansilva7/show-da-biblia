@@ -55,6 +55,10 @@ próprio editor quadrado antes de enviar a imagem.
 Esse editor permite mover o quadrado de recorte e redimensioná-lo diretamente
 por toque ou ponteiro.
 
+`assets/icon.png` é o ícone oficial configurado no Expo para iOS, Android,
+Android adaptativo e favicon do Web. A alteração é refletida em um novo build
+ou após reinstalar o app nativo.
+
 O Login inclui recuperação de senha por e-mail: informe o e-mail, valide o
 código de seis dígitos e escolha uma nova senha. O token temporário desse fluxo
 fica somente na memória do app; depois da troca, o app volta ao Login. A API
