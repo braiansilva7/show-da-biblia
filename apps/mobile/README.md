@@ -25,7 +25,7 @@ Execute a partir da raiz do monorepo:
 Copie ou defina as variáveis públicas no ambiente de execução:
 
 ```text
-EXPO_PUBLIC_API_URL=http://localhost:3001/api/v1
+EXPO_PUBLIC_API_URL=http://192.168.1.7:3010/api/v1
 ```
 
 `EXPO_PUBLIC_API_URL` deve terminar em `/api/v1`. O Mobile consome apenas as
@@ -40,7 +40,7 @@ Para abrir o Expo Web, a origem usada pelo navegador também precisa estar em
 `CORS_ORIGIN` da raiz. Em desenvolvimento local, inclua
 `http://localhost:8081` e `http://127.0.0.1:8081`; para testar em outro
 dispositivo da rede, use o IP do computador, por exemplo
-`http://192.168.1.3:8081`, tanto em `CORS_ORIGIN` quanto em
+`http://192.168.1.7:8081`, tanto em `CORS_ORIGIN` quanto em
 `EXPO_PUBLIC_API_URL`. Reinicie a API após alterar o `.env`.
 
 ## Estado atual

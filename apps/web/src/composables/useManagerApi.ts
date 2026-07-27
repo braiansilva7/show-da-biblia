@@ -26,7 +26,7 @@ import type {
 } from '@/types/question';
 
 const apiUrl = (
-  import.meta.env.VITE_API_URL ?? 'http://localhost:3000'
+  import.meta.env.VITE_API_URL ?? 'http://localhost:3010'
 ).replace(/\/$/, '');
 const tokenStorageKey = 'show-da-biblia.access-token';
 const questionsStorageKey = 'show-da-biblia.questions-list';
