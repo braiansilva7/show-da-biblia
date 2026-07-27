@@ -73,13 +73,17 @@ export class EmailService {
     code: string;
     locale: 'pt-BR' | 'en' | 'es';
   }): Promise<void> {
+    return this.sendCode({ ...input, subject: subjectByLocale[input.locale], text: input.locale === 'pt-BR' ? `Use o código ${input.code} para redefinir sua senha. Ele expira em 10 minutos.` : input.locale === 'es' ? `Usa el código ${input.code} para restablecer tu contraseña. Caduca en 10 minutos.` : `Use code ${input.code} to reset your password. It expires in 10 minutes.` });
+  }
+
+  async sendRegistrationVerificationCode(input: { to: string; code: string; locale: 'pt-BR' | 'en' | 'es' }): Promise<void> {
+    const subject = input.locale === 'pt-BR' ? 'Confirme seu e-mail para criar sua conta' : input.locale === 'es' ? 'Confirma tu correo para crear tu cuenta' : 'Confirm your email to create your account';
+    const text = input.locale === 'pt-BR' ? `Use o código ${input.code} para confirmar seu e-mail e criar sua conta. Ele expira em 10 minutos.` : input.locale === 'es' ? `Usa el código ${input.code} para confirmar tu correo y crear tu cuenta. Caduca en 10 minutos.` : `Use code ${input.code} to confirm your email and create your account. It expires in 10 minutes.`;
+    return this.sendCode({ ...input, subject, text });
+  }
+
+  private async sendCode(input: { to: string; code: string; locale: 'pt-BR' | 'en' | 'es'; subject: string; text: string }): Promise<void> {
     const config = smtpEnvironment();
-    const text =
-      input.locale === 'pt-BR'
-        ? `Use o código ${input.code} para redefinir sua senha. Ele expira em 10 minutos.`
-        : input.locale === 'es'
-          ? `Usa el código ${input.code} para restablecer tu contraseña. Caduca en 10 minutos.`
-          : `Use code ${input.code} to reset your password. It expires in 10 minutes.`;
     let socket = await this.connect(config.host, config.port, config.secure);
     try {
       const greeting = await this.response(socket);
@@ -113,10 +117,10 @@ export class EmailService {
       const payload = [
         `From: ${config.from}`,
         `To: ${input.to}`,
-        `Subject: ${subjectByLocale[input.locale]}`,
+        `Subject: ${input.subject}`,
         'Content-Type: text/plain; charset=utf-8',
         '',
-        text,
+        input.text,
         '.',
       ].join('\r\n');
       await this.command(socket, payload);

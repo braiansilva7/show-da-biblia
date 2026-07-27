@@ -1,4 +1,4 @@
-h1:wbWbiZc5fasxgn1lAoVsnJAbz5FroF/w1y29M/t8kqo=
+h1:uXnmhkDTUvzBu+KFqnacVWMVGY7zMWIrXEJKBb1x/5I=
 20260723230000.sql h1:dTkMan0kFpZE6RcVcAyUa+h/4ksAlqq3DR+U2UtIXo0=
 20260725090000_permission_roles.sql h1:jVehq3of4YnCkwwS1rT3HEZhmfSXjHVQODUKZPkfTOQ=
 20260725100000_user_country_required.sql h1:77RwjLez3iL6ErqzINtU0gXhMDqMkghs24bWXKwnVC8=
@@ -13,3 +13,4 @@ h1:wbWbiZc5fasxgn1lAoVsnJAbz5FroF/w1y29M/t8kqo=
 20260725200000_joker_cards.sql h1:jSpMXl5U2dqDrjDbxGEisEeNaf8eGlCiaaBdbFHT1JY=
 20260725210000_gameplay_scoring_ranking.sql h1:dRsiL0iq4SOkASSEF3lDBsOVsbN1F9m2vVl0wZbRLy4=
 20260725220000_password_recovery.sql h1:UwbojC8NHfZsqfPSyCzg8u0X9UW2HTrpkDghSFunKG8=
+20260726120000_registration_email_verification.sql h1:Bhqs8iYNUU8Q6fMhGOX8nXGFGrHQ3J57i3tib6S0G5Y=

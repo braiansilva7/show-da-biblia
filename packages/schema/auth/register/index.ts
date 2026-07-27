@@ -59,7 +59,20 @@ export const registerPlayerSchema = {
   response: {
     201: loginResponseSchema,
     400: errorMessageSchema,
+    401: errorMessageSchema,
     409: errorMessageSchema,
     500: errorMessageSchema,
   },
 };
+
+export const checkUsernameAvailabilitySchema = {
+  description: 'Informa se um nome de usuário está disponível para cadastro público.',
+  tags: [ETagSwagger.auth],
+  body: Type.Object({ username: Type.String({ minLength: 3, maxLength: 120 }) }),
+  response: {
+    200: Type.Object({ available: Type.Boolean() }),
+    400: errorMessageSchema,
+  },
+};
+
+export type CheckUsernameAvailabilityRequest = { username: string };

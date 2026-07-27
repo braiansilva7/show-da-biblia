@@ -71,6 +71,13 @@ export function passwordResetEnvironment() {
   };
 }
 
+export function registrationEmailVerificationEnvironment() {
+  return {
+    codeSecret:
+      process.env.REGISTRATION_EMAIL_CODE_SECRET?.trim() || required('JWT_SECRET'),
+  };
+}
+
 export function managerApiEnvironment() {
   const appEnvironment = required('APP_ENVIRONMENT');
   if (!['LOCAL', 'DEV', 'HMG', 'PROD'].includes(appEnvironment)) {

@@ -23,7 +23,7 @@ type AppSessionValue = {
   user: MobileUser | null;
   sessionMessage: string | null;
   login: (email: string, password: string) => Promise<void>;
-  register: (input: RegisterInput) => Promise<void>;
+  register: (input: RegisterInput, registrationToken: string) => Promise<void>;
   updateProfile: (input: UpdateProfileInput) => Promise<void>;
   logout: () => Promise<void>;
   clearSessionMessage: () => void;
@@ -77,8 +77,8 @@ export function AppSessionProvider({ children }: PropsWithChildren) {
       sessionMessage,
       login: async (email: string, password: string) =>
         accept(await authApi.login(email, password)),
-      register: async (input: RegisterInput) =>
-        accept(await authApi.register(input)),
+      register: async (input: RegisterInput, registrationToken: string) =>
+        accept(await authApi.register(input, registrationToken)),
       updateProfile: async (input: UpdateProfileInput) => {
         const updated = await authApi.updateProfile(input);
         const stored = await authStorage.read();

@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import * as ImagePicker from 'expo-image-picker';
 import { Picker } from '@react-native-picker/picker';
 import { Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { countryApi } from '../api/countryApi';
+import { authApi } from '../api/authApi';
 import { AvatarCropper } from '../components/AvatarCropper';
 import { FormField } from '../components/FormField';
 import { PrimaryButton } from '../components/PrimaryButton';
@@ -35,6 +36,11 @@ export function RegisterScreen({
   const [countriesError, setCountriesError] = useState<string | null>(null);
   const [countriesLoading, setCountriesLoading] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [verificationRequested, setVerificationRequested] = useState(false);
+  const [verificationCode, setVerificationCode] = useState('');
+  const [usernameStatus, setUsernameStatus] = useState<'idle' | 'checking' | 'available' | 'taken' | 'error'>('idle');
+  const [lastCheckedUsername, setLastCheckedUsername] = useState('');
+  const usernameRef = useRef(username);
   const loadCountries = useCallback(async () => {
     setCountriesLoading(true);
     setCountriesError(null);
@@ -64,20 +70,47 @@ export function RegisterScreen({
       else setPicture(selectedPicture);
     }
   };
-  const submit = async () => {
+  const requestCode = async () => {
     if (!username || !email || !password || !countryId)
       return setError(t('requiredFields'));
+    if (usernameStatus === 'taken') return setError(t('usernameUnavailable'));
+    if (usernameStatus === 'checking') return setError(t('usernameChecking'));
     setLoading(true);
     setError(null);
     try {
-      await register({
-        username,
-        email,
-        password,
-        countryId,
-        languageCode,
-        profilePicture: picture,
-      });
+      await authApi.requestRegistrationEmailCode(email.trim(), languageCode);
+      setVerificationRequested(true);
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : t('registerError'));
+    } finally {
+      setLoading(false);
+    }
+  };
+  const updateUsername = (value: string) => {
+    usernameRef.current = value;
+    setUsername(value);
+    if (value.trim().toLowerCase() !== lastCheckedUsername) setUsernameStatus('idle');
+  };
+  const checkUsernameAvailability = async () => {
+    const candidate = username.trim();
+    if (candidate.length < 3 || candidate.toLowerCase() === lastCheckedUsername) return;
+    setUsernameStatus('checking');
+    try {
+      const available = await authApi.checkUsernameAvailability(candidate);
+      if (usernameRef.current.trim().toLowerCase() !== candidate.toLowerCase()) return;
+      setLastCheckedUsername(candidate.toLowerCase());
+      setUsernameStatus(available ? 'available' : 'taken');
+    } catch {
+      if (usernameRef.current.trim().toLowerCase() === candidate.toLowerCase()) setUsernameStatus('error');
+    }
+  };
+  const verifyAndRegister = async () => {
+    if (!/^\d{6}$/.test(verificationCode)) return setError(t('verificationCodeRequired'));
+    setLoading(true);
+    setError(null);
+    try {
+      const verification = await authApi.verifyRegistrationEmailCode(email.trim(), verificationCode);
+      await register({ username, email, password, countryId, languageCode, profilePicture: picture }, verification.registrationToken);
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : t('registerError'));
     } finally {
@@ -87,13 +120,28 @@ export function RegisterScreen({
   return (
     <Screen>
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.title}>{t('register')}</Text>
+        <Text style={styles.title}>{verificationRequested ? t('verifyEmailTitle') : t('register')}</Text>
+        {verificationRequested ? (
+          <>
+            <Text style={styles.description}>{t('verifyEmailDescription')}</Text>
+            <FormField label={t('verificationCode')} value={verificationCode} onChangeText={setVerificationCode} keyboardType="number-pad" autoCapitalize="none" />
+            {error ? <Text style={styles.error}>{error}</Text> : null}
+            <PrimaryButton label={loading ? t('loading') : t('verifyAndCreateAccount')} onPress={() => void verifyAndRegister()} />
+            <Text accessibilityRole="button" style={styles.link} onPress={() => void requestCode()}>{t('resendCode')}</Text>
+            <Text accessibilityRole="button" style={styles.link} onPress={() => { setVerificationRequested(false); setVerificationCode(''); setError(null); }}>{t('changeEmail')}</Text>
+          </>
+        ) : <>
         <FormField
           label={t('username')}
           value={username}
-          onChangeText={setUsername}
+          onChangeText={updateUsername}
+          onBlur={() => void checkUsernameAvailability()}
           autoCapitalize="none"
         />
+        {usernameStatus === 'checking' ? <Text style={styles.description}>{t('usernameChecking')}</Text> : null}
+        {usernameStatus === 'available' ? <Text style={styles.available}>{t('usernameAvailable')}</Text> : null}
+        {usernameStatus === 'taken' ? <Text style={styles.error}>{t('usernameUnavailable')}</Text> : null}
+        {usernameStatus === 'error' ? <Text style={styles.error}>{t('usernameCheckError')}</Text> : null}
         <FormField
           label={t('email')}
           value={email}
@@ -158,9 +206,11 @@ export function RegisterScreen({
         />
         {error ? <Text style={styles.error}>{error}</Text> : null}
         <PrimaryButton
-          label={loading ? t('loading') : t('register')}
-          onPress={() => void submit()}
+          label={loading ? t('loading') : t('sendVerificationCode')}
+          onPress={() => void requestCode()}
+          disabled={usernameStatus === 'taken'}
         />
+        </>}
         <Text
           accessibilityRole="button"
           style={styles.link}
@@ -185,6 +235,8 @@ export function RegisterScreen({
 const styles = StyleSheet.create({
   content: { gap: theme.spacing.md, paddingBottom: theme.spacing.xl },
   title: { color: theme.colors.text, fontSize: 28, fontWeight: '800' },
+  description: { color: theme.colors.text },
+  available: { color: theme.colors.primary, fontWeight: '600' },
   label: { color: theme.colors.text, fontWeight: '600' },
   select: {
     backgroundColor: theme.colors.surface,

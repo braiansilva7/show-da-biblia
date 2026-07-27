@@ -7,6 +7,7 @@ import type {
   RegisterInput,
   UpdateProfileInput,
   PasswordResetVerification,
+  RegistrationEmailVerification,
 } from '../types/auth';
 
 type ApiUser = {
@@ -80,14 +81,37 @@ export const authApi = {
       })
     );
   },
-  async register(input: RegisterInput) {
+  async register(input: RegisterInput, registrationToken: string) {
     return session(
       await request<ApiSession>('/auth/register', {
         method: 'POST',
         authenticated: false,
+        headers: { Authorization: `Bearer ${registrationToken}` },
         body: await profileForm(input),
       })
     );
+  },
+  async checkUsernameAvailability(username: string): Promise<boolean> {
+    const response = await request<{ available: boolean }>('/auth/register/check-username', {
+      method: 'POST', authenticated: false,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username }),
+    });
+    return response.available;
+  },
+  async requestRegistrationEmailCode(email: string, languageCode: RegisterInput['languageCode']) {
+    await request<{ message: string }>('/auth/register/request-email-code', {
+      method: 'POST', authenticated: false,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, language_code: languageCode }),
+    });
+  },
+  async verifyRegistrationEmailCode(email: string, code: string): Promise<RegistrationEmailVerification> {
+    const response = await request<{ registration_token: string; expires_in: string }>('/auth/register/verify-email-code', {
+      method: 'POST', authenticated: false,
+      headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, code }),
+    });
+    return { registrationToken: response.registration_token, expiresIn: response.expires_in };
   },
   async me() {
     const response = await request<{ user: ApiUser }>('/auth/me');

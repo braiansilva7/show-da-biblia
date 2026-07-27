@@ -4,7 +4,8 @@ import { AuthController } from '@/controllers/auth/index.js';
 import { authenticatedPermissions } from '@/permissions/index.js';
 import { currentUserSchema } from '@core/schema/auth/me/index.js';
 import { loginSchema } from '@core/schema/auth/login/index.js';
-import { registerPlayerSchema } from '@core/schema/auth/register/index.js';
+import { checkUsernameAvailabilitySchema, registerPlayerSchema } from '@core/schema/auth/register/index.js';
+import { requestRegistrationEmailCodeSchema, verifyRegistrationEmailCodeSchema } from '@core/schema/auth/register/email-verification.js';
 import { updateOwnProfileSchema } from '@core/schema/auth/profile/index.js';
 import { forgotPasswordResetPasswordSchema, forgotPasswordSendCodeSchema, forgotPasswordVerifyCodeSchema } from '@core/schema/auth/forgot-password/index.js';
 
@@ -17,6 +18,19 @@ export default function authRoutes(server: FastifyInstance) {
   server.post('/auth/register', {
     schema: registerPlayerSchema,
     handler: authController.register,
+    preHandler: [(request, reply) => server.authenticateRegistrationEmail(request, reply)],
+  });
+  server.post('/auth/register/check-username', {
+    schema: checkUsernameAvailabilitySchema,
+    handler: authController.checkUsernameAvailability,
+  });
+  server.post('/auth/register/request-email-code', {
+    schema: requestRegistrationEmailCodeSchema,
+    handler: authController.requestRegistrationEmailCode,
+  });
+  server.post('/auth/register/verify-email-code', {
+    schema: verifyRegistrationEmailCodeSchema,
+    handler: authController.verifyRegistrationEmailCode,
   });
   server.post('/auth/forgot-password/send-code', {
     schema: forgotPasswordSendCodeSchema,

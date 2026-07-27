@@ -35,6 +35,10 @@ export class UserService {
     return this.userRepository.findByEmail(email);
   }
 
+  usernameExists(username: string): Promise<boolean> {
+    return this.userRepository.existsByUsername(username.trim());
+  }
+
   async create(input: ICreateUserInput): Promise<UserListItem> {
     if (await this.userRepository.existsByUsername(input.username)) {
       throw new Error('USERNAME_ALREADY_EXISTS');
@@ -62,6 +66,8 @@ export class UserService {
   }
 
   async registerPlayer(input: IRegisterPlayerInput): Promise<UserListItem> {
+    if (await this.userRepository.findByEmail(input.email))
+      throw new Error('EMAIL_ALREADY_EXISTS');
     const playerRole = await this.permissionRepository.findByCode('PLAYER');
     if (!playerRole || !playerRole.active)
       throw new Error('PLAYER_ROLE_NOT_FOUND');

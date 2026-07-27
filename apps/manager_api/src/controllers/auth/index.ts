@@ -8,11 +8,15 @@ import { UpdateOwnProfileUseCase } from '@core/useCases/auth/UpdateOwnProfile.us
 import type { LoginRequest } from '@core/schema/auth/login/request.schema.js';
 import { parseUserMultipart } from '@core/schema/user/parseUserRequest.js';
 import { parseRegisterPlayerInput } from '@core/schema/auth/register/index.js';
+import type { CheckUsernameAvailabilityRequest } from '@core/schema/auth/register/index.js';
 import { parseOwnProfileInput } from '@core/schema/auth/profile/index.js';
 import { postgresErrorCode } from '@core/common/functions/postgres-error-code.js';
 import type { IProfilePicture } from '@core/interfaces/user/IProfilePicture.js';
 import { PasswordResetService } from '@core/services/password-reset.service.js';
+import { RegistrationEmailVerificationService } from '@core/services/registration-email-verification.service.js';
+import type { RequestRegistrationEmailCodeRequest, VerifyRegistrationEmailCodeRequest } from '@core/schema/auth/register/email-verification.js';
 import type { ForgotPasswordResetPasswordRequest, ForgotPasswordSendCodeRequest, ForgotPasswordVerifyCodeRequest } from '@core/schema/auth/forgot-password/index.js';
+import { UserService } from '@core/services/user.service.js';
 
 @injectable()
 export class AuthController {
@@ -23,7 +27,10 @@ export class AuthController {
     @inject(UpdateOwnProfileUseCase)
     private readonly updateOwnProfileUseCase: UpdateOwnProfileUseCase,
     @inject(PasswordResetService)
-    private readonly passwordResetService: PasswordResetService
+    private readonly passwordResetService: PasswordResetService,
+    @inject(RegistrationEmailVerificationService)
+    private readonly registrationEmailVerificationService: RegistrationEmailVerificationService,
+    @inject(UserService) private readonly userService: UserService
   ) {}
 
   private async readProfileRequest(request: FastifyRequest): Promise<{
@@ -85,6 +92,8 @@ export class AuthController {
       return reply
         .code(400)
         .send({ message: request.t('auth_register_invalid_input') });
+    if (input.email.toLowerCase() !== request.verifiedRegistrationEmail)
+      return reply.code(401).send({ message: request.t('registration_email_verification_required') });
     try {
       const player = await this.registerPlayerUseCase.execute(input);
       const user = await this.loginUseCase.execute(
@@ -102,6 +111,8 @@ export class AuthController {
         return reply
           .code(409)
           .send({ message: request.t('username_already_exists') });
+      if (error instanceof Error && error.message === 'EMAIL_ALREADY_EXISTS')
+        return reply.code(409).send({ message: request.t('registration_email_already_used') });
       if (error instanceof Error && error.message === 'PLAYER_ROLE_NOT_FOUND')
         return reply
           .code(500)
@@ -115,6 +126,50 @@ export class AuthController {
           .code(409)
           .send({ message: request.t('user_already_exists') });
       throw error;
+    }
+  };
+
+  public checkUsernameAvailability = async (
+    request: FastifyRequest<{ Body: CheckUsernameAvailabilityRequest }>
+  ) => ({
+    available: !(await this.userService.usernameExists(request.body.username)),
+  });
+
+  public requestRegistrationEmailCode = async (
+    request: FastifyRequest<{ Body: RequestRegistrationEmailCodeRequest }>,
+    reply: FastifyReply
+  ) => {
+    try {
+      await this.registrationEmailVerificationService.sendCode(
+        request.body.email,
+        request.body.language_code,
+        request.ip
+      );
+      return reply.code(202).send({ message: request.t('registration_email_code_sent') });
+    } catch (error) {
+      const code = error instanceof Error ? error.message : '';
+      const status = code === 'REGISTRATION_EMAIL_ALREADY_EXISTS' ? 409 : code === 'REGISTRATION_CODE_RATE_LIMITED' || code === 'REGISTRATION_CODE_RESEND_TOO_SOON' ? 429 : 503;
+      const key = code === 'REGISTRATION_EMAIL_ALREADY_EXISTS' ? 'registration_email_already_used' : code === 'REGISTRATION_CODE_RATE_LIMITED' ? 'registration_email_rate_limited' : code === 'REGISTRATION_CODE_RESEND_TOO_SOON' ? 'registration_email_resend_too_soon' : 'registration_email_delivery_unavailable';
+      return reply.code(status).send({ message: request.t(key) });
+    }
+  };
+
+  public verifyRegistrationEmailCode = async (
+    request: FastifyRequest<{ Body: VerifyRegistrationEmailCodeRequest }>,
+    reply: FastifyReply
+  ) => {
+    try {
+      const email = await this.registrationEmailVerificationService.verifyCode(request.body.email, request.body.code);
+      const registrationToken = await reply.jwtSign(
+        { email, token_purpose: 'registration_email' },
+        { sign: { expiresIn: '15m' } }
+      );
+      return { registration_token: registrationToken, expires_in: '15m' };
+    } catch (error) {
+      const code = error instanceof Error ? error.message : '';
+      const status = code === 'REGISTRATION_EMAIL_ALREADY_EXISTS' ? 409 : code === 'REGISTRATION_CODE_TOO_MANY_ATTEMPTS' ? 429 : 400;
+      const key = code === 'REGISTRATION_EMAIL_ALREADY_EXISTS' ? 'registration_email_already_used' : code === 'REGISTRATION_CODE_TOO_MANY_ATTEMPTS' ? 'registration_email_too_many_attempts' : code === 'REGISTRATION_CODE_EXPIRED' ? 'registration_email_code_expired' : 'registration_email_code_invalid';
+      return reply.code(status).send({ message: request.t(key) });
     }
   };
 

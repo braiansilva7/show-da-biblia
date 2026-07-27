@@ -5,13 +5,6 @@ import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { Pool } from 'pg';
 import type { TFunction } from 'i18next';
 
-declare module '@fastify/jwt' {
-  interface FastifyJWT {
-    payload: { user_id: string; module: 'manager' };
-    user: { user_id: string; module: 'manager' };
-  }
-}
-
 declare module 'fastify' {
   interface FastifyRequest {
     authenticatedUser?: User;

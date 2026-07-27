@@ -14,7 +14,7 @@ export function registerAuthenticatePasswordReset(server: FastifyInstance) {
           .send({ message: request.t('auth_invalid_or_expired_token') });
         return;
       }
-      if (request.user.token_purpose !== 'password_reset') {
+      if (request.user.token_purpose !== 'password_reset' || !request.user.user_id || request.user.session_version === undefined) {
         reply
           .code(401)
           .send({ message: request.t('auth_invalid_or_expired_token') });

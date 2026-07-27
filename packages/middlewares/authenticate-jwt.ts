@@ -13,7 +13,7 @@ export function registerAuthenticateJwt(server: FastifyInstance) {
     ) => {
       try {
         await request.jwtVerify();
-        if (request.user.token_purpose === 'password_reset') throw new Error();
+        if (request.user.token_purpose || !request.user.user_id || request.user.session_version === undefined) throw new Error();
       } catch {
         reply
           .code(401)

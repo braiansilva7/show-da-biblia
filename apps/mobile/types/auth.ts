@@ -34,3 +34,8 @@ export type PasswordResetVerification = {
   resetToken: string;
   expiresIn: string;
 };
+
+export type RegistrationEmailVerification = {
+  registrationToken: string;
+  expiresIn: string;
+};

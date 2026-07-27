@@ -7,16 +7,18 @@ import type { Pool } from 'pg';
 declare module '@fastify/jwt' {
   interface FastifyJWT {
     payload: {
-      user_id: string;
-      module: 'manager';
-      session_version: number;
-      token_purpose?: 'password_reset';
+      user_id?: string;
+      module?: 'manager';
+      session_version?: number;
+      email?: string;
+      token_purpose?: 'password_reset' | 'registration_email';
     };
     user: {
-      user_id: string;
-      module: 'manager';
-      session_version: number;
-      token_purpose?: 'password_reset';
+      user_id?: string;
+      module?: 'manager';
+      session_version?: number;
+      email?: string;
+      token_purpose?: 'password_reset' | 'registration_email';
     };
   }
 }
@@ -24,6 +26,7 @@ declare module '@fastify/jwt' {
 declare module 'fastify' {
   interface FastifyRequest {
     authenticatedUser?: User;
+    verifiedRegistrationEmail?: string;
   }
 
   interface FastifyInstance {
@@ -33,6 +36,10 @@ declare module 'fastify' {
       allowedPermissions: PermissionAction[]
     ) => Promise<void>;
     authenticatePasswordReset: (
+      request: FastifyRequest,
+      reply: FastifyReply
+    ) => Promise<void>;
+    authenticateRegistrationEmail: (
       request: FastifyRequest,
       reply: FastifyReply
     ) => Promise<void>;

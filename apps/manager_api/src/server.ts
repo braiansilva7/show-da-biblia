@@ -7,6 +7,7 @@ import { registerDatabase } from '@core/plugins/database/index.js';
 import { registerMultipart } from '@core/plugins/multipart/index.js';
 import { registerAuthenticateJwt } from '@core/middlewares/authenticate-jwt.js';
 import { registerAuthenticatePasswordReset } from '@core/middlewares/authenticate-password-reset.js';
+import { registerAuthenticateRegistrationEmail } from '@core/middlewares/authenticate-registration-email.js';
 import i18nextPlugin from '@core/plugins/i18next/index.js';
 import healthRoutes from '@/routes/health.route.js';
 import routes from '@/routes/index.js';
@@ -33,6 +34,7 @@ export async function buildServer() {
   });
   registerAuthenticateJwt(app);
   registerAuthenticatePasswordReset(app);
+  registerAuthenticateRegistrationEmail(app);
   await app.register(healthRoutes);
   await app.register(routes, { prefix: '/api/v1' });
 
