@@ -14,6 +14,7 @@ export type User = {
   languageCode: LanguageCode;
   profilePictureUrl: string | null;
   totalScore: number;
+  highestUnlockedLevel: 1 | 2 | 3;
   active: boolean;
   createdAt: string;
   updatedAt: string;
@@ -36,6 +37,7 @@ export type PublicUser = {
   language_code: LanguageCode;
   profile_picture_url: string | null;
   total_score: number;
+  highest_unlocked_level: 1 | 2 | 3;
   active: boolean;
   created_at: string;
 };

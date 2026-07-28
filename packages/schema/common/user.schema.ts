@@ -27,6 +27,11 @@ export const publicUserSchema = Type.Object({
   language_code: languageCodeSchema,
   profile_picture_url: Type.Union([Type.String(), Type.Null()]),
   total_score: Type.Integer(),
+  highest_unlocked_level: Type.Union([
+    Type.Literal(1),
+    Type.Literal(2),
+    Type.Literal(3),
+  ]),
   active: Type.Boolean(),
   created_at: Type.String(),
 });

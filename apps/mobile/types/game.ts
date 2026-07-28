@@ -22,6 +22,7 @@ export type GameQuestion = {
   sessionQuestionId: string;
   orderNumber: number;
   difficultyLevel: 1 | 2 | 3;
+  presentedAt: string;
   statement: string;
   answers: GameAnswer[];
 };
@@ -32,6 +33,41 @@ export type GameSession = {
   score: number;
   skipsRemaining: number;
   currentLevel: 1 | 2 | 3;
+};
+
+export type GameStart = { session: GameSession; question: GameQuestion; jokers: Joker[] };
+
+export type GameSummary = {
+  id: string;
+  status: 'FINISHED';
+  endReason: 'TIMEOUT' | 'WRONG_ANSWER' | 'COMPLETED';
+  score: number;
+  correctAnswers: number;
+  answeredQuestions: number;
+  skipsUsed: number;
+  jokers: Array<Pick<Joker, 'code'> & { quantityUsed: number }>;
+  highestUnlockedLevel: 1 | 2 | 3;
+  durationSeconds: number | null;
+};
+
+export type AnswerFeedback = {
+  correctAnswerOptionId: string;
+  explanation: string;
+};
+
+export type AnswerResult =
+  | { finished: true; summary: GameSummary; feedback: AnswerFeedback }
+  | {
+      finished: false;
+      session: GameSession;
+      question: GameQuestion;
+      feedback: AnswerFeedback;
+    };
+
+export type JokerEffect = {
+  joker: Joker;
+  eliminatedOptionIds: string[];
+  revealedOptionId?: string;
 };
 
 export type RankingEntry = {

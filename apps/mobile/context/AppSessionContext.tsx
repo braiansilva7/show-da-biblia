@@ -27,6 +27,7 @@ type AppSessionValue = {
   updateProfile: (input: UpdateProfileInput) => Promise<void>;
   logout: () => Promise<void>;
   clearSessionMessage: () => void;
+  refreshUser: () => Promise<void>;
 };
 const AppSessionContext = createContext<AppSessionValue | null>(null);
 
@@ -47,6 +48,14 @@ export function AppSessionProvider({ children }: PropsWithChildren) {
     await authStorage.clear();
     setUser(null);
   }, []);
+  const refreshUser = useCallback(async () => {
+    const recovered = await authApi.me();
+    const stored = await authStorage.read();
+    if (stored)
+      await authStorage.save({ accessToken: stored.accessToken, user: recovered });
+    setUser(recovered);
+    setLocale(recovered.languageCode);
+  }, [setLocale]);
   useEffect(() => {
     void (async () => {
       const stored = await authStorage.read();
@@ -91,9 +100,10 @@ export function AppSessionProvider({ children }: PropsWithChildren) {
         setLocale(updated.languageCode);
       },
       logout,
+      refreshUser,
       clearSessionMessage: () => setSessionMessage(null),
     }),
-    [accept, booting, logout, sessionMessage, user]
+    [accept, booting, logout, refreshUser, sessionMessage, user]
   );
   return (
     <AppSessionContext.Provider value={value}>

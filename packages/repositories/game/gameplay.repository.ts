@@ -21,14 +21,28 @@ type S = {
   finished_at: string | Date | null;
   end_reason: string | null;
 };
+type JokerSummary = {
+  code: 'ELIMINATE_1' | 'ELIMINATE_2' | 'ELIMINATE_3' | 'REVEAL_ANSWER';
+  quantity_available: number;
+  quantity_used: number;
+};
 const iso = (v: string | Date) => (v instanceof Date ? v.toISOString() : v);
-const summary = (s: S, correct: number, answered: number) => ({
+const summary = (
+  s: S,
+  correct: number,
+  answered: number,
+  jokers: JokerSummary[],
+  highestUnlockedLevel: number
+) => ({
   id: s.id,
   status: s.status,
   end_reason: s.end_reason,
   score: s.score,
   correct_answers: correct,
   answered_questions: answered,
+  skips_used: 3 - s.skips_remaining,
+  jokers,
+  highest_unlocked_level: highestUnlockedLevel,
   started_at: iso(s.started_at),
   finished_at: s.finished_at ? iso(s.finished_at) : null,
   duration_seconds: s.finished_at
@@ -54,7 +68,7 @@ export class GameplayRepository {
     order: number
   ) {
     const q = await tx.execute(
-      sql`SELECT q.id, qt.statement FROM questions q JOIN question_translations qt ON qt.question_id=q.id AND qt.language_code=${language} WHERE q.status='PUBLISHED' AND q.difficulty_level=${level} AND NOT EXISTS (SELECT 1 FROM session_questions sq WHERE sq.game_session_id=${sessionId} AND sq.question_id=q.id) ORDER BY q.published_at,q.id LIMIT 1`
+      sql`SELECT q.id, qt.statement FROM questions q JOIN question_translations qt ON qt.question_id=q.id AND qt.language_code=${language} WHERE q.status='PUBLISHED' AND q.difficulty_level=${level} AND NOT EXISTS (SELECT 1 FROM session_questions sq WHERE sq.game_session_id=${sessionId} AND sq.question_id=q.id) ORDER BY random() LIMIT 1`
     );
     if (!q.rows[0]) throw new Error('GAME_SESSION_NO_NEXT_QUESTION');
     const a = await tx.execute(
@@ -75,16 +89,27 @@ export class GameplayRepository {
       answers: a.rows,
     };
   }
+  private async jokers(tx: any, sessionId: string): Promise<JokerSummary[]> {
+    const result = await tx.execute(sql`
+      SELECT jt.code, sj.quantity_available, sj.quantity_used
+      FROM session_jokers sj
+      INNER JOIN joker_types jt ON jt.id = sj.joker_type_id
+      WHERE sj.game_session_id = ${sessionId}
+      ORDER BY jt.code
+    `);
+    return result.rows as JokerSummary[];
+  }
   async start(input: IStartGameInput) {
     return this.db.transaction(async (tx) => {
       const u = await tx.execute(
         sql`SELECT language_code FROM users WHERE id=${input.userId} AND active=TRUE FOR UPDATE`
       );
       if (!u.rows[0]) throw new Error('GAME_SESSION_NOT_FOUND');
-      const active = await tx.execute<any>(
-        sql`SELECT id FROM game_sessions WHERE user_id=${input.userId} AND status='IN_PROGRESS'`
-      );
-      if (active.rows[0]) throw new Error('GAME_SESSION_ALREADY_ACTIVE');
+      await tx.execute(sql`
+        UPDATE game_sessions
+        SET status='ABANDONED', finished_at=NOW(), end_reason=NULL
+        WHERE user_id=${input.userId} AND status='IN_PROGRESS'
+      `);
       const id = createUuidV7();
       await tx.execute(
         sql`INSERT INTO game_sessions (id,user_id,language_code) VALUES (${id},${input.userId},${u.rows[0].language_code})`
@@ -116,6 +141,7 @@ export class GameplayRepository {
           status: 'IN_PROGRESS',
         },
         question,
+        jokers: await this.jokers(tx, id),
       };
     });
   }
@@ -135,10 +161,15 @@ export class GameplayRepository {
     await tx.execute(
       sql`UPDATE users SET total_score=COALESCE((SELECT MAX(score) FROM game_sessions WHERE user_id=${s.user_id} AND status='FINISHED'),0) WHERE id=${s.user_id}`
     );
+    const progress = await tx.execute(sql`
+      SELECT highest_unlocked_level FROM player_progress WHERE user_id=${s.user_id}
+    `);
     return summary(
       { ...s, status: 'FINISHED', finished_at: now, end_reason: reason },
       correct,
-      answered
+      answered,
+      await this.jokers(tx, s.id),
+      Number(progress.rows[0]?.highest_unlocked_level ?? 1)
     );
   }
   async answer(input: IAnswerQuestionInput) {
@@ -164,10 +195,24 @@ export class GameplayRepository {
         return { finished: true, summary: await this.close(tx, s, 'TIMEOUT') };
       }
       const a = await tx.execute<any>(
-        sql`SELECT is_correct FROM answer_options WHERE id=${input.answerOptionId} AND question_id=${q.question_id}`
+        sql`SELECT ao.id, ao.is_correct, qt.explanation
+          FROM answer_options ao
+          INNER JOIN question_translations qt
+            ON qt.question_id = ao.question_id AND qt.language_code = ${s.language_code}
+          WHERE ao.id=${input.answerOptionId} AND ao.question_id=${q.question_id}`
       );
       if (!a.rows[0]) throw new Error('GAME_ANSWER_INVALID');
       const correct = !!a.rows[0].is_correct;
+      const correctAnswer = correct
+        ? { id: a.rows[0].id }
+        : (await tx.execute<any>(
+            sql`SELECT id FROM answer_options WHERE question_id=${q.question_id} AND is_correct=TRUE LIMIT 1`
+          )).rows[0];
+      if (!correctAnswer) throw new Error('GAME_ANSWER_INVALID');
+      const feedback = {
+        correct_answer_option_id: correctAnswer.id,
+        explanation: String(a.rows[0].explanation),
+      };
       await tx.execute(
         sql`UPDATE session_questions SET status='ANSWERED',selected_answer_option_id=${input.answerOptionId},is_correct=${correct},earned_points=${correct ? 1 : 0},answered_at=NOW() WHERE id=${q.id}`
       );
@@ -175,6 +220,7 @@ export class GameplayRepository {
         return {
           finished: true,
           summary: await this.close(tx, s, 'WRONG_ANSWER'),
+          feedback,
         };
       await tx.execute(
         sql`INSERT INTO score_events (id,user_id,game_session_id,session_question_id,points,event_type) VALUES (${createUuidV7()},${s.user_id},${s.id},${q.id},1,'CORRECT_ANSWER')`
@@ -187,6 +233,7 @@ export class GameplayRepository {
         return {
           finished: true,
           summary: await this.close(tx, { ...s, score }, 'COMPLETED'),
+          feedback,
         };
       }
       const level = Math.floor(score / 10) + 1;
@@ -198,6 +245,7 @@ export class GameplayRepository {
       );
       return {
         finished: false,
+        feedback,
         session: {
           id: s.id,
           current_level: level,
@@ -225,12 +273,18 @@ export class GameplayRepository {
       const c = await tx.execute<any>(
         sql`SELECT count(*) FILTER (WHERE is_correct=TRUE)::int correct,count(*) FILTER (WHERE status='ANSWERED')::int answered FROM session_questions WHERE game_session_id=${s.id}`
       );
-      if (s.status === 'FINISHED')
+      if (s.status === 'FINISHED') {
+        const progress = await tx.execute(sql`
+          SELECT highest_unlocked_level FROM player_progress WHERE user_id=${s.user_id}
+        `);
         return summary(
           s,
           Number(c.rows[0].correct),
-          Number(c.rows[0].answered)
+          Number(c.rows[0].answered),
+          await this.jokers(tx, s.id),
+          Number(progress.rows[0]?.highest_unlocked_level ?? 1)
         );
+      }
       const p = await tx.execute<any>(
         sql`SELECT id,presented_at FROM session_questions WHERE game_session_id=${s.id} AND status='PENDING' FOR UPDATE`
       );
@@ -243,6 +297,23 @@ export class GameplayRepository {
         sql`UPDATE session_questions SET status='TIMED_OUT',answered_at=NOW() WHERE id=${p.rows[0].id}`
       );
       return this.close(tx, s, 'TIMEOUT');
+    });
+  }
+  async abandon(input: { userId: string; sessionId: string }) {
+    return this.db.transaction(async (tx) => {
+      const result = await tx.execute<S>(sql`
+        SELECT * FROM game_sessions
+        WHERE id=${input.sessionId} AND user_id=${input.userId}
+        FOR UPDATE
+      `);
+      const session = result.rows[0];
+      if (!session) throw new Error('GAME_SESSION_NOT_FOUND');
+      if (session.status !== 'IN_PROGRESS') return;
+      await tx.execute(sql`
+        UPDATE game_sessions
+        SET status='ABANDONED', finished_at=NOW(), end_reason=NULL
+        WHERE id=${session.id}
+      `);
     });
   }
   async ranking(input: IRankingInput) {

@@ -121,7 +121,7 @@ export class GameSessionRepository {
             WHERE used_questions.game_session_id = ${session.id}
               AND used_questions.question_id = q.id
           )
-        ORDER BY q.published_at ASC NULLS LAST, q.id ASC
+        ORDER BY random()
         LIMIT 1
       `);
       const nextQuestion = nextQuestionResult.rows[0];

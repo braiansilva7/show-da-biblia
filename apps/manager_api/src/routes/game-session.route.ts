@@ -8,6 +8,7 @@ import {
   startGameSchema,
   answerGameSchema,
   finishGameSchema,
+  abandonGameSchema,
   rankingSchema,
 } from '@core/schema/game/gameplay/index.js';
 
@@ -30,6 +31,11 @@ export default function gameSessionRoutes(server: FastifyInstance) {
   server.post('/game-sessions/:sessionId/finish', {
     schema: finishGameSchema,
     handler: controller.finish,
+    preHandler: auth,
+  });
+  server.post('/game-sessions/:sessionId/abandon', {
+    schema: abandonGameSchema,
+    handler: controller.abandon,
     preHandler: auth,
   });
   server.get('/rankings/international', {

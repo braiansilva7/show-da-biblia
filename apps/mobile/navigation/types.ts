@@ -1,4 +1,5 @@
 import type { NavigatorScreenParams } from '@react-navigation/native';
+import type { GameSummary } from '../types/game';
 
 export type AppTabParamList = {
   Home: undefined;
@@ -12,5 +13,5 @@ export type RootStackParamList = {
   ForgotPassword: undefined;
   AppTabs: NavigatorScreenParams<AppTabParamList>;
   Game: undefined;
-  Result: { sessionId?: string };
+  Result: { summary: GameSummary };
 };

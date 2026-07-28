@@ -20,6 +20,9 @@ export class GameplayUseCase {
   finish(input: any) {
     return this.repo.finish(input);
   }
+  abandon(input: any) {
+    return this.repo.abandon(input);
+  }
   ranking(input: any) {
     return this.repo.ranking(input);
   }

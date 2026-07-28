@@ -18,6 +18,7 @@ type ApiUser = {
   language_code: MobileUser['languageCode'];
   profile_picture_url: string | null;
   total_score: number;
+  highest_unlocked_level: 1 | 2 | 3;
 };
 type ApiSession = { access_token: string; user: ApiUser };
 const user = (value: ApiUser): MobileUser => ({
@@ -28,6 +29,7 @@ const user = (value: ApiUser): MobileUser => ({
   languageCode: value.language_code,
   profilePictureUrl: value.profile_picture_url,
   totalScore: value.total_score,
+  highestUnlockedLevel: value.highest_unlocked_level,
 });
 const session = (value: ApiSession): AuthSession => ({
   accessToken: value.access_token,

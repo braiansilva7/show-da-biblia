@@ -2,6 +2,7 @@ import { inject, injectable } from 'tsyringe';
 import { and, desc, eq, ne, sql } from 'drizzle-orm';
 import type { AppDatabase } from '@core/plugins/database/index.js';
 import { users } from '@core/models/user/user.model.js';
+import { playerProgress } from '@core/models/player/playerProgress.model.js';
 import type {
   LanguageCode,
   User,
@@ -18,10 +19,16 @@ function mapLanguage(value: string): LanguageCode {
 
 async function mapUser(
   row: typeof users.$inferSelect,
-  permissions: PermissionRepository
+  permissions: PermissionRepository,
+  db: AppDatabase
 ): Promise<User> {
   const permissionRole = await permissions.roleForUser(row.id);
   if (!permissionRole) throw new Error('User permission assignment not found');
+  const [progress] = await db
+    .select({ highestUnlockedLevel: playerProgress.highest_unlocked_level })
+    .from(playerProgress)
+    .where(eq(playerProgress.user_id, row.id))
+    .limit(1);
   return {
     id: row.id,
     username: row.username,
@@ -35,6 +42,10 @@ async function mapUser(
     languageCode: mapLanguage(row.language_code),
     profilePictureUrl: row.profile_picture_url,
     totalScore: row.total_score,
+    highestUnlockedLevel:
+      progress?.highestUnlockedLevel === 2 || progress?.highestUnlockedLevel === 3
+        ? progress.highestUnlockedLevel
+        : 1,
     active: row.active,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -55,7 +66,7 @@ export class UserRepository {
       .from(users)
       .where(sql`lower(${users.email}) = ${email.toLowerCase()}`)
       .limit(1);
-    return rows[0] ? mapUser(rows[0], this.permissions) : null;
+    return rows[0] ? mapUser(rows[0], this.permissions, this.db) : null;
   }
 
   async existsByUsername(
@@ -81,7 +92,7 @@ export class UserRepository {
       .from(users)
       .where(eq(users.id, id))
       .limit(1);
-    return rows[0] ? mapUser(rows[0], this.permissions) : null;
+    return rows[0] ? mapUser(rows[0], this.permissions, this.db) : null;
   }
 
   async list(input: IListUsersInput): Promise<{
@@ -110,7 +121,7 @@ export class UserRepository {
     return {
       users: await Promise.all(
         rows.map(async (row) =>
-          toPublicUser(await mapUser(row, this.permissions))
+          toPublicUser(await mapUser(row, this.permissions, this.db))
         )
       ),
       total: count?.total ?? 0,
@@ -141,7 +152,7 @@ export class UserRepository {
       })
       .returning();
     await this.permissions.assign(row.id, input.permissionRoleId);
-    return toPublicUser(await mapUser(row, this.permissions));
+    return toPublicUser(await mapUser(row, this.permissions, this.db));
   }
 
   async update(
@@ -178,7 +189,7 @@ export class UserRepository {
     if (!row) return null;
     if (input.permissionRoleId !== undefined)
       await this.permissions.assign(id, input.permissionRoleId);
-    return toPublicUser(await mapUser(row, this.permissions));
+    return toPublicUser(await mapUser(row, this.permissions, this.db));
   }
 
   async resetPassword(id: string, passwordHash: string): Promise<User | null> {
@@ -191,7 +202,7 @@ export class UserRepository {
       })
       .where(eq(users.id, id))
       .returning();
-    return row ? mapUser(row, this.permissions) : null;
+    return row ? mapUser(row, this.permissions, this.db) : null;
   }
 
   async delete(id: string): Promise<boolean> {

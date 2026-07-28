@@ -164,6 +164,20 @@ export class GameController {
       return this.gameError(e, request, reply);
     }
   };
+  abandon = async (
+    request: FastifyRequest<{ Params: { sessionId: string } }>,
+    reply: FastifyReply
+  ) => {
+    try {
+      await this.gameplay.abandon({
+        userId: request.authenticatedUser!.id,
+        sessionId: request.params.sessionId,
+      });
+      return reply.code(204).send();
+    } catch (e) {
+      return this.gameError(e, request, reply);
+    }
+  };
   ranking = async (
     request: FastifyRequest<{
       Querystring: { page?: number; page_size?: number };
