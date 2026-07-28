@@ -168,6 +168,16 @@ export class UserRepository {
       active: boolean;
     }>
   ): Promise<UserListItem | null> {
+    const currentLanguage =
+      input.languageCode === undefined
+        ? undefined
+        : (
+            await this.db
+              .select({ languageCode: users.language_code })
+              .from(users)
+              .where(eq(users.id, id))
+              .limit(1)
+          )[0]?.languageCode;
     const patch: Partial<typeof users.$inferInsert> = {};
     if (input.username !== undefined) patch.username = input.username;
     if (input.email !== undefined) patch.email = input.email.toLowerCase();
@@ -187,6 +197,17 @@ export class UserRepository {
       .where(eq(users.id, id))
       .returning();
     if (!row) return null;
+    if (
+      input.languageCode !== undefined &&
+      currentLanguage !== undefined &&
+      currentLanguage !== input.languageCode
+    ) {
+      await this.db.execute(sql`
+        UPDATE game_sessions
+        SET status='ABANDONED', finished_at=NOW(), end_reason=NULL
+        WHERE user_id=${id} AND status='IN_PROGRESS'
+      `);
+    }
     if (input.permissionRoleId !== undefined)
       await this.permissions.assign(id, input.permissionRoleId);
     return toPublicUser(await mapUser(row, this.permissions, this.db));
