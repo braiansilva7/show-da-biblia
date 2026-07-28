@@ -55,6 +55,8 @@ export type AnswerFeedback = {
   explanation: string;
 };
 
+export type TimeoutResult = { summary: GameSummary; feedback: AnswerFeedback };
+
 export type AnswerResult =
   | { finished: true; summary: GameSummary; feedback: AnswerFeedback }
   | {

@@ -106,7 +106,10 @@ export const finishGameSchema = {
   summary: 'Finalizar partida',
   security: [{ authenticateJwt: [] }],
   params,
-  response: { 200: gameSummarySchema, ...error },
+  response: {
+    200: Type.Object({ summary: gameSummarySchema, feedback: answerFeedbackSchema }),
+    ...error,
+  },
 };
 export const abandonGameSchema = {
   tags: [ETagSwagger.game],

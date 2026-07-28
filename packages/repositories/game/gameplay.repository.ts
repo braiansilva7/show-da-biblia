@@ -99,6 +99,22 @@ export class GameplayRepository {
     `);
     return result.rows as JokerSummary[];
   }
+  private async answerFeedback(tx: any, questionId: string, language: string) {
+    const result = await tx.execute(sql`
+      SELECT ao.id, qt.explanation
+      FROM answer_options ao
+      INNER JOIN question_translations qt
+        ON qt.question_id = ao.question_id AND qt.language_code = ${language}
+      WHERE ao.question_id = ${questionId} AND ao.is_correct = TRUE
+      LIMIT 1
+    `);
+    const answer = result.rows[0];
+    if (!answer) throw new Error('GAME_ANSWER_INVALID');
+    return {
+      correct_answer_option_id: answer.id,
+      explanation: String(answer.explanation),
+    };
+  }
   async start(input: IStartGameInput) {
     return this.db.transaction(async (tx) => {
       const u = await tx.execute(
@@ -192,7 +208,11 @@ export class GameplayRepository {
         await tx.execute(
           sql`UPDATE session_questions SET status='TIMED_OUT',answered_at=NOW() WHERE id=${q.id}`
         );
-        return { finished: true, summary: await this.close(tx, s, 'TIMEOUT') };
+        return {
+          finished: true,
+          summary: await this.close(tx, s, 'TIMEOUT'),
+          feedback: await this.answerFeedback(tx, q.question_id, s.language_code),
+        };
       }
       const a = await tx.execute<any>(
         sql`SELECT ao.id, ao.is_correct, qt.explanation
@@ -203,16 +223,7 @@ export class GameplayRepository {
       );
       if (!a.rows[0]) throw new Error('GAME_ANSWER_INVALID');
       const correct = !!a.rows[0].is_correct;
-      const correctAnswer = correct
-        ? { id: a.rows[0].id }
-        : (await tx.execute<any>(
-            sql`SELECT id FROM answer_options WHERE question_id=${q.question_id} AND is_correct=TRUE LIMIT 1`
-          )).rows[0];
-      if (!correctAnswer) throw new Error('GAME_ANSWER_INVALID');
-      const feedback = {
-        correct_answer_option_id: correctAnswer.id,
-        explanation: String(a.rows[0].explanation),
-      };
+      const feedback = await this.answerFeedback(tx, q.question_id, s.language_code);
       await tx.execute(
         sql`UPDATE session_questions SET status='ANSWERED',selected_answer_option_id=${input.answerOptionId},is_correct=${correct},earned_points=${correct ? 1 : 0},answered_at=NOW() WHERE id=${q.id}`
       );
@@ -277,16 +288,29 @@ export class GameplayRepository {
         const progress = await tx.execute(sql`
           SELECT highest_unlocked_level FROM player_progress WHERE user_id=${s.user_id}
         `);
-        return summary(
-          s,
-          Number(c.rows[0].correct),
-          Number(c.rows[0].answered),
-          await this.jokers(tx, s.id),
-          Number(progress.rows[0]?.highest_unlocked_level ?? 1)
-        );
+        const timedOutQuestion = await tx.execute<{ question_id: string }>(sql`
+          SELECT question_id FROM session_questions
+          WHERE game_session_id=${s.id} AND status='TIMED_OUT'
+          ORDER BY answered_at DESC NULLS LAST LIMIT 1
+        `);
+        if (!timedOutQuestion.rows[0]) throw new Error('GAME_SESSION_NOT_FINISHABLE');
+        return {
+          summary: summary(
+            s,
+            Number(c.rows[0].correct),
+            Number(c.rows[0].answered),
+            await this.jokers(tx, s.id),
+            Number(progress.rows[0]?.highest_unlocked_level ?? 1)
+          ),
+          feedback: await this.answerFeedback(
+            tx,
+            timedOutQuestion.rows[0].question_id,
+            s.language_code
+          ),
+        };
       }
       const p = await tx.execute<any>(
-        sql`SELECT id,presented_at FROM session_questions WHERE game_session_id=${s.id} AND status='PENDING' FOR UPDATE`
+        sql`SELECT id,question_id,presented_at FROM session_questions WHERE game_session_id=${s.id} AND status='PENDING' FOR UPDATE`
       );
       if (
         !p.rows[0] ||
@@ -296,7 +320,10 @@ export class GameplayRepository {
       await tx.execute(
         sql`UPDATE session_questions SET status='TIMED_OUT',answered_at=NOW() WHERE id=${p.rows[0].id}`
       );
-      return this.close(tx, s, 'TIMEOUT');
+      return {
+        summary: await this.close(tx, s, 'TIMEOUT'),
+        feedback: await this.answerFeedback(tx, p.rows[0].question_id, s.language_code),
+      };
     });
   }
   async abandon(input: { userId: string; sessionId: string }) {

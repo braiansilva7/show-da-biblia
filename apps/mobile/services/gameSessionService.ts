@@ -5,6 +5,7 @@ import type {
   GameSession,
   GameStart,
   GameSummary,
+  TimeoutResult,
   JokerCode,
   JokerEffect,
 } from '../types/game';
@@ -14,7 +15,7 @@ export interface GameSessionService {
   answer(sessionId: string, sessionQuestionId: string, answerOptionId: string): Promise<AnswerResult>;
   skip(sessionId: string, sessionQuestionId: string): Promise<{ session: GameSession; question: GameQuestion }>;
   useJoker(sessionId: string, sessionQuestionId: string, code: JokerCode): Promise<JokerEffect>;
-  finish(sessionId: string): Promise<GameSummary>;
+  finish(sessionId: string): Promise<TimeoutResult>;
   abandon(sessionId: string): Promise<void>;
 }
 

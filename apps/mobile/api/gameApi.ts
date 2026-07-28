@@ -9,6 +9,7 @@ import type {
   Joker,
   JokerCode,
   JokerEffect,
+  TimeoutResult,
 } from '../types/game';
 
 type ApiSession = {
@@ -140,8 +141,12 @@ export const gameApi = {
       revealedOptionId: response.effect.revealed_answer_option_id,
     };
   },
-  async finish(sessionId: string): Promise<GameSummary> {
-    return summary(await request<ApiSummary>(`/game-sessions/${sessionId}/finish`, { method: 'POST' }));
+  async finish(sessionId: string): Promise<TimeoutResult> {
+    const response = await request<{ summary: ApiSummary; feedback: ApiAnswerFeedback }>(
+      `/game-sessions/${sessionId}/finish`,
+      { method: 'POST' }
+    );
+    return { summary: summary(response.summary), feedback: feedback(response.feedback) };
   },
   async abandon(sessionId: string): Promise<void> {
     await request<void>(`/game-sessions/${sessionId}/abandon`, { method: 'POST' });

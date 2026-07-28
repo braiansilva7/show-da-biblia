@@ -29,4 +29,15 @@ describe('gameApi', () => {
     await gameApi.abandon('session-1');
     expect(mockedRequest).toHaveBeenCalledWith('/game-sessions/session-1/abandon', { method: 'POST' });
   });
+
+  it('maps timeout feedback without navigating away from the question', async () => {
+    mockedRequest.mockResolvedValueOnce({
+      summary: { id: 'session-1', status: 'FINISHED', end_reason: 'TIMEOUT', score: 4, correct_answers: 4, answered_questions: 4, skips_used: 0, jokers: [], highest_unlocked_level: 1, duration_seconds: 60 },
+      feedback: { correct_answer_option_id: 'answer-3', explanation: 'The correct answer is explained here.' },
+    });
+    await expect(gameApi.finish('session-1')).resolves.toMatchObject({
+      summary: { endReason: 'TIMEOUT' },
+      feedback: { correctAnswerOptionId: 'answer-3' },
+    });
+  });
 });

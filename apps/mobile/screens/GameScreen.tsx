@@ -12,10 +12,11 @@ import { theme } from '../theme';
 import type { AnswerFeedback, GameQuestion, GameSession, GameSummary, Joker } from '../types/game';
 
 type FeedbackState = {
-  selectedAnswerId: string;
+  selectedAnswerId?: string;
   feedback: AnswerFeedback;
   next?: { session: GameSession; question: GameQuestion };
   summary?: GameSummary;
+  timedOut?: boolean;
 };
 
 function ActionCard({ icon, label, detail, disabled, onPress }: { icon: keyof typeof MaterialCommunityIcons.glyphMap; label: string; detail: string; disabled: boolean; onPress: () => void }) {
@@ -50,7 +51,10 @@ export function GameScreen({ navigation }: NativeStackScreenProps<RootStackParam
   const finish = useCallback(async () => {
     if (!session || busy || answerFeedback) return;
     setBusy(true); setError(null);
-    try { navigation.replace('Result', { summary: await gameSessionService.finish(session.id) }); }
+    try {
+      const result = await gameSessionService.finish(session.id);
+      setAnswerFeedback({ feedback: result.feedback, summary: result.summary, timedOut: true });
+    }
     catch { setError(t('gameActionError')); setBusy(false); }
   }, [answerFeedback, busy, navigation, session, t]);
   useEffect(() => {
@@ -79,7 +83,12 @@ export function GameScreen({ navigation }: NativeStackScreenProps<RootStackParam
     if (!session || !question) return;
     const result = await gameSessionService.answer(session.id, question.sessionQuestionId, answerId);
     setAnswerFeedback(result.finished
-      ? { selectedAnswerId: answerId, feedback: result.feedback, summary: result.summary }
+      ? {
+          selectedAnswerId: result.summary.endReason === 'TIMEOUT' ? undefined : answerId,
+          feedback: result.feedback,
+          summary: result.summary,
+          timedOut: result.summary.endReason === 'TIMEOUT',
+        }
       : { selectedAnswerId: answerId, feedback: result.feedback, next: { session: result.session, question: result.question } });
   });
   const skip = () => action(async () => {
@@ -91,7 +100,26 @@ export function GameScreen({ navigation }: NativeStackScreenProps<RootStackParam
     const effect = await gameSessionService.useJoker(session.id, question.sessionQuestionId, code);
     setJokers((current) => current.map((item) => item.code === effect.joker.code ? effect.joker : item));
     setEliminated((current) => [...new Set([...current, ...effect.eliminatedOptionIds])]);
-    if (effect.revealedOptionId) setRevealed(effect.revealedOptionId);
+    if (effect.revealedOptionId) {
+      setRevealed(effect.revealedOptionId);
+      const result = await gameSessionService.answer(
+        session.id,
+        question.sessionQuestionId,
+        effect.revealedOptionId
+      );
+      setAnswerFeedback(result.finished
+        ? {
+            selectedAnswerId: effect.revealedOptionId,
+            feedback: result.feedback,
+            summary: result.summary,
+            timedOut: result.summary.endReason === 'TIMEOUT',
+          }
+        : {
+            selectedAnswerId: effect.revealedOptionId,
+            feedback: result.feedback,
+            next: { session: result.session, question: result.question },
+          });
+    }
   });
   const advance = () => {
     if (!answerFeedback) return;
@@ -105,17 +133,18 @@ export function GameScreen({ navigation }: NativeStackScreenProps<RootStackParam
     <View style={styles.metrics}>
       <View style={styles.metricCard}><MaterialCommunityIcons color={theme.colors.primary} name="stairs" size={22} /><Text style={styles.metricLabel}>{t('level')}</Text><Text style={styles.metricValue}>{session.currentLevel} · {session.score % 10}/10</Text></View>
       <View style={styles.metricCard}><MaterialCommunityIcons color={theme.colors.primary} name="star-four-points" size={22} /><Text style={styles.metricLabel}>{t('score')}</Text><Text style={styles.metricValue}>{session.score}</Text></View>
-      <View style={styles.metricCard}><MaterialCommunityIcons color={seconds < 15 ? theme.colors.error : theme.colors.primary} name="timer-outline" size={22} /><Text style={styles.metricLabel}>{t('time')}</Text><Text style={styles.metricValue}>{seconds}s</Text></View>
+      <View style={[styles.metricCard, answerFeedback?.timedOut && styles.timeExpired]}><MaterialCommunityIcons color={seconds < 15 || answerFeedback?.timedOut ? theme.colors.error : theme.colors.primary} name="timer-outline" size={22} /><Text style={styles.metricLabel}>{t('time')}</Text><Text style={styles.metricValue}>{seconds}s</Text></View>
     </View>
     <Text style={styles.question}>{question.statement}</Text>
     <View style={styles.answers}>{question.answers.map((item) => {
       const isCorrect = answerFeedback?.feedback.correctAnswerOptionId === item.id;
+      const isRevealed = revealed === item.id;
       const isSelected = answerFeedback?.selectedAnswerId === item.id;
       const disabled = controlsDisabled || eliminated.includes(item.id);
-      return <View key={item.id}><Pressable disabled={disabled} onPress={() => answer(item.id)} style={[styles.answer, eliminated.includes(item.id) && styles.cardDisabled, isCorrect && styles.correct, isSelected && !isCorrect && styles.wrong]}><Text style={styles.answerText}>{item.position}. {item.content}</Text>{isCorrect ? <MaterialCommunityIcons color={theme.colors.success} name="check-circle" size={24} /> : null}{isSelected && !isCorrect ? <MaterialCommunityIcons color={theme.colors.error} name="close-circle" size={24} /> : null}</Pressable>{isCorrect && answerFeedback ? <View style={styles.explanation}><Text style={styles.explanationTitle}>{t('answerExplanation')}</Text><Text style={styles.explanationText}>{answerFeedback.feedback.explanation}</Text></View> : null}</View>;
+      return <View key={item.id}><Pressable disabled={disabled} onPress={() => answer(item.id)} style={[styles.answer, eliminated.includes(item.id) && styles.cardDisabled, (isCorrect || isRevealed) && styles.correct, isSelected && !isCorrect && styles.wrong]}><Text style={styles.answerText}>{item.position}. {item.content}</Text>{isCorrect || isRevealed ? <MaterialCommunityIcons color={theme.colors.success} name="check-circle" size={24} /> : null}{isSelected && !isCorrect ? <MaterialCommunityIcons color={theme.colors.error} name="close-circle" size={24} /> : null}</Pressable>{isCorrect && answerFeedback ? <View style={styles.explanation}><Text style={styles.explanationTitle}>{t('answerExplanation')}</Text><Text style={styles.explanationText}>{answerFeedback.feedback.explanation}</Text></View> : null}</View>;
     })}</View>
     {answerFeedback ? <PrimaryButton label={answerFeedback.summary ? t('viewResult') : t('nextQuestion')} onPress={advance} /> : <View style={styles.actions}>
-      <ActionCard detail={`${session.skipsRemaining} ${t('available')}`} disabled={controlsDisabled || session.skipsRemaining === 0} icon="skip-next-circle-outline" label={t('skipQuestion')} onPress={skip} />
+      <ActionCard detail={`${session.skipsRemaining} ${t('available')}`} disabled={controlsDisabled || session.skipsRemaining === 0} icon="run-fast" label={t('skipQuestion')} onPress={skip} />
       {jokers.map((item) => <ActionCard key={item.code} detail={`${item.quantityAvailable} ${t('available')}`} disabled={controlsDisabled || item.quantityAvailable === 0} icon={item.code === 'REVEAL_ANSWER' ? 'account-group-outline' : 'cards-outline'} label={t(item.code === 'REVEAL_ANSWER' ? 'jokerReveal' : 'jokerEliminate')} onPress={() => useJoker(item.code)} />)}
     </View>}
     {error ? <Text style={styles.error}>{error}</Text> : null}
@@ -124,7 +153,7 @@ export function GameScreen({ navigation }: NativeStackScreenProps<RootStackParam
 
 const styles = StyleSheet.create({
   content: { gap: theme.spacing.md, paddingBottom: theme.spacing.xl, paddingTop: theme.spacing.lg },
-  metrics: { flexDirection: 'row', gap: theme.spacing.sm }, metricCard: { alignItems: 'center', backgroundColor: theme.colors.surface, borderColor: theme.colors.border, borderRadius: theme.radius.md, borderWidth: 1, flex: 1, gap: 3, padding: theme.spacing.sm }, metricLabel: { color: theme.colors.mutedText, fontSize: 12 }, metricValue: { color: theme.colors.text, fontSize: 15, fontWeight: '800' },
+  metrics: { flexDirection: 'row', gap: theme.spacing.sm }, metricCard: { alignItems: 'center', backgroundColor: theme.colors.surface, borderColor: theme.colors.border, borderRadius: theme.radius.md, borderWidth: 1, flex: 1, gap: 3, padding: theme.spacing.sm }, timeExpired: { backgroundColor: '#FCE8E6', borderColor: theme.colors.error }, metricLabel: { color: theme.colors.mutedText, fontSize: 12 }, metricValue: { color: theme.colors.text, fontSize: 15, fontWeight: '800' },
   question: { color: theme.colors.text, fontSize: 23, fontWeight: '800', lineHeight: 31, marginTop: theme.spacing.sm }, answers: { gap: theme.spacing.sm }, answer: { alignItems: 'center', backgroundColor: theme.colors.surface, borderColor: theme.colors.border, borderRadius: theme.radius.md, borderWidth: 1, flexDirection: 'row', gap: theme.spacing.sm, justifyContent: 'space-between', padding: theme.spacing.md }, answerText: { color: theme.colors.text, flex: 1, fontSize: 16 }, correct: { backgroundColor: '#DDF4E5', borderColor: theme.colors.success }, wrong: { backgroundColor: '#FCE8E6', borderColor: theme.colors.error }, explanation: { backgroundColor: '#EDF8F1', borderBottomLeftRadius: theme.radius.md, borderBottomRightRadius: theme.radius.md, marginTop: -theme.spacing.sm, padding: theme.spacing.md, paddingTop: theme.spacing.lg }, explanationTitle: { color: theme.colors.success, fontWeight: '800', marginBottom: 4 }, explanationText: { color: theme.colors.text, lineHeight: 20 },
   actions: { gap: theme.spacing.sm }, actionCard: { alignItems: 'center', backgroundColor: theme.colors.surface, borderColor: theme.colors.border, borderRadius: theme.radius.md, borderWidth: 1, flexDirection: 'row', gap: theme.spacing.md, padding: theme.spacing.md }, actionText: { flex: 1 }, actionLabel: { color: theme.colors.text, fontSize: 16, fontWeight: '700' }, actionDetail: { color: theme.colors.mutedText, fontSize: 13, marginTop: 2 }, cardDisabled: { opacity: 0.45 }, cardPressed: { transform: [{ scale: 0.99 }] }, error: { color: theme.colors.error },
 });

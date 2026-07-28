@@ -26,7 +26,7 @@ export const es: TranslationDictionary = {
   skipsRemaining: 'Saltos restantes',
   skipQuestion: 'Saltar pregunta',
   jokerEliminate: 'Eliminar alternativas',
-  jokerReveal: 'Llamar a los universitarios',
+  jokerReveal: 'Pregunta a Salomón',
   available: 'disponible',
   answerExplanation: 'Explicación',
   nextQuestion: 'Siguiente pregunta',
