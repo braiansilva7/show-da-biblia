@@ -60,6 +60,21 @@ export const es: TranslationDictionary = {
   tabHome: 'Inicio',
   tabRankings: 'Clasificaciones',
   tabProfile: 'Perfil',
+  tabAbout: 'Acerca de',
+  aboutTitle: 'Acerca de',
+  aboutMission:
+    'Show de la Biblia fue desarrollado con el propósito de fortalecer la fe y brindar una experiencia de aprendizaje y reflexión sobre las Escrituras.',
+  aboutCollaboration:
+    'Contamos con la contribución de todos para enviarnos sugerencias, críticas e ideas que nos ayuden a mejorar el juego cada día.',
+  aboutContact: 'Para soporte o contacto, envía un correo electrónico a:',
+  aboutContactEmail: 'grupo5developer@gmail.com',
+  aboutSupportTitle: 'Apoya a Show de la Biblia',
+  aboutSupportDescription:
+    'Ayúdanos a mantener y ampliar este proyecto para llegar a más personas.',
+  donate: 'Hacer una donación',
+  donationUnavailable: 'Las donaciones no están disponibles en este momento.',
+  donationError:
+    'No fue posible abrir la página de donación. Inténtalo de nuevo más tarde.',
   unavailableTitle: 'En preparación',
   unavailableDescription:
     'Esta parte de la aplicación aún se está construyendo.',

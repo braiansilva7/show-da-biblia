@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useLocalization } from '../context/LocalizationContext';
+import { AboutScreen } from '../screens/AboutScreen';
 import { HomeScreen } from '../screens/HomeScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
 import { RankingsScreen } from '../screens/RankingsScreen';
@@ -47,6 +48,20 @@ export function AppTabs() {
           title: t('tabProfile'),
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="person-outline" color={color} size={size} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="About"
+        component={AboutScreen}
+        options={{
+          title: t('tabAbout'),
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons
+              name="information-circle-outline"
+              color={color}
+              size={size}
+            />
           ),
         }}
       />

@@ -5,6 +5,7 @@ export type AppTabParamList = {
   Home: undefined;
   Rankings: undefined;
   Profile: undefined;
+  About: undefined;
 };
 
 export type RootStackParamList = {

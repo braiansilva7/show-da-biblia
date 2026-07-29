@@ -1,4 +1,4 @@
-import type { RootStackParamList } from '../navigation/types';
+import type { AppTabParamList, RootStackParamList } from '../navigation/types';
 
 describe('navigation contracts', () => {
   it('accepts the result route parameters', () => {
@@ -7,6 +7,10 @@ describe('navigation contracts', () => {
   });
   it('declares the password recovery route', () => {
     const route: RootStackParamList['ForgotPassword'] = undefined;
+    expect(route).toBeUndefined();
+  });
+  it('declares the about tab', () => {
+    const route: AppTabParamList['About'] = undefined;
     expect(route).toBeUndefined();
   });
 });

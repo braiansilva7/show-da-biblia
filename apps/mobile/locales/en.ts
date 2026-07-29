@@ -58,6 +58,20 @@ export const en: TranslationDictionary = {
   tabHome: 'Home',
   tabRankings: 'Rankings',
   tabProfile: 'Profile',
+  tabAbout: 'About',
+  aboutTitle: 'About',
+  aboutMission:
+    'Bible Show was developed to strengthen faith and provide an experience of learning and reflection on the Scriptures.',
+  aboutCollaboration:
+    'We count on everyone to send us suggestions, feedback, and ideas that help us improve the game every day.',
+  aboutContact: 'For support or contact, send an email to:',
+  aboutContactEmail: 'grupo5developer@gmail.com',
+  aboutSupportTitle: 'Support Bible Show',
+  aboutSupportDescription:
+    'Help us maintain and expand this project to reach more people.',
+  donate: 'Make a donation',
+  donationUnavailable: 'Donations are not available right now.',
+  donationError: 'We could not open the donation page. Please try again later.',
   unavailableTitle: 'In progress',
   unavailableDescription: 'This part of the app is still being built.',
   email: 'Email',

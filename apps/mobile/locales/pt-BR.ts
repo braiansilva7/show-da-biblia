@@ -57,6 +57,21 @@ export const ptBR = {
   tabHome: 'Início',
   tabRankings: 'Rankings',
   tabProfile: 'Perfil',
+  tabAbout: 'Sobre',
+  aboutTitle: 'Sobre',
+  aboutMission:
+    'O Show da Bíblia foi desenvolvido com o propósito de fortalecer a fé e proporcionar uma experiência de aprendizado e reflexão sobre as Escrituras.',
+  aboutCollaboration:
+    'Contamos com a contribuição de todos para nos enviar sugestões, críticas e ideias que nos ajudem a aprimorar o jogo a cada dia.',
+  aboutContact: 'Para suporte ou contato, envie um e-mail para:',
+  aboutContactEmail: 'grupo5developer@gmail.com',
+  aboutSupportTitle: 'Apoie o Show da Bíblia',
+  aboutSupportDescription:
+    'Ajude-nos a manter e expandir este projeto para mais pessoas.',
+  donate: 'Fazer uma doação',
+  donationUnavailable: 'As doações não estão disponíveis no momento.',
+  donationError:
+    'Não foi possível abrir a página de doação. Tente novamente mais tarde.',
   unavailableTitle: 'Em preparação',
   unavailableDescription:
     'Esta parte do aplicativo ainda está sendo construída.',
