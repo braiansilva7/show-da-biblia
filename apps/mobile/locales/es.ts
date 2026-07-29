@@ -53,6 +53,8 @@ export const es: TranslationDictionary = {
   answeredQuestions: 'Preguntas respondidas',
   skipsUsed: 'Saltos usados',
   cardsUsed: 'Cartas usadas',
+  itemsUsed: 'Elementos utilizados',
+  noItemsUsed: 'No se utilizó ningún elemento en esta partida.',
   unlockedLevel: 'Nivel desbloqueado',
   backHome: 'Volver al inicio',
   tabHome: 'Inicio',

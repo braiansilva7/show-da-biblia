@@ -50,6 +50,8 @@ export const ptBR = {
   answeredQuestions: 'Questões respondidas',
   skipsUsed: 'Pulos usados',
   cardsUsed: 'Cartas usadas',
+  itemsUsed: 'Itens utilizados',
+  noItemsUsed: 'Nenhum item foi utilizado nesta partida.',
   unlockedLevel: 'Nível desbloqueado',
   backHome: 'Voltar ao início',
   tabHome: 'Início',

@@ -51,6 +51,8 @@ export const en: TranslationDictionary = {
   answeredQuestions: 'Questions answered',
   skipsUsed: 'Skips used',
   cardsUsed: 'Cards used',
+  itemsUsed: 'Items used',
+  noItemsUsed: 'No items were used in this game.',
   unlockedLevel: 'Unlocked level',
   backHome: 'Back to home',
   tabHome: 'Home',
