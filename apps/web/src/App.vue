@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue';
 import LoginForm from '@/components/auth/LoginForm.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import DashboardPage from '@/pages/DashboardPage.vue';
+import RankingsPage from '@/pages/RankingsPage.vue';
 import UsersPage from '@/pages/UsersPage.vue';
 import CategoriesPage from '@/pages/CategoriesPage.vue';
 import QuestionsPage from '@/pages/QuestionsPage.vue';
@@ -12,6 +13,7 @@ import type { Page } from '@/types/navigation';
 import type { ManagedUser, UserFormInput } from '@/types/user';
 import type { Category, CategoryFormInput } from '@/types/category';
 import type { EditableQuestion, QuestionFormInput } from '@/types/question';
+import type { RankingScope } from '@/types/ranking';
 
 const api = useManagerApi();
 const {
@@ -57,6 +59,15 @@ const {
   isPublishingQuestion,
   isUnpublishingQuestion,
   isRemovingQuestion,
+  rankingScope,
+  rankingItems,
+  rankingPageNumber,
+  rankingTotal,
+  myRankings,
+  rankingError,
+  myRankingError,
+  isLoadingRanking,
+  isLoadingMoreRanking,
 } = api;
 const currentPage = ref<Page>('dashboard');
 const canManageUsers = computed(
@@ -68,10 +79,24 @@ const canManageCategories = computed(
 const canViewQuestions = computed(
   () => user.value?.permissions.includes('questions.view') ?? false
 );
-const canCreateQuestions = computed(() => user.value?.permissions.includes('questions.create') ?? false);
-const canUpdateQuestions = computed(() => user.value?.permissions.includes('questions.update') ?? false);
-const canPublishQuestions = computed(() => user.value?.permissions.includes('questions.publish') ?? false);
-const canDeleteQuestions = computed(() => user.value?.permissions.includes('questions.delete') ?? false);
+const canCreateQuestions = computed(
+  () => user.value?.permissions.includes('questions.create') ?? false
+);
+const canUpdateQuestions = computed(
+  () => user.value?.permissions.includes('questions.update') ?? false
+);
+const canPublishQuestions = computed(
+  () => user.value?.permissions.includes('questions.publish') ?? false
+);
+const canDeleteQuestions = computed(
+  () => user.value?.permissions.includes('questions.delete') ?? false
+);
+const isPlayer = computed(() => user.value?.permission_role?.code === 'PLAYER');
+const canViewAdministrativeDashboard = computed(
+  () =>
+    (user.value?.permissions.includes('dashboard.view') ?? false) &&
+    !isPlayer.value
+);
 
 async function openUsers() {
   if (!canManageUsers.value) return;
@@ -88,29 +113,69 @@ async function openQuestions() {
   currentPage.value = 'questions';
   await api.loadQuestions();
 }
+async function openRankings(
+  options: {
+    scope?: RankingScope;
+    page?: number;
+    append?: boolean;
+  } = {}
+) {
+  currentPage.value = 'ranking';
+  await api.loadRankings(options);
+}
 async function openQuestionForm(id?: string) {
   if (id ? !canUpdateQuestions.value : !canCreateQuestions.value) return;
   if (!questionCategories.value.length) await api.loadQuestions();
-  if (id) { const question = await api.loadQuestion(id); if (!question) return; }
-  else editingQuestion.value = null;
+  if (id) {
+    const question = await api.loadQuestion(id);
+    if (!question) return;
+  } else editingQuestion.value = null;
   currentPage.value = 'question-form';
 }
 async function saveQuestion(input: QuestionFormInput) {
-  if (await api.saveQuestion(input, editingQuestion.value)) await openQuestions();
+  if (await api.saveQuestion(input, editingQuestion.value))
+    await openQuestions();
 }
-async function publishQuestion(id: string) { await api.publishQuestion(id); }
-async function unpublishQuestion(id: string) { await api.unpublishQuestion(id); }
-async function removeQuestion(id: string) { await api.removeQuestion(id); }
+async function publishQuestion(id: string) {
+  await api.publishQuestion(id);
+}
+async function unpublishQuestion(id: string) {
+  await api.unpublishQuestion(id);
+}
+async function removeQuestion(id: string) {
+  await api.removeQuestion(id);
+}
 
 function navigate(page: Page) {
   if (page === 'users') void openUsers();
   else if (page === 'categories') void openCategories();
   else if (page === 'questions') void openQuestions();
+  else if (page === 'ranking') void openRankings();
   else {
     currentPage.value = page;
-    if (user.value?.permissions.includes('dashboard.view'))
+    if (page === 'dashboard' && canViewAdministrativeDashboard.value)
       void api.loadDashboard();
+    else if (
+      page === 'dashboard' &&
+      !user.value?.permissions.includes('dashboard.view')
+    )
+      void openRankings();
   }
+}
+
+async function continueAfterAuthentication() {
+  if (!user.value) return;
+  if (user.value.permissions.includes('dashboard.view')) {
+    currentPage.value = 'dashboard';
+    if (canViewAdministrativeDashboard.value) await api.loadDashboard();
+    return;
+  }
+  await openRankings();
+}
+
+async function login(email: string, password: string) {
+  await api.login(email, password);
+  await continueAfterAuthentication();
 }
 
 async function saveUser(input: UserFormInput, target: ManagedUser | null) {
@@ -133,8 +198,7 @@ function logout() {
 
 onMounted(async () => {
   await api.restoreSession();
-  if (user.value?.permissions.includes('dashboard.view'))
-    await api.loadDashboard();
+  await continueAfterAuthentication();
 });
 </script>
 
@@ -144,7 +208,7 @@ onMounted(async () => {
       v-if="!user"
       :error="loginError"
       :is-submitting="isLoggingIn"
-      @submit="({ email, password }) => api.login(email, password)"
+      @submit="({ email, password }) => login(email, password)"
     />
     <AppLayout
       v-else
@@ -161,6 +225,20 @@ onMounted(async () => {
         :is-loading="isLoadingDashboard"
         :reload="api.loadDashboard"
         @open-users="openUsers"
+      />
+      <RankingsPage
+        v-else-if="currentPage === 'ranking'"
+        :user="user"
+        :scope="rankingScope"
+        :items="rankingItems"
+        :page="rankingPageNumber"
+        :total="rankingTotal"
+        :mine="myRankings"
+        :error="rankingError"
+        :my-error="myRankingError"
+        :is-loading="isLoadingRanking"
+        :is-loading-more="isLoadingMoreRanking"
+        @load="openRankings"
       />
       <UsersPage
         v-else-if="currentPage === 'users'"

@@ -91,7 +91,7 @@ function MyRankingCard({
 
 export function RankingsScreen() {
   const { t } = useLocalization();
-  const [scope, setScope] = useState<RankingScope>('international');
+  const [scope, setScope] = useState<RankingScope>('national');
   const [items, setItems] = useState<RankingEntry[]>([]);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
@@ -160,7 +160,7 @@ export function RankingsScreen() {
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.title}>{t('rankingsTitle')}</Text>
         <View style={styles.tabs}>
-          {(['international', 'national'] as const).map((item) => (
+          {(['national', 'international'] as const).map((item) => (
             <Pressable
               accessibilityRole="tab"
               accessibilityState={{ selected: scope === item }}

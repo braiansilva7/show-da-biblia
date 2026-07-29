@@ -206,6 +206,63 @@ select:focus {
   color: #6a3e1c;
   font-weight: 600;
 }
+.ranking-tabs {
+  border-bottom: 1px solid #e7e5ef;
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+.ranking-tabs .v-btn {
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  color: #5d596c;
+  margin-bottom: -1px;
+}
+.ranking-tabs .v-btn.active {
+  border-bottom-color: #7f4f24;
+  color: #7f4f24;
+  font-weight: 700;
+}
+.ranking-position {
+  color: #5d596c;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.ranking-load-more {
+  display: flex;
+  justify-content: center;
+  padding-top: 1.25rem;
+}
+.my-ranking-card {
+  background: #f7efe7;
+  border: 1px solid #e4c395;
+  border-radius: 12px;
+  margin-top: 1.5rem;
+  padding: 1.25rem;
+}
+.my-ranking-card h2 {
+  font-size: 1.05rem;
+  margin-bottom: 1rem;
+}
+.my-ranking-content {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+.my-ranking-content > span:not(.user-avatar) {
+  color: #5d596c;
+}
+.my-ranking-content .my-ranking-score {
+  color: #2f2b3d;
+  font-weight: 700;
+  margin-left: auto;
+}
+.ranking-my-error {
+  color: #b42318;
+  font-size: 0.875rem;
+  margin: 1rem 0 0;
+}
 .sidebar-footer {
   border-top: 1px solid #e7e5ef;
   display: grid;

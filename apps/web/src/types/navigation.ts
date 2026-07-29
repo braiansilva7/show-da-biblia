@@ -1,1 +1,7 @@
-export type Page = 'dashboard' | 'users' | 'categories' | 'questions' | 'question-form';
+export type Page =
+  | 'dashboard'
+  | 'users'
+  | 'categories'
+  | 'questions'
+  | 'question-form'
+  | 'ranking';

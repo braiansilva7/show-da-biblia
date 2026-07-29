@@ -24,12 +24,23 @@ import type {
   EditableQuestion,
   QuestionFormInput,
 } from '@/types/question';
+import type {
+  ApiPlayerRanking,
+  ApiRankingEntry,
+  ApiRankingPage,
+  MyRankings,
+  PlayerRanking,
+  RankingEntry,
+  RankingPage,
+  RankingScope,
+} from '@/types/ranking';
 
 const apiUrl = (
   import.meta.env.VITE_API_URL ?? 'http://localhost:3010'
 ).replace(/\/$/, '');
 const tokenStorageKey = 'show-da-biblia.access-token';
 const questionsStorageKey = 'show-da-biblia.questions-list';
+const rankingPageSize = 20;
 
 const emptyQuestionFilters = (): QuestionFilters => ({
   search: '',
@@ -71,15 +82,59 @@ function getMessage(data: unknown, fallback: string): string {
     : fallback;
 }
 
-function normalizeEditableQuestion(question: EditableQuestion): EditableQuestion {
+function normalizeEditableQuestion(
+  question: EditableQuestion
+): EditableQuestion {
   const languages = ['pt-BR', 'en', 'es'] as const;
   return {
     ...question,
-    translations: Object.fromEntries(languages.map((language) => [language, question.translations?.[language] ?? { statement: '', explanation: '' }])) as EditableQuestion['translations'],
+    translations: Object.fromEntries(
+      languages.map((language) => [
+        language,
+        question.translations?.[language] ?? { statement: '', explanation: '' },
+      ])
+    ) as EditableQuestion['translations'],
     options: question.options.map((option) => ({
       ...option,
-      translations: Object.fromEntries(languages.map((language) => [language, option.translations?.[language] ?? { content: '' }])) as typeof option.translations,
+      translations: Object.fromEntries(
+        languages.map((language) => [
+          language,
+          option.translations?.[language] ?? { content: '' },
+        ])
+      ) as typeof option.translations,
     })),
+  };
+}
+
+function rankingEntry(value: ApiRankingEntry): RankingEntry {
+  return {
+    position: value.position,
+    userId: value.user_id,
+    username: value.username,
+    countryId: value.country_id,
+    countryName: value.country_name,
+    profilePictureUrl: value.profile_picture_url,
+    score: value.score,
+    correctAnswers: value.correct_answers,
+    durationSeconds: value.duration_seconds,
+  };
+}
+
+function rankingPage(value: ApiRankingPage): RankingPage {
+  return {
+    page: value.page,
+    pageSize: value.page_size,
+    total: value.total,
+    items: value.items.map(rankingEntry),
+  };
+}
+
+function playerRanking(value: ApiPlayerRanking): PlayerRanking {
+  return {
+    position: value.position,
+    score: value.score,
+    correctAnswers: value.correct_answers,
+    durationSeconds: value.duration_seconds,
   };
 }
 
@@ -128,9 +183,19 @@ export function useManagerApi() {
   const isPublishingQuestion = ref(false);
   const isUnpublishingQuestion = ref(false);
   const isRemovingQuestion = ref(false);
+  const rankingScope = ref<RankingScope>('national');
+  const rankingItems = ref<RankingEntry[]>([]);
+  const rankingPageNumber = ref(1);
+  const rankingTotal = ref(0);
+  const myRankings = ref<MyRankings | null>(null);
+  const rankingError = ref('');
+  const myRankingError = ref('');
+  const isLoadingRanking = ref(false);
+  const isLoadingMoreRanking = ref(false);
   let usersRequestId = 0;
   let categoriesRequestId = 0;
   let questionsRequestId = 0;
+  let rankingRequestId = 0;
 
   function persistQuestionState() {
     sessionStorage.setItem(
@@ -281,6 +346,100 @@ export function useManagerApi() {
       isLoadingDashboard.value = false;
     }
   }
+
+  async function loadRankings(
+    options: {
+      scope?: RankingScope;
+      page?: number;
+      append?: boolean;
+    } = {}
+  ) {
+    const scope = options.scope ?? rankingScope.value;
+    const page = options.page ?? 1;
+    const append = options.append ?? false;
+    const requestId = ++rankingRequestId;
+    rankingScope.value = scope;
+    if (append) isLoadingMoreRanking.value = true;
+    else {
+      isLoadingRanking.value = true;
+      rankingItems.value = [];
+      rankingTotal.value = 0;
+      rankingPageNumber.value = 1;
+      myRankings.value = null;
+      myRankingError.value = '';
+    }
+    rankingError.value = '';
+    try {
+      const response = await fetch(
+        `${apiUrl}/api/v1/rankings/${scope}?page=${page}&page_size=${rankingPageSize}`,
+        { headers: authorizationHeaders() }
+      );
+      const data = (await response.json().catch(() => null)) as
+        (Partial<ApiRankingPage> & ApiMessage) | null;
+      if (
+        !response.ok ||
+        !Array.isArray(data?.items) ||
+        typeof data.page !== 'number' ||
+        typeof data.page_size !== 'number' ||
+        typeof data.total !== 'number'
+      ) {
+        if (requestId === rankingRequestId)
+          rankingError.value = getMessage(data, t('load_ranking_failed'));
+        return;
+      }
+      if (requestId !== rankingRequestId) return;
+      const result = rankingPage(data as ApiRankingPage);
+      rankingItems.value = append
+        ? [...rankingItems.value, ...result.items]
+        : result.items;
+      rankingPageNumber.value = result.page;
+      rankingTotal.value = result.total;
+      if (!append) {
+        try {
+          const myResponse = await fetch(`${apiUrl}/api/v1/rankings/me`, {
+            headers: authorizationHeaders(),
+          });
+          const mine = (await myResponse.json().catch(() => null)) as
+            | ({
+                international?: ApiPlayerRanking | null;
+                national?: ApiPlayerRanking | null;
+              } & ApiMessage)
+            | null;
+          if (
+            !myResponse.ok ||
+            !mine ||
+            !('international' in mine) ||
+            !('national' in mine)
+          ) {
+            if (requestId === rankingRequestId)
+              myRankingError.value = getMessage(
+                mine,
+                t('load_my_ranking_failed')
+              );
+            return;
+          }
+          if (requestId !== rankingRequestId) return;
+          myRankings.value = {
+            international: mine.international
+              ? playerRanking(mine.international)
+              : null,
+            national: mine.national ? playerRanking(mine.national) : null,
+          };
+        } catch {
+          if (requestId === rankingRequestId)
+            myRankingError.value = t('load_my_ranking_connection_failed');
+        }
+      }
+    } catch {
+      if (requestId === rankingRequestId)
+        rankingError.value = t('load_ranking_connection_failed');
+    } finally {
+      if (requestId === rankingRequestId) {
+        isLoadingRanking.value = false;
+        isLoadingMoreRanking.value = false;
+      }
+    }
+  }
   async function loadCategories(
     options: { page?: number; search?: string; limit?: number } = {}
   ) {
@@ -400,58 +559,133 @@ export function useManagerApi() {
   async function loadQuestion(id: string): Promise<EditableQuestion | null> {
     questionFormError.value = '';
     try {
-      const response = await fetch(`${apiUrl}/api/v1/questions/${id}`, { headers: authorizationHeaders() });
-      const data = (await response.json().catch(() => null)) as ({ question?: EditableQuestion } & ApiMessage) | null;
-      if (!response.ok || !data?.question) { questionFormError.value = getMessage(data, t('load_questions_failed')); return null; }
+      const response = await fetch(`${apiUrl}/api/v1/questions/${id}`, {
+        headers: authorizationHeaders(),
+      });
+      const data = (await response.json().catch(() => null)) as
+        ({ question?: EditableQuestion } & ApiMessage) | null;
+      if (!response.ok || !data?.question) {
+        questionFormError.value = getMessage(data, t('load_questions_failed'));
+        return null;
+      }
       editingQuestion.value = normalizeEditableQuestion(data.question);
       return editingQuestion.value;
-    } catch { questionFormError.value = t('load_questions_connection_failed'); return null; }
+    } catch {
+      questionFormError.value = t('load_questions_connection_failed');
+      return null;
+    }
   }
 
-  async function saveQuestion(input: QuestionFormInput, target: EditableQuestion | null): Promise<boolean> {
-    questionFormError.value = ''; isSavingQuestion.value = true;
+  async function saveQuestion(
+    input: QuestionFormInput,
+    target: EditableQuestion | null
+  ): Promise<boolean> {
+    questionFormError.value = '';
+    isSavingQuestion.value = true;
     try {
-      const response = await fetch(target ? `${apiUrl}/api/v1/questions/${target.id}` : `${apiUrl}/api/v1/questions`, {
-        method: target ? 'PATCH' : 'POST', headers: { ...authorizationHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify(input),
-      });
-      const data = (await response.json().catch(() => null)) as ({ question?: EditableQuestion } & ApiMessage) | null;
-      if (!response.ok || !data?.question) { questionFormError.value = getMessage(data, t('save_question_failed')); return false; }
-      editingQuestion.value = normalizeEditableQuestion(data.question); return true;
-    } catch { questionFormError.value = t('save_question_connection_failed'); return false; }
-    finally { isSavingQuestion.value = false; }
+      const response = await fetch(
+        target
+          ? `${apiUrl}/api/v1/questions/${target.id}`
+          : `${apiUrl}/api/v1/questions`,
+        {
+          method: target ? 'PATCH' : 'POST',
+          headers: {
+            ...authorizationHeaders(),
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(input),
+        }
+      );
+      const data = (await response.json().catch(() => null)) as
+        ({ question?: EditableQuestion } & ApiMessage) | null;
+      if (!response.ok || !data?.question) {
+        questionFormError.value = getMessage(data, t('save_question_failed'));
+        return false;
+      }
+      editingQuestion.value = normalizeEditableQuestion(data.question);
+      return true;
+    } catch {
+      questionFormError.value = t('save_question_connection_failed');
+      return false;
+    } finally {
+      isSavingQuestion.value = false;
+    }
   }
 
   async function publishQuestion(id: string): Promise<boolean> {
-    questionsError.value = ''; isPublishingQuestion.value = true;
+    questionsError.value = '';
+    isPublishingQuestion.value = true;
     try {
-      const response = await fetch(`${apiUrl}/api/v1/questions/${id}/publish`, { method: 'POST', headers: authorizationHeaders() });
-      const data = (await response.json().catch(() => null)) as (ApiMessage & { pending?: string[] }) | null;
-      if (!response.ok) { questionsError.value = data?.pending?.join(' ') || getMessage(data, t('publish_question_failed')); return false; }
-      await loadQuestions(); return true;
-    } catch { questionsError.value = t('publish_question_connection_failed'); return false; }
-    finally { isPublishingQuestion.value = false; }
+      const response = await fetch(`${apiUrl}/api/v1/questions/${id}/publish`, {
+        method: 'POST',
+        headers: authorizationHeaders(),
+      });
+      const data = (await response.json().catch(() => null)) as
+        (ApiMessage & { pending?: string[] }) | null;
+      if (!response.ok) {
+        questionsError.value =
+          data?.pending?.join(' ') ||
+          getMessage(data, t('publish_question_failed'));
+        return false;
+      }
+      await loadQuestions();
+      return true;
+    } catch {
+      questionsError.value = t('publish_question_connection_failed');
+      return false;
+    } finally {
+      isPublishingQuestion.value = false;
+    }
   }
 
   async function unpublishQuestion(id: string): Promise<boolean> {
-    questionsError.value = ''; isUnpublishingQuestion.value = true;
+    questionsError.value = '';
+    isUnpublishingQuestion.value = true;
     try {
-      const response = await fetch(`${apiUrl}/api/v1/questions/${id}/unpublish`, { method: 'POST', headers: authorizationHeaders() });
-      const data = (await response.json().catch(() => null)) as ApiMessage | null;
-      if (!response.ok) { questionsError.value = getMessage(data, t('unpublish_question_failed')); return false; }
-      await loadQuestions(); return true;
-    } catch { questionsError.value = t('unpublish_question_connection_failed'); return false; }
-    finally { isUnpublishingQuestion.value = false; }
+      const response = await fetch(
+        `${apiUrl}/api/v1/questions/${id}/unpublish`,
+        { method: 'POST', headers: authorizationHeaders() }
+      );
+      const data = (await response
+        .json()
+        .catch(() => null)) as ApiMessage | null;
+      if (!response.ok) {
+        questionsError.value = getMessage(data, t('unpublish_question_failed'));
+        return false;
+      }
+      await loadQuestions();
+      return true;
+    } catch {
+      questionsError.value = t('unpublish_question_connection_failed');
+      return false;
+    } finally {
+      isUnpublishingQuestion.value = false;
+    }
   }
 
   async function removeQuestion(id: string): Promise<boolean> {
-    questionsError.value = ''; isRemovingQuestion.value = true;
+    questionsError.value = '';
+    isRemovingQuestion.value = true;
     try {
-      const response = await fetch(`${apiUrl}/api/v1/questions/${id}`, { method: 'DELETE', headers: authorizationHeaders() });
-      const data = (await response.json().catch(() => null)) as ApiMessage | null;
-      if (!response.ok) { questionsError.value = getMessage(data, t('remove_question_failed')); return false; }
-      await loadQuestions(); return true;
-    } catch { questionsError.value = t('remove_question_connection_failed'); return false; }
-    finally { isRemovingQuestion.value = false; }
+      const response = await fetch(`${apiUrl}/api/v1/questions/${id}`, {
+        method: 'DELETE',
+        headers: authorizationHeaders(),
+      });
+      const data = (await response
+        .json()
+        .catch(() => null)) as ApiMessage | null;
+      if (!response.ok) {
+        questionsError.value = getMessage(data, t('remove_question_failed'));
+        return false;
+      }
+      await loadQuestions();
+      return true;
+    } catch {
+      questionsError.value = t('remove_question_connection_failed');
+      return false;
+    } finally {
+      isRemovingQuestion.value = false;
+    }
   }
 
   async function saveCategory(
@@ -627,6 +861,12 @@ export function useManagerApi() {
     questionFilters.value = emptyQuestionFilters();
     questionCategories.value = [];
     sessionStorage.removeItem(questionsStorageKey);
+    rankingItems.value = [];
+    rankingPageNumber.value = 1;
+    rankingTotal.value = 0;
+    myRankings.value = null;
+    rankingError.value = '';
+    myRankingError.value = '';
   }
   return {
     user,
@@ -671,10 +911,20 @@ export function useManagerApi() {
     isPublishingQuestion,
     isUnpublishingQuestion,
     isRemovingQuestion,
+    rankingScope,
+    rankingItems,
+    rankingPageNumber,
+    rankingTotal,
+    myRankings,
+    rankingError,
+    myRankingError,
+    isLoadingRanking,
+    isLoadingMoreRanking,
     login,
     restoreSession,
     loadUsers,
     loadDashboard,
+    loadRankings,
     loadRoles,
     loadCountries,
     loadCategories,

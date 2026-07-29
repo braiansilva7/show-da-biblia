@@ -2,6 +2,7 @@ import { inject, injectable } from 'tsyringe';
 import { sql } from 'drizzle-orm';
 import type { AppDatabase } from '@core/plugins/database/index.js';
 import { createUuidV7 } from '@core/common/functions/uuid.js';
+import { toPublicProfilePictureUrl } from '@core/common/functions/to-public-profile-picture-url.js';
 import type {
   IAnswerQuestionInput,
   IFinishGameInput,
@@ -374,7 +375,7 @@ export class GameplayRepository {
         username: x.username,
         country_id: x.country_id,
         country_name: x.country_name,
-        profile_picture_url: x.profile_picture_url,
+        profile_picture_url: toPublicProfilePictureUrl(x.profile_picture_url),
         score: x.score,
         correct_answers: x.correct_answers,
         duration_seconds: Math.floor(

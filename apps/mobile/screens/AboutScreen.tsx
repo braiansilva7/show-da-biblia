@@ -57,7 +57,12 @@ export function AboutScreen() {
 const styles = StyleSheet.create({
   content: { gap: theme.spacing.lg, paddingBottom: theme.spacing.xl },
   title: { color: theme.colors.text, fontSize: 28, fontWeight: '800' },
-  description: { color: theme.colors.mutedText, fontSize: 16, lineHeight: 24 },
+  description: {
+    color: theme.colors.mutedText,
+    fontSize: 16,
+    lineHeight: 24,
+    textAlign: 'justify',
+  },
   contact: {
     backgroundColor: theme.colors.surface,
     borderColor: theme.colors.border,
@@ -82,6 +87,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontStyle: 'italic',
     lineHeight: 24,
+    textAlign: 'justify',
   },
   unavailable: { color: theme.colors.mutedText, fontSize: 13, lineHeight: 19 },
   error: { color: theme.colors.error, fontSize: 13, lineHeight: 19 },

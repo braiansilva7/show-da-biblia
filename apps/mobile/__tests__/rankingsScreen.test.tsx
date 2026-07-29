@@ -26,7 +26,7 @@ jest.mock('../services/rankingService', () => ({
 const mockedRankingService = rankingService as jest.Mocked<
   typeof rankingService
 >;
-const internationalItem = {
+const nationalItem = {
   position: 1,
   userId: 'other',
   username: 'Maria',
@@ -42,19 +42,19 @@ describe('RankingsScreen', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockedRankingService.mine.mockResolvedValue({
-      international: {
+      international: null,
+      national: {
         position: 42,
         score: 12,
         correctAnswers: 12,
         durationSeconds: 80,
       },
-      national: null,
     });
     mockedRankingService.list.mockImplementation(async (scope, page) => ({
       page: page ?? 1,
       pageSize: 20,
-      total: scope === 'international' ? 21 : 0,
-      items: scope === 'international' && page === 1 ? [internationalItem] : [],
+      total: scope === 'national' ? 21 : 0,
+      items: scope === 'national' && page === 1 ? [nationalItem] : [],
     }));
   });
 
@@ -64,16 +64,16 @@ describe('RankingsScreen', () => {
     await waitFor(() => expect(screen.getByText('Maria')).toBeTruthy());
     expect(screen.getByText('#42 · 01:20')).toBeTruthy();
     expect(screen.getByText('#1 · 00:50')).toBeTruthy();
-    expect(mockedRankingService.list).toHaveBeenCalledWith(
-      'international',
-      1,
-      20
-    );
+    expect(mockedRankingService.list).toHaveBeenCalledWith('national', 1, 20);
 
-    fireEvent.press(screen.getByRole('tab', { name: 'nationalRanking' }));
+    fireEvent.press(screen.getByRole('tab', { name: 'internationalRanking' }));
 
     await waitFor(() =>
-      expect(mockedRankingService.list).toHaveBeenCalledWith('national', 1, 20)
+      expect(mockedRankingService.list).toHaveBeenCalledWith(
+        'international',
+        1,
+        20
+      )
     );
     expect(screen.getByText('rankingEmptyTitle')).toBeTruthy();
     expect(screen.getByText('rankingUnranked')).toBeTruthy();
@@ -86,11 +86,7 @@ describe('RankingsScreen', () => {
     fireEvent.press(screen.getByText('loadMore'));
 
     await waitFor(() =>
-      expect(mockedRankingService.list).toHaveBeenCalledWith(
-        'international',
-        2,
-        20
-      )
+      expect(mockedRankingService.list).toHaveBeenCalledWith('national', 2, 20)
     );
   });
 

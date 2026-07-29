@@ -15,6 +15,11 @@ const verticalNavigation: NavigationItem[] = [
     icon: 'mdi-home-variant-outline',
   },
   {
+    page: 'ranking',
+    title: 'ranking',
+    icon: 'mdi-trophy-outline',
+  },
+  {
     page: 'users',
     title: 'users',
     icon: 'mdi-account-group-outline',

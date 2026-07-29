@@ -1,4 +1,5 @@
 import type { User, PublicUser } from '@core/common/types/user.js';
+import { toPublicProfilePictureUrl } from '@core/common/functions/to-public-profile-picture-url.js';
 
 export function toPublicUser(user: User): PublicUser {
   return {
@@ -18,7 +19,7 @@ export function toPublicUser(user: User): PublicUser {
     permissions: user.permissions,
     country_id: user.countryId,
     language_code: user.languageCode,
-    profile_picture_url: user.profilePictureUrl,
+    profile_picture_url: toPublicProfilePictureUrl(user.profilePictureUrl),
     total_score: user.totalScore,
     best_time_seconds: user.bestTimeSeconds,
     highest_unlocked_level: user.highestUnlockedLevel,
