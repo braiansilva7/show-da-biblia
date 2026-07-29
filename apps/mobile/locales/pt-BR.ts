@@ -70,6 +70,7 @@ export const ptBR = {
   createAccount: 'Ainda não tem conta? Cadastre-se',
   alreadyHaveAccount: 'Já possui uma conta? Entre',
   logout: 'Sair',
+  editProfile: 'Editar perfil',
   saveProfile: 'Salvar perfil',
   choosePhoto: 'Escolher foto',
   cropPhoto: 'Recortar foto',

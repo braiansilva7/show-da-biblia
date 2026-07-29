@@ -73,6 +73,7 @@ export const es: TranslationDictionary = {
   createAccount: '¿Aún no tienes cuenta? Regístrate',
   alreadyHaveAccount: '¿Ya tienes una cuenta? Inicia sesión',
   logout: 'Cerrar sesión',
+  editProfile: 'Editar perfil',
   saveProfile: 'Guardar perfil',
   choosePhoto: 'Elegir foto',
   cropPhoto: 'Recortar foto',

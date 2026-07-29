@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
 import { Picker } from '@react-native-picker/picker';
 import {
@@ -49,6 +50,19 @@ export function ProfileScreen() {
   const [rankingsError, setRankingsError] = useState(false);
   const [rankingsLoading, setRankingsLoading] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const resetProfileForm = useCallback(() => {
+    if (!user) return;
+    setIsEditing(false);
+    setUsername(user.username);
+    setEmail(user.email);
+    setCountryId(user.countryId);
+    setLanguageCode(user.languageCode);
+    setPicture(null);
+    setPictureToCrop(null);
+    setRemovePicture(false);
+    setMessage(null);
+  }, [user]);
   const loadCountries = useCallback(async () => {
     setCountriesLoading(true);
     setCountriesError(null);
@@ -84,8 +98,12 @@ export function ProfileScreen() {
     );
     return () => clearTimeout(timeout);
   }, [successMessage]);
+  useFocusEffect(
+    useCallback(() => () => resetProfileForm(), [resetProfileForm])
+  );
   if (!user) return null;
   const choosePicture = async () => {
+    if (!isEditing) return;
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) return setMessage(t('permissionDenied'));
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -102,6 +120,7 @@ export function ProfileScreen() {
     }
   };
   const save = async () => {
+    if (!isEditing || loading) return;
     setLoading(true);
     setMessage(null);
     setSuccessMessage(null);
@@ -117,6 +136,7 @@ export function ProfileScreen() {
       setPicture(null);
       setRemovePicture(false);
       setSuccessMessage(t('profileSaved'));
+      setIsEditing(false);
       void loadRankings();
     } catch (reason) {
       setMessage(reason instanceof Error ? reason.message : t('profileError'));
@@ -136,13 +156,18 @@ export function ProfileScreen() {
             />
             <Pressable
               accessibilityRole="checkbox"
-              accessibilityState={{ checked: removePicture }}
+              accessibilityState={{
+                checked: removePicture,
+                disabled: !isEditing,
+              }}
+              disabled={!isEditing}
               onPress={() => {
+                if (!isEditing) return;
                 const nextRemovePicture = !removePicture;
                 setRemovePicture(nextRemovePicture);
                 if (nextRemovePicture) setPicture(null);
               }}
-              style={styles.removeOption}
+              style={[styles.removeOption, !isEditing && styles.optionDisabled]}
             >
               <View
                 style={[
@@ -215,12 +240,14 @@ export function ProfileScreen() {
           value={username}
           onChangeText={setUsername}
           autoCapitalize="none"
+          editable={isEditing}
         />
         <FormField
           label={t('email')}
           value={email}
           onChangeText={setEmail}
           autoCapitalize="none"
+          editable={isEditing}
           keyboardType="email-address"
         />
         <Text style={styles.label}>{t('language')}</Text>
@@ -229,6 +256,7 @@ export function ProfileScreen() {
             selectedValue={languageCode}
             onValueChange={(value) => setLanguageCode(value as Locale)}
             style={styles.picker}
+            enabled={isEditing}
           >
             {gameLanguages.map(({ code, labelKey }) => (
               <Picker.Item key={code} label={t(labelKey)} value={code} />
@@ -243,6 +271,7 @@ export function ProfileScreen() {
               selectedValue={countryId}
               onValueChange={setCountryId}
               style={styles.picker}
+              enabled={isEditing}
             >
               <Picker.Item label={t('selectCountry')} value="" />
               {countries.map((country) => (
@@ -267,18 +296,29 @@ export function ProfileScreen() {
             </Text>
           </View>
         ) : null}
-        <PrimaryButton
-          label={t('choosePhoto')}
-          onPress={() => void choosePicture()}
-        />
+        {!isEditing ? (
+          <PrimaryButton
+            label={t('editProfile')}
+            onPress={() => setIsEditing(true)}
+          />
+        ) : null}
         {successMessage ? (
           <Text style={styles.message}>{successMessage}</Text>
         ) : null}
         {message ? <Text style={styles.error}>{message}</Text> : null}
-        <PrimaryButton
-          label={loading ? t('loading') : t('saveProfile')}
-          onPress={() => void save()}
-        />
+        {isEditing ? (
+          <>
+            <PrimaryButton
+              label={t('choosePhoto')}
+              onPress={() => void choosePicture()}
+            />
+            <PrimaryButton
+              disabled={loading}
+              label={loading ? t('loading') : t('saveProfile')}
+              onPress={() => void save()}
+            />
+          </>
+        ) : null}
         <Text
           accessibilityRole="button"
           style={styles.logout}
@@ -307,6 +347,7 @@ const styles = StyleSheet.create({
   avatar: { alignSelf: 'center', borderRadius: 48, height: 96, width: 96 },
   avatarMarked: { opacity: 0.45 },
   removeOption: { alignItems: 'center', flexDirection: 'row', gap: 8 },
+  optionDisabled: { opacity: 0.5 },
   checkbox: {
     alignItems: 'center',
     borderColor: theme.colors.border,

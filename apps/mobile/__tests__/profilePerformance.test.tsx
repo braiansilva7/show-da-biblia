@@ -4,6 +4,10 @@ import { ProfileScreen } from '../screens/ProfileScreen';
 import { countryApi } from '../api/countryApi';
 import { rankingService } from '../services/rankingService';
 
+jest.mock('@react-navigation/native', () => ({
+  useFocusEffect: () => undefined,
+}));
+
 jest.mock('@expo/vector-icons', () => ({ Ionicons: () => null }));
 jest.mock('../components/AvatarCropper', () => ({ AvatarCropper: () => null }));
 jest.mock('../components/FormField', () => ({ FormField: () => null }));

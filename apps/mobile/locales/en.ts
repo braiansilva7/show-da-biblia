@@ -70,6 +70,7 @@ export const en: TranslationDictionary = {
   createAccount: 'Do not have an account? Sign up',
   alreadyHaveAccount: 'Already have an account? Sign in',
   logout: 'Sign out',
+  editProfile: 'Edit profile',
   saveProfile: 'Save profile',
   choosePhoto: 'Choose photo',
   cropPhoto: 'Crop photo',
