@@ -29,6 +29,16 @@ async function mapUser(
     .from(playerProgress)
     .where(eq(playerProgress.user_id, row.id))
     .limit(1);
+  const bestTime = await db.execute<{ best_time_seconds: number | string }>(sql`
+    SELECT EXTRACT(EPOCH FROM finished_at - started_at)::int AS best_time_seconds
+    FROM game_sessions
+    WHERE user_id=${row.id} AND status='FINISHED' AND finished_at IS NOT NULL
+    ORDER BY score DESC,
+      (SELECT count(*) FROM session_questions WHERE game_session_id=game_sessions.id AND is_correct=TRUE) DESC,
+      finished_at - started_at ASC,
+      finished_at ASC
+    LIMIT 1
+  `);
   return {
     id: row.id,
     username: row.username,
@@ -43,9 +53,13 @@ async function mapUser(
     profilePictureUrl: row.profile_picture_url,
     totalScore: row.total_score,
     highestUnlockedLevel:
-      progress?.highestUnlockedLevel === 2 || progress?.highestUnlockedLevel === 3
+      progress?.highestUnlockedLevel === 2 ||
+      progress?.highestUnlockedLevel === 3
         ? progress.highestUnlockedLevel
         : 1,
+    bestTimeSeconds: bestTime.rows[0]
+      ? Number(bestTime.rows[0].best_time_seconds)
+      : null,
     active: row.active,
     createdAt: row.created_at,
     updatedAt: row.updated_at,

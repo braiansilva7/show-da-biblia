@@ -211,7 +211,11 @@ export class GameplayRepository {
         return {
           finished: true,
           summary: await this.close(tx, s, 'TIMEOUT'),
-          feedback: await this.answerFeedback(tx, q.question_id, s.language_code),
+          feedback: await this.answerFeedback(
+            tx,
+            q.question_id,
+            s.language_code
+          ),
         };
       }
       const a = await tx.execute<any>(
@@ -223,7 +227,11 @@ export class GameplayRepository {
       );
       if (!a.rows[0]) throw new Error('GAME_ANSWER_INVALID');
       const correct = !!a.rows[0].is_correct;
-      const feedback = await this.answerFeedback(tx, q.question_id, s.language_code);
+      const feedback = await this.answerFeedback(
+        tx,
+        q.question_id,
+        s.language_code
+      );
       await tx.execute(
         sql`UPDATE session_questions SET status='ANSWERED',selected_answer_option_id=${input.answerOptionId},is_correct=${correct},earned_points=${correct ? 1 : 0},answered_at=NOW() WHERE id=${q.id}`
       );
@@ -293,7 +301,8 @@ export class GameplayRepository {
           WHERE game_session_id=${s.id} AND status='TIMED_OUT'
           ORDER BY answered_at DESC NULLS LAST LIMIT 1
         `);
-        if (!timedOutQuestion.rows[0]) throw new Error('GAME_SESSION_NOT_FINISHABLE');
+        if (!timedOutQuestion.rows[0])
+          throw new Error('GAME_SESSION_NOT_FINISHABLE');
         return {
           summary: summary(
             s,
@@ -322,7 +331,11 @@ export class GameplayRepository {
       );
       return {
         summary: await this.close(tx, s, 'TIMEOUT'),
-        feedback: await this.answerFeedback(tx, p.rows[0].question_id, s.language_code),
+        feedback: await this.answerFeedback(
+          tx,
+          p.rows[0].question_id,
+          s.language_code
+        ),
       };
     });
   }
@@ -349,7 +362,7 @@ export class GameplayRepository {
       ? sql`AND u.country_id=(SELECT country_id FROM users WHERE id=${input.userId})`
       : sql``;
     const rows = await this.db.execute<any>(
-      sql`WITH best AS (SELECT DISTINCT ON (gs.user_id) gs.user_id,gs.score,gs.started_at,gs.finished_at, (SELECT count(*) FROM session_questions sq WHERE sq.game_session_id=gs.id AND sq.is_correct=TRUE)::int correct_answers FROM game_sessions gs WHERE gs.status='FINISHED' ORDER BY gs.user_id,gs.score DESC,gs.finished_at-gs.started_at ASC,gs.finished_at ASC), ranked AS (SELECT b.*,u.username,u.country_id,c.name country_name,row_number() OVER (ORDER BY b.score DESC,b.correct_answers DESC,b.finished_at-b.started_at ASC,b.finished_at ASC) position FROM best b JOIN users u ON u.id=b.user_id JOIN countries c ON c.id=u.country_id WHERE u.active=TRUE ${country}) SELECT *,count(*) OVER() total FROM ranked ORDER BY position LIMIT ${input.pageSize} OFFSET ${off}`
+      sql`WITH best AS (SELECT DISTINCT ON (gs.user_id) gs.user_id,gs.score,gs.started_at,gs.finished_at, (SELECT count(*) FROM session_questions sq WHERE sq.game_session_id=gs.id AND sq.is_correct=TRUE)::int correct_answers FROM game_sessions gs WHERE gs.status='FINISHED' ORDER BY gs.user_id,gs.score DESC,gs.finished_at-gs.started_at ASC,gs.finished_at ASC), ranked AS (SELECT b.*,u.username,u.country_id,u.profile_picture_url,c.name country_name,row_number() OVER (ORDER BY b.score DESC,b.correct_answers DESC,b.finished_at-b.started_at ASC,b.finished_at ASC) position FROM best b JOIN users u ON u.id=b.user_id JOIN countries c ON c.id=u.country_id WHERE u.active=TRUE ${country}) SELECT *,count(*) OVER() total FROM ranked ORDER BY position LIMIT ${input.pageSize} OFFSET ${off}`
     );
     return {
       page: input.page,
@@ -361,6 +374,7 @@ export class GameplayRepository {
         username: x.username,
         country_id: x.country_id,
         country_name: x.country_name,
+        profile_picture_url: x.profile_picture_url,
         score: x.score,
         correct_answers: x.correct_answers,
         duration_seconds: Math.floor(
@@ -379,7 +393,15 @@ export class GameplayRepository {
       const r = await this.db.execute<any>(
         sql`WITH best AS (SELECT DISTINCT ON (gs.user_id) gs.user_id,gs.score,gs.started_at,gs.finished_at,(SELECT count(*) FROM session_questions sq WHERE sq.game_session_id=gs.id AND sq.is_correct=TRUE)::int correct_answers FROM game_sessions gs WHERE gs.status='FINISHED' ORDER BY gs.user_id,gs.score DESC,gs.finished_at-gs.started_at ASC,gs.finished_at ASC), ranked AS (SELECT b.*,row_number() OVER (ORDER BY b.score DESC,b.correct_answers DESC,b.finished_at-b.started_at ASC,b.finished_at ASC) position FROM best b JOIN users u ON u.id=b.user_id WHERE u.active=TRUE ${country}) SELECT position,score,correct_answers,EXTRACT(EPOCH FROM finished_at-started_at)::int duration_seconds FROM ranked WHERE user_id=${userId}`
       );
-      return r.rows[0] ?? null;
+      const ranking = r.rows[0];
+      return ranking
+        ? {
+            position: Number(ranking.position),
+            score: Number(ranking.score),
+            correct_answers: Number(ranking.correct_answers),
+            duration_seconds: Number(ranking.duration_seconds),
+          }
+        : null;
     };
     return {
       international: await position(false),

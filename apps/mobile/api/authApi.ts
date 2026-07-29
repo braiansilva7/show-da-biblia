@@ -18,7 +18,7 @@ type ApiUser = {
   language_code: MobileUser['languageCode'];
   profile_picture_url: string | null;
   total_score: number;
-  highest_unlocked_level: 1 | 2 | 3;
+  best_time_seconds: number | null;
 };
 type ApiSession = { access_token: string; user: ApiUser };
 const user = (value: ApiUser): MobileUser => ({
@@ -29,7 +29,7 @@ const user = (value: ApiUser): MobileUser => ({
   languageCode: value.language_code,
   profilePictureUrl: value.profile_picture_url,
   totalScore: value.total_score,
-  highestUnlockedLevel: value.highest_unlocked_level,
+  bestTimeSeconds: value.best_time_seconds,
 });
 const session = (value: ApiSession): AuthSession => ({
   accessToken: value.access_token,
@@ -94,26 +94,45 @@ export const authApi = {
     );
   },
   async checkUsernameAvailability(username: string): Promise<boolean> {
-    const response = await request<{ available: boolean }>('/auth/register/check-username', {
-      method: 'POST', authenticated: false,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username }),
-    });
+    const response = await request<{ available: boolean }>(
+      '/auth/register/check-username',
+      {
+        method: 'POST',
+        authenticated: false,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username }),
+      }
+    );
     return response.available;
   },
-  async requestRegistrationEmailCode(email: string, languageCode: RegisterInput['languageCode']) {
+  async requestRegistrationEmailCode(
+    email: string,
+    languageCode: RegisterInput['languageCode']
+  ) {
     await request<{ message: string }>('/auth/register/request-email-code', {
-      method: 'POST', authenticated: false,
+      method: 'POST',
+      authenticated: false,
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, language_code: languageCode }),
     });
   },
-  async verifyRegistrationEmailCode(email: string, code: string): Promise<RegistrationEmailVerification> {
-    const response = await request<{ registration_token: string; expires_in: string }>('/auth/register/verify-email-code', {
-      method: 'POST', authenticated: false,
-      headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, code }),
+  async verifyRegistrationEmailCode(
+    email: string,
+    code: string
+  ): Promise<RegistrationEmailVerification> {
+    const response = await request<{
+      registration_token: string;
+      expires_in: string;
+    }>('/auth/register/verify-email-code', {
+      method: 'POST',
+      authenticated: false,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, code }),
     });
-    return { registrationToken: response.registration_token, expiresIn: response.expires_in };
+    return {
+      registrationToken: response.registration_token,
+      expiresIn: response.expires_in,
+    };
   },
   async me() {
     const response = await request<{ user: ApiUser }>('/auth/me');
@@ -128,22 +147,43 @@ export const authApi = {
   },
   async sendPasswordResetCode(email: string) {
     await request<{ message: string }>('/auth/forgot-password/send-code', {
-      method: 'POST', authenticated: false,
-      headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }),
+      method: 'POST',
+      authenticated: false,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
     });
   },
-  async verifyPasswordResetCode(email: string, code: string): Promise<PasswordResetVerification> {
-    const response = await request<{ reset_token: string; expires_in: string }>('/auth/forgot-password/verify-code', {
-      method: 'POST', authenticated: false,
-      headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, code }),
-    });
+  async verifyPasswordResetCode(
+    email: string,
+    code: string
+  ): Promise<PasswordResetVerification> {
+    const response = await request<{ reset_token: string; expires_in: string }>(
+      '/auth/forgot-password/verify-code',
+      {
+        method: 'POST',
+        authenticated: false,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, code }),
+      }
+    );
     return { resetToken: response.reset_token, expiresIn: response.expires_in };
   },
-  async resetPassword(resetToken: string, password: string, confirmation: string) {
+  async resetPassword(
+    resetToken: string,
+    password: string,
+    confirmation: string
+  ) {
     await request<void>('/auth/forgot-password/reset-password', {
-      method: 'POST', authenticated: false,
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${resetToken}` },
-      body: JSON.stringify({ new_password: password, confirm_password: confirmation }),
+      method: 'POST',
+      authenticated: false,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${resetToken}`,
+      },
+      body: JSON.stringify({
+        new_password: password,
+        confirm_password: confirmation,
+      }),
     });
   },
 };

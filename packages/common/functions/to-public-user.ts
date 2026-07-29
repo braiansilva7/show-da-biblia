@@ -20,6 +20,7 @@ export function toPublicUser(user: User): PublicUser {
     language_code: user.languageCode,
     profile_picture_url: user.profilePictureUrl,
     total_score: user.totalScore,
+    best_time_seconds: user.bestTimeSeconds,
     highest_unlocked_level: user.highestUnlockedLevel,
     active: user.active,
     created_at: user.createdAt,

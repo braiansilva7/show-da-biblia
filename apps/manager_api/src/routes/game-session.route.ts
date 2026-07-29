@@ -9,6 +9,7 @@ import {
   answerGameSchema,
   finishGameSchema,
   abandonGameSchema,
+  myRankingSchema,
   rankingSchema,
 } from '@core/schema/game/gameplay/index.js';
 
@@ -49,7 +50,7 @@ export default function gameSessionRoutes(server: FastifyInstance) {
     preHandler: auth,
   });
   server.get('/rankings/me', {
-    schema: rankingSchema,
+    schema: myRankingSchema,
     handler: controller.myRanking,
     preHandler: auth,
   });

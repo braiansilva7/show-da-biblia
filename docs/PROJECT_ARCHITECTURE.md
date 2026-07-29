@@ -259,9 +259,10 @@ rastreabilidade na mesma transação.
 Cada acerto vale um ponto. A partida possui três níveis de dez acertos; erro
 ou expiração de um minuto encerra a sessão. `score_events` mantém a auditoria
 dos pontos e `users.total_score` é apenas o cache derivado da maior pontuação
-de uma partida finalizada. O ranking é calculado sem tabelas paralelas, com
-uma melhor partida por jogador ativo, filtrando país por `country_id` quando
-nacional e desempate pelo menor tempo total.
+de uma partida finalizada. O melhor tempo é a duração da partida com mais
+acertos e, em empate, a menor duração. O ranking é calculado sem tabelas
+paralelas, com uma melhor partida por jogador ativo, filtrando país por
+`country_id` quando nacional e desempate pelo menor tempo total.
 
 ## UUIDs e migrations
 

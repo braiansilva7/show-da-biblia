@@ -19,10 +19,12 @@ import { PROFILE_SUCCESS_MESSAGE_DURATION_MS } from '../constants/app';
 import { gameLanguages } from '../constants/languages';
 import { useAppSession } from '../context/AppSessionContext';
 import { useLocalization } from '../context/LocalizationContext';
+import { rankingService } from '../services/rankingService';
 import { theme } from '../theme';
 import type { Country, ProfilePicture } from '../types/auth';
-import type { Locale } from '../types/game';
+import type { Locale, MyRankings } from '../types/game';
 import { profilePictureFromAsset } from '../utils/profilePicture';
+import { formatDuration } from '../utils/formatDuration';
 
 export function ProfileScreen() {
   const { user, updateProfile, logout } = useAppSession();
@@ -43,6 +45,9 @@ export function ProfileScreen() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [countriesError, setCountriesError] = useState<string | null>(null);
   const [countriesLoading, setCountriesLoading] = useState(true);
+  const [rankings, setRankings] = useState<MyRankings | null>(null);
+  const [rankingsError, setRankingsError] = useState(false);
+  const [rankingsLoading, setRankingsLoading] = useState(true);
   const [loading, setLoading] = useState(false);
   const loadCountries = useCallback(async () => {
     setCountriesLoading(true);
@@ -55,9 +60,22 @@ export function ProfileScreen() {
       setCountriesLoading(false);
     }
   }, [t]);
+  const loadRankings = useCallback(async () => {
+    setRankingsLoading(true);
+    setRankingsError(false);
+    try {
+      setRankings(await rankingService.mine());
+    } catch {
+      setRankingsError(true);
+    }
+    setRankingsLoading(false);
+  }, []);
   useEffect(() => {
     void loadCountries();
   }, [loadCountries]);
+  useEffect(() => {
+    void loadRankings();
+  }, [loadRankings, user?.countryId, user?.totalScore]);
   useEffect(() => {
     if (!successMessage) return;
     const timeout = setTimeout(
@@ -99,6 +117,7 @@ export function ProfileScreen() {
       setPicture(null);
       setRemovePicture(false);
       setSuccessMessage(t('profileSaved'));
+      void loadRankings();
     } catch (reason) {
       setMessage(reason instanceof Error ? reason.message : t('profileError'));
     } finally {
@@ -138,6 +157,59 @@ export function ProfileScreen() {
           </View>
         ) : null}
         <Text style={styles.title}>{t('profileTitle')}</Text>
+        <View style={styles.performance}>
+          <Text style={styles.performanceTitle}>{t('performanceTitle')}</Text>
+          <View style={styles.performanceRow}>
+            <View style={styles.performanceItem}>
+              <Text style={styles.performanceLabel}>{t('homeScore')}</Text>
+              <Text style={styles.performanceValue}>{user.totalScore}</Text>
+            </View>
+            <View style={styles.performanceItem}>
+              <Text style={styles.performanceLabel}>{t('bestTime')}</Text>
+              <Text style={styles.performanceValue}>
+                {formatDuration(user.bestTimeSeconds)}
+              </Text>
+            </View>
+          </View>
+          <View style={styles.performanceRow}>
+            <View style={styles.performanceItem}>
+              <Text style={styles.performanceLabel}>
+                {t('internationalRanking')}
+              </Text>
+              <Text style={styles.performanceValue}>
+                {rankingsLoading
+                  ? t('rankingLoading')
+                  : rankings?.international
+                    ? `#${rankings.international.position} · ${formatDuration(rankings.international.durationSeconds)}`
+                    : t('rankingNoPosition')}
+              </Text>
+            </View>
+            <View style={styles.performanceItem}>
+              <Text style={styles.performanceLabel}>
+                {t('nationalRanking')}
+              </Text>
+              <Text style={styles.performanceValue}>
+                {rankingsLoading
+                  ? t('rankingLoading')
+                  : rankings?.national
+                    ? `#${rankings.national.position} · ${formatDuration(rankings.national.durationSeconds)}`
+                    : t('rankingNoPosition')}
+              </Text>
+            </View>
+          </View>
+          {rankingsError ? (
+            <View style={styles.rankingError}>
+              <Text style={styles.error}>{t('performanceUnavailable')}</Text>
+              <Text
+                accessibilityRole="button"
+                style={styles.retry}
+                onPress={() => void loadRankings()}
+              >
+                {t('tryAgain')}
+              </Text>
+            </View>
+          ) : null}
+        </View>
         <FormField
           label={t('username')}
           value={username}
@@ -263,6 +335,28 @@ const styles = StyleSheet.create({
   message: { color: theme.colors.success },
   error: { color: theme.colors.error },
   countryError: { gap: theme.spacing.xs },
+  performance: {
+    backgroundColor: theme.colors.surface,
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
+    gap: theme.spacing.sm,
+    padding: theme.spacing.md,
+  },
+  performanceTitle: {
+    color: theme.colors.text,
+    fontSize: 18,
+    fontWeight: '800',
+  },
+  performanceRow: { flexDirection: 'row', gap: theme.spacing.sm },
+  performanceItem: { flex: 1, gap: theme.spacing.xs },
+  performanceLabel: { color: theme.colors.mutedText, fontSize: 12 },
+  performanceValue: {
+    color: theme.colors.text,
+    fontSize: 18,
+    fontWeight: '800',
+  },
+  rankingError: { gap: theme.spacing.xs },
   logout: { color: theme.colors.error, fontWeight: '700', textAlign: 'center' },
   retry: { color: theme.colors.primary, fontWeight: '700' },
 });

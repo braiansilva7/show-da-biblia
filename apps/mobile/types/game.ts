@@ -35,7 +35,11 @@ export type GameSession = {
   currentLevel: 1 | 2 | 3;
 };
 
-export type GameStart = { session: GameSession; question: GameQuestion; jokers: Joker[] };
+export type GameStart = {
+  session: GameSession;
+  question: GameQuestion;
+  jokers: Joker[];
+};
 
 export type GameSummary = {
   id: string;
@@ -74,7 +78,31 @@ export type JokerEffect = {
 
 export type RankingEntry = {
   position: number;
-  player: Pick<Player, 'id' | 'username' | 'profilePictureUrl'>;
+  userId: string;
+  username: string;
+  countryId: string;
+  countryName: string;
+  profilePictureUrl: string | null;
   score: number;
   correctAnswers: number;
+  durationSeconds: number;
 };
+
+export type RankingPage = {
+  page: number;
+  pageSize: number;
+  total: number;
+  items: RankingEntry[];
+};
+
+export type PlayerRanking = Pick<
+  RankingEntry,
+  'position' | 'score' | 'correctAnswers' | 'durationSeconds'
+>;
+
+export type MyRankings = {
+  international: PlayerRanking | null;
+  national: PlayerRanking | null;
+};
+
+export type RankingScope = 'international' | 'national';

@@ -20,6 +20,23 @@ const error = {
   404: errorMessageSchema,
   409: errorMessageSchema,
 };
+const rankingItemSchema = Type.Object({
+  position: Type.Integer({ minimum: 1 }),
+  user_id: id,
+  username: Type.String(),
+  country_id: id,
+  country_name: Type.String(),
+  profile_picture_url: Type.Union([Type.String(), Type.Null()]),
+  score: Type.Integer({ minimum: 0 }),
+  correct_answers: Type.Integer({ minimum: 0 }),
+  duration_seconds: Type.Integer({ minimum: 0 }),
+});
+const playerRankingSchema = Type.Object({
+  position: Type.Integer({ minimum: 1 }),
+  score: Type.Integer({ minimum: 0 }),
+  correct_answers: Type.Integer({ minimum: 0 }),
+  duration_seconds: Type.Integer({ minimum: 0 }),
+});
 const gameSummarySchema = Type.Object({
   id,
   status: Type.Literal('FINISHED'),
@@ -40,7 +57,9 @@ const gameSummarySchema = Type.Object({
     })
   ),
   highest_unlocked_level: Type.Union([
-    Type.Literal(1), Type.Literal(2), Type.Literal(3),
+    Type.Literal(1),
+    Type.Literal(2),
+    Type.Literal(3),
   ]),
   duration_seconds: Type.Union([Type.Integer({ minimum: 0 }), Type.Null()]),
 });
@@ -107,7 +126,10 @@ export const finishGameSchema = {
   security: [{ authenticateJwt: [] }],
   params,
   response: {
-    200: Type.Object({ summary: gameSummarySchema, feedback: answerFeedbackSchema }),
+    200: Type.Object({
+      summary: gameSummarySchema,
+      feedback: answerFeedbackSchema,
+    }),
     ...error,
   },
 };
@@ -123,5 +145,25 @@ export const rankingSchema = {
   summary: 'Consultar ranking',
   security: [{ authenticateJwt: [] }],
   querystring: rankQuery,
-  response: { 200: Type.Any(), ...error },
+  response: {
+    200: Type.Object({
+      page: Type.Integer({ minimum: 1 }),
+      page_size: Type.Integer({ minimum: 1, maximum: 100 }),
+      total: Type.Integer({ minimum: 0 }),
+      items: Type.Array(rankingItemSchema),
+    }),
+    ...error,
+  },
+};
+export const myRankingSchema = {
+  tags: [ETagSwagger.game],
+  summary: 'Consultar a posição do jogador autenticado',
+  security: [{ authenticateJwt: [] }],
+  response: {
+    200: Type.Object({
+      international: Type.Union([playerRankingSchema, Type.Null()]),
+      national: Type.Union([playerRankingSchema, Type.Null()]),
+    }),
+    ...error,
+  },
 };

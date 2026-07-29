@@ -15,6 +15,7 @@ export type User = {
   profilePictureUrl: string | null;
   totalScore: number;
   highestUnlockedLevel: 1 | 2 | 3;
+  bestTimeSeconds: number | null;
   active: boolean;
   createdAt: string;
   updatedAt: string;
@@ -38,6 +39,7 @@ export type PublicUser = {
   profile_picture_url: string | null;
   total_score: number;
   highest_unlocked_level: 1 | 2 | 3;
+  best_time_seconds: number | null;
   active: boolean;
   created_at: string;
 };

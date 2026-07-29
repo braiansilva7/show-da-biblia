@@ -8,7 +8,7 @@ export type MobileUser = {
   languageCode: Locale;
   profilePictureUrl: string | null;
   totalScore: number;
-  highestUnlockedLevel: 1 | 2 | 3;
+  bestTimeSeconds: number | null;
 };
 export type AuthSession = { accessToken: string; user: MobileUser };
 export type Country = { id: string; isoCode: string; name: string };

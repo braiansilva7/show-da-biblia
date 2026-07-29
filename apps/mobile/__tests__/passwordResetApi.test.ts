@@ -50,16 +50,29 @@ describe('password reset API', () => {
     global.fetch = jest.fn(async (url: string, init?: RequestInit) => {
       calls.push({ url, init });
       if (url.endsWith('/verify-email-code'))
-        return new Response(JSON.stringify({ registration_token: 'email-token', expires_in: '15m' }), { status: 200 });
-      return new Response(JSON.stringify({ message: 'Code sent' }), { status: 202 });
+        return new Response(
+          JSON.stringify({
+            registration_token: 'email-token',
+            expires_in: '15m',
+          }),
+          { status: 200 }
+        );
+      return new Response(JSON.stringify({ message: 'Code sent' }), {
+        status: 202,
+      });
     }) as typeof fetch;
 
     await authApi.requestRegistrationEmailCode('maria@example.test', 'pt-BR');
-    const verified = await authApi.verifyRegistrationEmailCode('maria@example.test', '123456');
+    const verified = await authApi.verifyRegistrationEmailCode(
+      'maria@example.test',
+      '123456'
+    );
 
     expect(verified.registrationToken).toBe('email-token');
     expect(calls[0].url).toContain('/auth/register/request-email-code');
-    expect(calls[0].init?.body).toBe(JSON.stringify({ email: 'maria@example.test', language_code: 'pt-BR' }));
+    expect(calls[0].init?.body).toBe(
+      JSON.stringify({ email: 'maria@example.test', language_code: 'pt-BR' })
+    );
     expect(calls[1].url).toContain('/auth/register/verify-email-code');
   });
 
@@ -67,15 +80,38 @@ describe('password reset API', () => {
     let registrationRequest: RequestInit | undefined;
     global.fetch = jest.fn(async (_url: string, init?: RequestInit) => {
       registrationRequest = init;
-      return new Response(JSON.stringify({
-        access_token: 'session-token',
-        user: { id: '019f9752-0000-7000-8000-000000000001', username: 'maria', email: 'maria@example.test', country_id: '019f9749-5b00-7000-8000-000000000019', language_code: 'pt-BR', profile_picture_url: null, total_score: 0 },
-      }), { status: 201 });
+      return new Response(
+        JSON.stringify({
+          access_token: 'session-token',
+          user: {
+            id: '019f9752-0000-7000-8000-000000000001',
+            username: 'maria',
+            email: 'maria@example.test',
+            country_id: '019f9749-5b00-7000-8000-000000000019',
+            language_code: 'pt-BR',
+            profile_picture_url: null,
+            total_score: 0,
+            best_time_seconds: null,
+          },
+        }),
+        { status: 201 }
+      );
     }) as typeof fetch;
 
-    await authApi.register({ username: 'maria', email: 'maria@example.test', password: 'safe-password', countryId: '019f9749-5b00-7000-8000-000000000019', languageCode: 'pt-BR' }, 'verified-email-token');
+    await authApi.register(
+      {
+        username: 'maria',
+        email: 'maria@example.test',
+        password: 'safe-password',
+        countryId: '019f9749-5b00-7000-8000-000000000019',
+        languageCode: 'pt-BR',
+      },
+      'verified-email-token'
+    );
 
-    expect(registrationRequest?.headers).toMatchObject({ Authorization: 'Bearer verified-email-token' });
+    expect(registrationRequest?.headers).toMatchObject({
+      Authorization: 'Bearer verified-email-token',
+    });
   });
 
   it('checks username availability with the public registration endpoint', async () => {
@@ -85,7 +121,9 @@ describe('password reset API', () => {
       return new Response(JSON.stringify({ available: true }), { status: 200 });
     }) as typeof fetch;
 
-    await expect(authApi.checkUsernameAvailability('maria')).resolves.toBe(true);
+    await expect(authApi.checkUsernameAvailability('maria')).resolves.toBe(
+      true
+    );
     expect(requestInit?.body).toBe(JSON.stringify({ username: 'maria' }));
   });
 });
