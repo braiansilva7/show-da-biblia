@@ -13,6 +13,7 @@
     },
     "android": {
       "package": "com.showdabiblia.mobile",
+      "usesCleartextTraffic": true,
       "adaptiveIcon": {
         "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#F8F3EB"

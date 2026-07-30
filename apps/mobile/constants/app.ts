@@ -1,4 +1,8 @@
 export const APP_NAME = 'Show da Bíblia';
 export const DEFAULT_LOCALE = 'pt-BR' as const;
 export const GAME_QUESTION_TIME_SECONDS = 60;
+export const GAME_LEVEL_COUNT = 3;
+export const GAME_CORRECT_ANSWERS_PER_LEVEL = 10;
+export const GAME_MAX_CORRECT_ANSWERS =
+  GAME_LEVEL_COUNT * GAME_CORRECT_ANSWERS_PER_LEVEL;
 export const PROFILE_SUCCESS_MESSAGE_DURATION_MS = 3_000;

@@ -7,7 +7,9 @@ RUN corepack enable && corepack prepare pnpm@11.9.0 --activate
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
 COPY apps/manager_api/package.json apps/manager_api/package.json
 
-RUN pnpm install --frozen-lockfile --filter manager_api...
+# O código compartilhado em packages/ também importa dependências da API.
+# Hoisting as disponibiliza durante a compilação e no runtime da imagem final.
+RUN pnpm install --frozen-lockfile --filter manager_api... --config.node-linker=hoisted
 
 COPY apps/manager_api apps/manager_api
 COPY packages packages

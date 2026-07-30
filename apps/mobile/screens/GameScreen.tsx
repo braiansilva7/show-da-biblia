@@ -5,11 +5,13 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { EmptyState } from '../components/EmptyState';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { Screen } from '../components/Screen';
+import { GAME_CORRECT_ANSWERS_PER_LEVEL } from '../constants/app';
 import { useLocalization } from '../context/LocalizationContext';
 import type { RootStackParamList } from '../navigation/types';
 import { gameSessionService } from '../services/gameSessionService';
 import { theme } from '../theme';
 import type { AnswerFeedback, GameQuestion, GameSession, GameSummary, Joker } from '../types/game';
+import { getCurrentQuestionInLevel } from '../utils/gameProgress';
 
 type FeedbackState = {
   selectedAnswerId?: string;
@@ -131,7 +133,7 @@ export function GameScreen({ navigation }: NativeStackScreenProps<RootStackParam
   const controlsDisabled = busy || Boolean(answerFeedback);
   return <Screen><ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
     <View style={styles.metrics}>
-      <View style={styles.metricCard}><MaterialCommunityIcons color={theme.colors.primary} name="stairs" size={22} /><Text style={styles.metricLabel}>{t('level')}</Text><Text style={styles.metricValue}>{session.currentLevel} · {session.score % 10}/10</Text></View>
+      <View style={styles.metricCard}><MaterialCommunityIcons color={theme.colors.primary} name="stairs" size={22} /><Text style={styles.metricLabel}>{t('level')}</Text><Text style={styles.metricValue}>{session.currentLevel} · {getCurrentQuestionInLevel(session.score)}/{GAME_CORRECT_ANSWERS_PER_LEVEL}</Text></View>
       <View style={styles.metricCard}><MaterialCommunityIcons color={theme.colors.primary} name="star-four-points" size={22} /><Text style={styles.metricLabel}>{t('score')}</Text><Text style={styles.metricValue}>{session.score}</Text></View>
       <View style={[styles.metricCard, answerFeedback?.timedOut && styles.timeExpired]}><MaterialCommunityIcons color={seconds < 15 || answerFeedback?.timedOut ? theme.colors.error : theme.colors.primary} name="timer-outline" size={22} /><Text style={styles.metricLabel}>{t('time')}</Text><Text style={styles.metricValue}>{seconds}s</Text></View>
     </View>

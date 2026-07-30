@@ -49,6 +49,10 @@ export const es: TranslationDictionary = {
   viewResult: 'Ver resultado',
   resultTitle: 'Resultado',
   resultDescription: 'Consulta el resumen consolidado de tu partida.',
+  challengeVictoryTitle: '¡Felicitaciones, campeón!',
+  challengeVictoryDescription:
+    'Completaste los 3 niveles y acertaste las 30 preguntas. ¡Has superado el desafío Show de la Biblia!',
+  challengeVictoryBadge: 'DESAFÍO COMPLETADO',
   correctAnswers: 'Aciertos',
   answeredQuestions: 'Preguntas respondidas',
   skipsUsed: 'Saltos usados',

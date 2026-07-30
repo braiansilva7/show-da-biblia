@@ -13,6 +13,7 @@ forma segura e permite criar e editar o próprio perfil.
 Execute a partir da raiz do monorepo:
 
 - `pnpm dev:mobile` — inicia o Expo localmente
+- `pnpm dev:mobile:clear` — inicia o Expo limpando o cache após alterar o `.env`
 - `pnpm --filter @show-da-biblia/mobile android` — abre no Android
 - `pnpm --filter @show-da-biblia/mobile ios` — abre no iOS
 - `pnpm --filter @show-da-biblia/mobile web` — abre no navegador
@@ -22,15 +23,21 @@ Execute a partir da raiz do monorepo:
 
 ## Ambiente
 
-Copie ou defina as variáveis públicas no ambiente de execução:
+Copie `apps/mobile/.env.example` para `apps/mobile/.env` e defina as
+variáveis públicas nele. O Expo é iniciado a partir de `apps/mobile`, portanto
+ele não lê automaticamente o `.env` da raiz:
 
 ```text
-EXPO_PUBLIC_API_URL=http://192.168.1.7:3010/api/v1
+EXPO_PUBLIC_API_URL=http://192.168.1.3:3000/api/v1
 ```
 
 `EXPO_PUBLIC_API_URL` deve terminar em `/api/v1`. O Mobile consome apenas as
 rotas documentadas no Swagger: cadastro, login, recuperação de senha, sessão,
 perfil e países.
+
+No Android, o app permite HTTP somente para este fluxo de desenvolvimento em
+rede local. Em homologação e produção, publique a API e o MinIO com HTTPS e
+troque ambas as URLs públicas para `https://`.
 
 `S3_PUBLIC_BASE_URL` é configurada no `.env` da raiz e define a URL pública
 de imagens devolvida pela API. Ao testar em celular, ela deve usar o IP LAN do
@@ -40,7 +47,7 @@ Para abrir o Expo Web, a origem usada pelo navegador também precisa estar em
 `CORS_ORIGIN` da raiz. Em desenvolvimento local, inclua
 `http://localhost:8081` e `http://127.0.0.1:8081`; para testar em outro
 dispositivo da rede, use o IP do computador, por exemplo
-`http://192.168.1.7:8081`, tanto em `CORS_ORIGIN` quanto em
+`http://192.168.1.3:8081`, tanto em `CORS_ORIGIN` quanto em
 `EXPO_PUBLIC_API_URL`. Reinicie a API após alterar o `.env`.
 
 ## Estado atual

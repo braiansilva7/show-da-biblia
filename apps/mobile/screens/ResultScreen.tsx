@@ -4,6 +4,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { Screen } from '../components/Screen';
+import { GAME_MAX_CORRECT_ANSWERS } from '../constants/app';
 import { useAppSession } from '../context/AppSessionContext';
 import { useLocalization } from '../context/LocalizationContext';
 import type { RootStackParamList } from '../navigation/types';
@@ -11,8 +12,6 @@ import { theme } from '../theme';
 import { formatDuration } from '../utils/formatDuration';
 
 type IconName = keyof typeof MaterialCommunityIcons.glyphMap;
-
-const MAX_CORRECT_ANSWERS = 30;
 
 function ResultMetric({
   icon,
@@ -49,6 +48,10 @@ export function ResultScreen({
   );
   const itemsUsed = summary.skipsUsed + cardsUsed;
   const usedJokers = summary.jokers.filter((item) => item.quantityUsed > 0);
+  const challengeWon =
+    summary.endReason === 'COMPLETED' &&
+    summary.correctAnswers === GAME_MAX_CORRECT_ANSWERS &&
+    summary.highestUnlockedLevel === 3;
 
   useEffect(() => {
     void refreshUser();
@@ -60,16 +63,48 @@ export function ResultScreen({
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.hero}>
-          <View style={styles.heroIcon}>
+        <View style={[styles.hero, challengeWon && styles.victoryHero]}>
+          {challengeWon ? (
+            <View style={styles.celebration}>
+              <MaterialCommunityIcons
+                color={theme.colors.secondary}
+                name="star-four-points"
+                size={24}
+              />
+              <MaterialCommunityIcons
+                color={theme.colors.secondary}
+                name="party-popper"
+                size={30}
+              />
+              <MaterialCommunityIcons
+                color={theme.colors.secondary}
+                name="star-four-points"
+                size={24}
+              />
+            </View>
+          ) : null}
+          <View style={[styles.heroIcon, challengeWon && styles.victoryIcon]}>
             <MaterialCommunityIcons
               color={theme.colors.secondary}
-              name="trophy-outline"
-              size={36}
+              name={challengeWon ? 'trophy' : 'trophy-outline'}
+              size={challengeWon ? 46 : 36}
             />
           </View>
-          <Text style={styles.title}>{t('resultTitle')}</Text>
-          <Text style={styles.description}>{t('resultDescription')}</Text>
+          {challengeWon ? (
+            <View style={styles.victoryBadge}>
+              <Text style={styles.victoryBadgeText}>
+                {t('challengeVictoryBadge')}
+              </Text>
+            </View>
+          ) : null}
+          <Text style={[styles.title, challengeWon && styles.victoryTitle]}>
+            {t(challengeWon ? 'challengeVictoryTitle' : 'resultTitle')}
+          </Text>
+          <Text style={styles.description}>
+            {t(
+              challengeWon ? 'challengeVictoryDescription' : 'resultDescription'
+            )}
+          </Text>
           <Text style={styles.score}>{summary.score}</Text>
           <Text style={styles.scoreLabel}>{t('score')}</Text>
         </View>
@@ -78,7 +113,7 @@ export function ResultScreen({
           <ResultMetric
             icon="check-decagram-outline"
             label={t('correctAnswers')}
-            value={`${summary.correctAnswers}/${MAX_CORRECT_ANSWERS}`}
+            value={`${summary.correctAnswers}/${GAME_MAX_CORRECT_ANSWERS}`}
           />
           <ResultMetric
             icon="timer-outline"
@@ -154,6 +189,38 @@ const styles = StyleSheet.create({
     height: 56,
     justifyContent: 'center',
     width: 56,
+  },
+  celebration: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: theme.spacing.md,
+  },
+  victoryHero: {
+    backgroundColor: '#FFF4CC',
+    borderColor: '#D89B16',
+    borderWidth: 2,
+  },
+  victoryIcon: {
+    borderColor: '#D89B16',
+    borderWidth: 2,
+    height: 72,
+    width: 72,
+  },
+  victoryBadge: {
+    backgroundColor: theme.colors.secondary,
+    borderRadius: 999,
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: 6,
+  },
+  victoryBadgeText: {
+    color: theme.colors.surface,
+    fontSize: 12,
+    fontWeight: '900',
+    letterSpacing: 1,
+  },
+  victoryTitle: {
+    color: theme.colors.secondary,
+    textAlign: 'center',
   },
   title: { color: theme.colors.text, fontSize: 28, fontWeight: '800' },
   description: {

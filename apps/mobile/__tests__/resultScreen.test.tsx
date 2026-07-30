@@ -21,7 +21,7 @@ function renderResult(overrides: Record<string, unknown> = {}) {
             summary: {
               id: 'session-1',
               status: 'FINISHED',
-              endReason: 'COMPLETED',
+              endReason: 'WRONG_ANSWER',
               score: 7,
               correctAnswers: 7,
               answeredQuestions: 9,
@@ -58,5 +58,32 @@ describe('ResultScreen', () => {
     });
 
     expect(screen.getByText('noItemsUsed')).toBeTruthy();
+  });
+
+  it('celebrates when the player completes all levels with every answer correct', () => {
+    const screen = renderResult({
+      endReason: 'COMPLETED',
+      score: 30,
+      correctAnswers: 30,
+      answeredQuestions: 30,
+      highestUnlockedLevel: 3,
+    });
+
+    expect(screen.getByText('challengeVictoryBadge')).toBeTruthy();
+    expect(screen.getByText('challengeVictoryTitle')).toBeTruthy();
+    expect(screen.getByText('challengeVictoryDescription')).toBeTruthy();
+    expect(screen.queryByText('resultDescription')).toBeNull();
+    expect(screen.getByText('30/30')).toBeTruthy();
+  });
+
+  it('does not celebrate an incomplete result even if level 3 was unlocked', () => {
+    const screen = renderResult({
+      endReason: 'WRONG_ANSWER',
+      correctAnswers: 29,
+      highestUnlockedLevel: 3,
+    });
+
+    expect(screen.getByText('resultTitle')).toBeTruthy();
+    expect(screen.queryByText('challengeVictoryTitle')).toBeNull();
   });
 });

@@ -46,6 +46,10 @@ export const ptBR = {
   viewResult: 'Ver resultado',
   resultTitle: 'Resultado',
   resultDescription: 'Confira o resumo consolidado da sua partida.',
+  challengeVictoryTitle: 'Parabéns, campeão!',
+  challengeVictoryDescription:
+    'Você concluiu os 3 níveis e acertou todas as 30 questões. Você venceu o desafio Show da Bíblia!',
+  challengeVictoryBadge: 'DESAFIO CONCLUÍDO',
   correctAnswers: 'Acertos',
   answeredQuestions: 'Questões respondidas',
   skipsUsed: 'Pulos usados',

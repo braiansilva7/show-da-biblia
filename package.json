@@ -15,6 +15,7 @@
     "dev:web": "pnpm --filter @show-da-biblia/web dev",
     "dev:mobile": "pnpm --filter @show-da-biblia/mobile dev",
     "dev:mobile:lan": "pnpm --filter @show-da-biblia/mobile dev:lan",
+    "dev:mobile:clear": "pnpm --filter @show-da-biblia/mobile dev:clear",
     "build": "turbo run build",
     "typecheck": "turbo run typecheck",
     "format": "prettier --write .",
