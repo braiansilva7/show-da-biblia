@@ -355,6 +355,7 @@ onMounted(async () => {
         :is-saving="isSavingUser"
         :save-error="saveUserError"
         :is-deleting="isDeletingUser"
+        :check-username="api.checkUsernameAvailability"
         :save-user="saveUser"
         :delete-user="deleteUser"
         @search="api.loadUsers"

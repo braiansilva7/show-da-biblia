@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import ImageCropDialog from '@/components/common/ImageCropDialog.vue';
 import type {
   Country,
@@ -15,6 +15,7 @@ const props = defineProps<{
   countries: Country[];
   error: string;
   isSaving: boolean;
+  checkUsername: (username: string) => Promise<boolean>;
 }>();
 const emit = defineEmits<{
   'update:modelValue': [value: boolean];
@@ -25,7 +26,11 @@ const isEditing = computed(() => props.user !== null);
 const isCropOpen = ref(false);
 const cropSource = ref('');
 const profilePicturePreview = ref('');
+const usernameStatus = ref<'idle' | 'checking' | 'available' | 'taken' | 'error'>('idle');
+const originalUsername = ref('');
 let localPreviewUrl = '';
+let usernameCheckTimeout: ReturnType<typeof setTimeout> | undefined;
+let usernameCheckRequest = 0;
 
 function revokeLocalPreview() {
   if (!localPreviewUrl) return;
@@ -56,9 +61,14 @@ watch(
   () => [props.modelValue, props.user] as const,
   ([visible, user]) => {
     if (!visible) return;
+    if (usernameCheckTimeout) clearTimeout(usernameCheckTimeout);
+    usernameCheckTimeout = undefined;
+    usernameCheckRequest += 1;
     revokeLocalPreview();
     closeCrop();
     profilePicturePreview.value = user?.profile_picture_url ?? '';
+    originalUsername.value = user?.username.trim() ?? '';
+    usernameStatus.value = 'idle';
     form.value = user
       ? {
           username: user.username,
@@ -75,9 +85,59 @@ watch(
   },
   { immediate: true }
 );
-function submit() {
+const usernameStatusMessage = computed(() => ({
+  idle: '',
+  checking: 'username_checking',
+  available: 'username_available',
+  taken: 'username_unavailable',
+  error: 'username_error',
+} as const)[usernameStatus.value]);
+const isUsernameUnavailable = computed(() =>
+  usernameStatus.value === 'taken' || usernameStatus.value === 'checking' || usernameStatus.value === 'error'
+);
+
+async function checkUsername(): Promise<boolean> {
+  if (usernameCheckTimeout) clearTimeout(usernameCheckTimeout);
+  usernameCheckTimeout = undefined;
+  const username = form.value.username.trim();
+  const request = ++usernameCheckRequest;
+  if (username.length < 3) {
+    usernameStatus.value = 'idle';
+    return false;
+  }
+  if (username === originalUsername.value) {
+    usernameStatus.value = 'idle';
+    return true;
+  }
+  usernameStatus.value = 'checking';
+  try {
+    const available = await props.checkUsername(username);
+    if (request !== usernameCheckRequest) return false;
+    usernameStatus.value = available ? 'available' : 'taken';
+    return available;
+  } catch {
+    if (request === usernameCheckRequest) usernameStatus.value = 'error';
+    return false;
+  }
+}
+function scheduleUsernameCheck() {
+  if (usernameCheckTimeout) clearTimeout(usernameCheckTimeout);
+  usernameCheckRequest += 1;
+  const username = form.value.username.trim();
+  if (username.length < 3 || username === originalUsername.value) {
+    usernameStatus.value = 'idle';
+    return;
+  }
+  usernameStatus.value = 'checking';
+  usernameCheckTimeout = setTimeout(() => void checkUsername(), 350);
+}
+async function submit() {
+  if (!(await checkUsername())) return;
   emit('submit', form.value);
 }
+onBeforeUnmount(() => {
+  if (usernameCheckTimeout) clearTimeout(usernameCheckTimeout);
+});
 
 function selectProfilePicture(event: Event) {
   const input = event.target as HTMLInputElement;
@@ -164,7 +224,14 @@ function toggleRemoveProfilePicture() {
               autocomplete="username"
               maxlength="120"
               required
+              @blur="checkUsername"
+              @input="scheduleUsernameCheck"
           /></label>
+          <p
+            v-if="usernameStatusMessage"
+            :class="['field-message', usernameStatus]"
+            role="status"
+          >{{ $t(usernameStatusMessage) }}</p>
           <label
             ><span>{{ $t('email') }}</span
             ><input
@@ -232,6 +299,7 @@ function toggleRemoveProfilePicture() {
               color="primary"
               type="submit"
               variant="flat"
+              :disabled="isUsernameUnavailable"
               :loading="isSaving"
               >{{ $t(isEditing ? 'save_changes' : 'register') }}</v-btn
             >

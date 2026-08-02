@@ -27,6 +27,7 @@ const props = defineProps<{
   isSaving: boolean;
   saveError: string;
   isDeleting: boolean;
+  checkUsername: (username: string) => Promise<boolean>;
   saveUser: (
     input: UserFormInput,
     target: ManagedUser | null
@@ -247,6 +248,7 @@ async function confirmDelete() {
       :countries="countries"
       :error="saveError"
       :is-saving="isSaving"
+      :check-username="checkUsername"
       @update:model-value="
         (visible) => {
           if (!visible) closeForm();
