@@ -58,6 +58,15 @@ export interface OwnProfileInput {
   confirm_password: string;
 }
 
+export interface RegistrationInput {
+  username: string;
+  email: string;
+  password: string;
+  country_id: string;
+  language_code: LanguageCode;
+  profile_picture: File | null;
+}
+
 export interface ManagedUser extends AuthenticatedUser {
   active: boolean;
   created_at: string;

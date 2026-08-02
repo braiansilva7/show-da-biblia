@@ -116,6 +116,7 @@ select:focus {
   justify-content: center;
   padding: 1.5rem;
 }
+.auth-card-scroll { align-items: flex-start; overflow-y: auto; padding-bottom: 2rem; padding-top: 6rem; }
 .auth-card {
   max-width: 500px;
   padding: 1.5rem;
@@ -149,10 +150,50 @@ select:focus {
   right: 4px;
   top: 4px;
 }
+.password-visibility-toggle {
+  align-items: center;
+  display: inline-flex;
+  height: 32px;
+  justify-content: center;
+  width: 40px;
+}
+.password-visibility-toggle svg {
+  height: 20px;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+  width: 20px;
+}
 .login-button {
   margin-top: 1.5rem;
   width: 100%;
 }
+.auth-link-button {
+  color: #7f4f24;
+  display: flex;
+  font-weight: 700;
+  margin: 0.35rem auto 0;
+}
+.form-success {
+  background: #e7f7ed;
+  border-radius: 6px;
+  color: #197241;
+  font-size: 0.875rem;
+  margin: 1.15rem 0 0;
+  padding: 0.75rem;
+}
+.field-message { font-size: 0.8rem; margin: 0.45rem 0 0; }
+.field-message.available { color: #197241; }
+.field-message.taken, .field-message.error { color: #b42318; }
+.field-message.checking { color: #5d596c; }
+.auth-form-grid { margin-top: 1.15rem; }
+.auth-card .profile-picture-picker { align-items: center; display: flex; flex-direction: column; gap: 0.6rem; margin-top: 0.45rem; }
+.auth-card .profile-picture-preview,
+.auth-card .profile-picture-placeholder { align-items: center; background: #f4f3f8; border: 1px solid #e7e5ef; border-radius: 50%; display: flex; height: 72px; justify-content: center; object-fit: cover; overflow: hidden; width: 72px; }
+.auth-card .profile-picture-placeholder { color: #797586; font-size: 0.7rem; text-align: center; }
+.auth-card .profile-picture-button { background: #7f4f24; border-radius: 4px; color: #fff; cursor: pointer; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.03em; padding: 0.45rem 0.7rem; position: relative; text-transform: uppercase; }
+.auth-card .profile-picture-input { cursor: pointer; inset: 0; opacity: 0; position: absolute; width: 100%; }
 .form-error {
   background: #ffe7e7;
   border-radius: 6px;

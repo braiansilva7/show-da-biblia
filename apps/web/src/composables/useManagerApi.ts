@@ -7,6 +7,7 @@ import type {
   ManagedUser,
   OwnProfileInput,
   PermissionRole,
+  RegistrationInput,
   UserFormInput,
   UsersListResponse,
 } from '@/types/user';
@@ -240,6 +241,12 @@ export function useManagerApi() {
     };
   }
 
+  function acceptSession(session: LoginResponse) {
+    sessionStorage.setItem(tokenStorageKey, session.access_token);
+    user.value = session.user;
+    setUserLanguage(session.user);
+  }
+
   async function gameRequest<T>(path: string, init: RequestInit = {}): Promise<T> {
     const response = await fetch(`${apiUrl}/api/v1${path}`, {
       ...init,
@@ -316,9 +323,7 @@ export function useManagerApi() {
         loginError.value = getMessage(data, t('login_failed'));
         return;
       }
-      sessionStorage.setItem(tokenStorageKey, data.access_token);
-      user.value = data.user;
-      setUserLanguage(data.user);
+      acceptSession(data);
     } catch {
       loginError.value = t('api_connection_failed');
     } finally {
@@ -827,6 +832,139 @@ export function useManagerApi() {
     if (response.ok && data?.countries) countries.value = data.countries;
   }
 
+  async function checkUsernameAvailability(username: string): Promise<boolean> {
+    const response = await fetch(
+      `${apiUrl}/api/v1/auth/register/check-username`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept-Language': locale.value,
+        },
+        body: JSON.stringify({ username: username.trim() }),
+      }
+    );
+    const data = (await response.json().catch(() => null)) as
+      | ({ available?: boolean } & ApiMessage)
+      | null;
+    if (!response.ok || typeof data?.available !== 'boolean')
+      throw new Error(getMessage(data, t('username_check_error')));
+    return data.available;
+  }
+
+  async function requestRegistrationEmailCode(
+    email: string,
+    languageCode: RegistrationInput['language_code']
+  ) {
+    const response = await fetch(
+      `${apiUrl}/api/v1/auth/register/request-email-code`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept-Language': locale.value,
+        },
+        body: JSON.stringify({ email: email.trim(), language_code: languageCode }),
+      }
+    );
+    const data = (await response.json().catch(() => null)) as ApiMessage | null;
+    if (!response.ok) throw new Error(getMessage(data, t('registration_failed')));
+  }
+
+  async function verifyRegistrationEmailCode(email: string, code: string) {
+    const response = await fetch(
+      `${apiUrl}/api/v1/auth/register/verify-email-code`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept-Language': locale.value,
+        },
+        body: JSON.stringify({ email: email.trim(), code: code.trim() }),
+      }
+    );
+    const data = (await response.json().catch(() => null)) as
+      | ({ registration_token?: string } & ApiMessage)
+      | null;
+    if (!response.ok || !data?.registration_token)
+      throw new Error(getMessage(data, t('registration_failed')));
+    return data.registration_token;
+  }
+
+  async function registerPlayer(input: RegistrationInput, registrationToken: string) {
+    const payload = new FormData();
+    payload.set('username', input.username);
+    payload.set('email', input.email.trim());
+    payload.set('password', input.password);
+    payload.set('country_id', input.country_id);
+    payload.set('language_code', input.language_code);
+    if (input.profile_picture)
+      payload.set('profile_picture', input.profile_picture);
+    const response = await fetch(`${apiUrl}/api/v1/auth/register`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${registrationToken}`,
+        'Accept-Language': locale.value,
+      },
+      body: payload,
+    });
+    const data = (await response.json().catch(() => null)) as
+      | (LoginResponse & ApiMessage)
+      | null;
+    if (!response.ok || !data?.access_token || !data.user)
+      throw new Error(getMessage(data, t('registration_failed')));
+    acceptSession(data);
+  }
+
+  async function sendPasswordResetCode(email: string) {
+    const response = await fetch(`${apiUrl}/api/v1/auth/forgot-password/send-code`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept-Language': locale.value,
+      },
+      body: JSON.stringify({ email: email.trim() }),
+    });
+    const data = (await response.json().catch(() => null)) as ApiMessage | null;
+    if (!response.ok) throw new Error(getMessage(data, t('password_recovery_failed')));
+  }
+
+  async function verifyPasswordResetCode(email: string, code: string) {
+    const response = await fetch(`${apiUrl}/api/v1/auth/forgot-password/verify-code`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept-Language': locale.value,
+      },
+      body: JSON.stringify({ email: email.trim(), code: code.trim() }),
+    });
+    const data = (await response.json().catch(() => null)) as
+      | ({ reset_token?: string } & ApiMessage)
+      | null;
+    if (!response.ok || !data?.reset_token)
+      throw new Error(getMessage(data, t('password_recovery_failed')));
+    return data.reset_token;
+  }
+
+  async function resetPassword(
+    resetToken: string,
+    password: string,
+    confirmation: string
+  ) {
+    const response = await fetch(`${apiUrl}/api/v1/auth/forgot-password/reset-password`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${resetToken}`,
+        'Content-Type': 'application/json',
+        'Accept-Language': locale.value,
+      },
+      body: JSON.stringify({ new_password: password, confirm_password: confirmation }),
+    });
+    if (response.status === 204) return;
+    const data = (await response.json().catch(() => null)) as ApiMessage | null;
+    throw new Error(getMessage(data, t('password_recovery_failed')));
+  }
+
   async function saveOwnProfile(input: OwnProfileInput): Promise<boolean | null> {
     ownProfileError.value = '';
     isSavingOwnProfile.value = true;
@@ -1038,6 +1176,13 @@ export function useManagerApi() {
     loadRankings,
     loadRoles,
     loadCountries,
+    checkUsernameAvailability,
+    requestRegistrationEmailCode,
+    verifyRegistrationEmailCode,
+    registerPlayer,
+    sendPasswordResetCode,
+    verifyPasswordResetCode,
+    resetPassword,
     saveOwnProfile,
     clearOwnProfileError,
     loadCategories,

@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import LoginForm from '@/components/auth/LoginForm.vue';
+import RegisterForm from '@/components/auth/RegisterForm.vue';
+import ForgotPasswordForm from '@/components/auth/ForgotPasswordForm.vue';
 import OwnProfileDialog from '@/components/auth/OwnProfileDialog.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import DashboardPage from '@/pages/DashboardPage.vue';
@@ -21,6 +24,7 @@ import type { RankingScope } from '@/types/ranking';
 import type { GameSummary } from '@/types/game';
 
 const api = useManagerApi();
+const { t } = useI18n();
 const {
   user,
   users,
@@ -76,6 +80,8 @@ const {
   isLoadingRanking,
   isLoadingMoreRanking,
 } = api;
+const authView = ref<'login' | 'register' | 'forgot-password'>('login');
+const loginNotice = ref('');
 const currentPage = ref<Page>('dashboard');
 const activeGameSessionId = ref<string | null>(null);
 const currentGameSummary = ref<GameSummary | null>(null);
@@ -198,6 +204,23 @@ async function login(email: string, password: string) {
   await api.login(email, password);
   await continueAfterAuthentication();
 }
+async function openRegistration() {
+  loginNotice.value = '';
+  try {
+    await api.loadCountries();
+  } catch {
+    // The form remains available and reports the missing selection through validation.
+  }
+  authView.value = 'register';
+}
+function openForgotPassword() {
+  loginNotice.value = '';
+  authView.value = 'forgot-password';
+}
+function openLogin(passwordReset = false) {
+  authView.value = 'login';
+  loginNotice.value = passwordReset ? t('password_reset_success') : '';
+}
 
 async function saveUser(input: UserFormInput, target: ManagedUser | null) {
   return api.saveUser(input, target);
@@ -241,12 +264,34 @@ onMounted(async () => {
 
 <template>
   <v-app>
+    <template v-if="!user">
     <LoginForm
-      v-if="!user"
+      v-if="authView === 'login'"
       :error="loginError"
+      :notice="loginNotice"
       :is-submitting="isLoggingIn"
       @submit="({ email, password }) => login(email, password)"
+      @register="openRegistration"
+      @forgot-password="openForgotPassword"
     />
+    <RegisterForm
+      v-else-if="authView === 'register'"
+      :countries="countries"
+      :check-username="api.checkUsernameAvailability"
+      :request-code="api.requestRegistrationEmailCode"
+      :verify-code="api.verifyRegistrationEmailCode"
+      :register="api.registerPlayer"
+      @complete="continueAfterAuthentication"
+      @login="openLogin()"
+    />
+    <ForgotPasswordForm
+      v-else
+      :send-code="api.sendPasswordResetCode"
+      :verify-code="api.verifyPasswordResetCode"
+      :reset-password="api.resetPassword"
+      @login="openLogin"
+    />
+    </template>
     <AppLayout
       v-else
       :user="user"
