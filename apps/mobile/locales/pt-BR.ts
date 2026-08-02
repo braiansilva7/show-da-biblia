@@ -85,6 +85,19 @@ export const ptBR = {
   country: 'País',
   language: 'Idioma',
   login: 'Entrar',
+  biometricLogin: 'Entrar com biometria',
+  biometricPrompt: 'Confirme sua identidade para entrar.',
+  biometricLoginError:
+    'Não foi possível confirmar sua identidade. Tente novamente ou entre com sua senha.',
+  biometricLoginTitle: 'Login com biometria',
+  biometricLoginDescription:
+    'Use sua biometria para entrar rapidamente neste dispositivo.',
+  biometricLoginUnavailable:
+    'A biometria não está disponível ou não foi cadastrada neste dispositivo.',
+  enableBiometricLogin: 'Ativar login com biometria',
+  disableBiometricLogin: 'Desativar login com biometria',
+  biometricLoginEnabled: 'Login com biometria ativado.',
+  biometricLoginDisabled: 'Login com biometria desativado.',
   register: 'Criar conta',
   createAccount: 'Ainda não tem conta? Cadastre-se',
   alreadyHaveAccount: 'Já possui uma conta? Entre',

@@ -28,6 +28,12 @@
     "plugins": [
       "expo-secure-store",
       [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "O Show da Bíblia usa o Face ID para confirmar sua identidade e proteger sua sessão."
+        }
+      ],
+      [
         "expo-image-picker",
         {
           "photosPermission": "O Show da Bíblia acessa suas fotos somente para você escolher a imagem do seu perfil."

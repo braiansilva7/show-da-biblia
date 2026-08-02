@@ -24,6 +24,7 @@
     "@testing-library/react-native": "^13.3.3",
     "expo": "~54.0.36",
     "expo-image-picker": "~17.0.11",
+    "expo-local-authentication": "~17.0.8",
     "expo-secure-store": "~15.0.8",
     "jest-expo": "~54.0.17",
     "react": "19.1.0",

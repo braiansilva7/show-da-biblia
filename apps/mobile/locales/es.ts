@@ -88,6 +88,19 @@ export const es: TranslationDictionary = {
   country: 'País',
   language: 'Idioma',
   login: 'Iniciar sesión',
+  biometricLogin: 'Iniciar sesión con biometría',
+  biometricPrompt: 'Confirma tu identidad para iniciar sesión.',
+  biometricLoginError:
+    'No fue posible confirmar tu identidad. Inténtalo de nuevo o inicia sesión con tu contraseña.',
+  biometricLoginTitle: 'Inicio de sesión con biometría',
+  biometricLoginDescription:
+    'Usa tu biometría para iniciar sesión rápidamente en este dispositivo.',
+  biometricLoginUnavailable:
+    'La biometría no está disponible o no está registrada en este dispositivo.',
+  enableBiometricLogin: 'Activar inicio de sesión con biometría',
+  disableBiometricLogin: 'Desactivar inicio de sesión con biometría',
+  biometricLoginEnabled: 'Inicio de sesión con biometría activado.',
+  biometricLoginDisabled: 'Inicio de sesión con biometría desactivado.',
   register: 'Crear cuenta',
   createAccount: '¿Aún no tienes cuenta? Regístrate',
   alreadyHaveAccount: '¿Ya tienes una cuenta? Inicia sesión',

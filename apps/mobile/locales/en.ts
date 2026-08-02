@@ -84,6 +84,19 @@ export const en: TranslationDictionary = {
   country: 'Country',
   language: 'Language',
   login: 'Sign in',
+  biometricLogin: 'Sign in with biometrics',
+  biometricPrompt: 'Confirm your identity to sign in.',
+  biometricLoginError:
+    'We could not confirm your identity. Try again or sign in with your password.',
+  biometricLoginTitle: 'Biometric sign-in',
+  biometricLoginDescription:
+    'Use your biometrics to sign in quickly on this device.',
+  biometricLoginUnavailable:
+    'Biometrics are unavailable or not enrolled on this device.',
+  enableBiometricLogin: 'Enable biometric sign-in',
+  disableBiometricLogin: 'Disable biometric sign-in',
+  biometricLoginEnabled: 'Biometric sign-in enabled.',
+  biometricLoginDisabled: 'Biometric sign-in disabled.',
   register: 'Create account',
   createAccount: 'Do not have an account? Sign up',
   alreadyHaveAccount: 'Already have an account? Sign in',

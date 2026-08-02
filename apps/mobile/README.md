@@ -35,6 +35,12 @@ EXPO_PUBLIC_API_URL=http://192.168.1.3:3010/api/v1
 rotas documentadas no Swagger: cadastro, login, recuperação de senha, sessão,
 perfil e países.
 
+Em dispositivos Android e iOS com biometria cadastrada, a pessoa pode ativar o
+login com biometria no Perfil. O app pede biometria forte e não aceita PIN/senha
+do aparelho nesse fluxo; em caso de indisponibilidade ou cancelamento, a pessoa
+pode usar a senha da própria conta. A preferência é removida no logout. Face ID
+requer um novo development build ou build de distribuição para teste no iOS.
+
 O botão de doação usa uma URL HTTPS hospedada pelo PayPal conforme o idioma
 selecionado: português (`pt-BR`) usa a conta brasileira; inglês e espanhol usam
 a conta internacional. Não requer variável de ambiente.

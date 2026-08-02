@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { Picker } from '@react-native-picker/picker';
 import {
@@ -8,6 +9,7 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
+  Switch,
   Text,
   View,
 } from 'react-native';
@@ -28,7 +30,15 @@ import { profilePictureFromAsset } from '../utils/profilePicture';
 import { formatDuration } from '../utils/formatDuration';
 
 export function ProfileScreen() {
-  const { user, updateProfile, logout } = useAppSession();
+  const {
+    biometricLoginEnabled,
+    biometricLoginSupported,
+    disableBiometricLogin,
+    enableBiometricLogin,
+    logout,
+    updateProfile,
+    user,
+  } = useAppSession();
   const { t } = useLocalization();
   const [countries, setCountries] = useState<Country[]>([]);
   const [username, setUsername] = useState(user?.username ?? '');
@@ -51,6 +61,8 @@ export function ProfileScreen() {
   const [rankingsLoading, setRankingsLoading] = useState(true);
   const [loading, setLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [biometricLoading, setBiometricLoading] = useState(false);
+  const [biometricMessage, setBiometricMessage] = useState<string | null>(null);
   const resetProfileForm = useCallback(() => {
     if (!user) return;
     setIsEditing(false);
@@ -144,6 +156,23 @@ export function ProfileScreen() {
       setLoading(false);
     }
   };
+  const toggleBiometricLogin = async () => {
+    if (biometricLoading) return;
+    setBiometricLoading(true);
+    setBiometricMessage(null);
+    try {
+      if (biometricLoginEnabled) {
+        await disableBiometricLogin();
+        setBiometricMessage(t('biometricLoginDisabled'));
+      } else {
+        const result = await enableBiometricLogin(t('biometricPrompt'));
+        if (result === 'success') setBiometricMessage(t('biometricLoginEnabled'));
+        if (result === 'failed') setBiometricMessage(t('biometricLoginError'));
+      }
+    } finally {
+      setBiometricLoading(false);
+    }
+  };
   const photoUri = picture?.uri ?? user.profilePictureUrl;
   return (
     <Screen>
@@ -233,6 +262,43 @@ export function ProfileScreen() {
                 {t('tryAgain')}
               </Text>
             </View>
+          ) : null}
+        </View>
+        <View style={styles.biometricCard}>
+          <View style={styles.biometricMainRow}>
+            <View style={styles.biometricIcon}>
+              <Ionicons
+                color={theme.colors.primary}
+                name="finger-print-outline"
+                size={28}
+              />
+            </View>
+            <View style={styles.biometricContent}>
+              <Text style={styles.biometricTitle}>
+                {t('biometricLoginTitle')}
+              </Text>
+              <Text style={styles.biometricDescription}>
+                {biometricLoginSupported
+                  ? t('biometricLoginDescription')
+                  : t('biometricLoginUnavailable')}
+              </Text>
+            </View>
+            <Switch
+              accessibilityLabel={t('biometricLoginTitle')}
+              accessibilityRole="switch"
+              disabled={!biometricLoginSupported || biometricLoading}
+              ios_backgroundColor={theme.colors.border}
+              onValueChange={() => void toggleBiometricLogin()}
+              thumbColor={theme.colors.surface}
+              trackColor={{
+                false: theme.colors.border,
+                true: theme.colors.primary,
+              }}
+              value={biometricLoginEnabled}
+            />
+          </View>
+          {biometricMessage ? (
+            <Text style={styles.message}>{biometricMessage}</Text>
           ) : null}
         </View>
         <FormField
@@ -384,6 +450,26 @@ const styles = StyleSheet.create({
     gap: theme.spacing.sm,
     padding: theme.spacing.md,
   },
+  biometricCard: {
+    backgroundColor: theme.colors.surface,
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
+    gap: theme.spacing.sm,
+    padding: theme.spacing.md,
+  },
+  biometricMainRow: { alignItems: 'center', flexDirection: 'row', gap: theme.spacing.sm },
+  biometricIcon: {
+    alignItems: 'center',
+    backgroundColor: '#F4EEE7',
+    borderRadius: 28,
+    height: 56,
+    justifyContent: 'center',
+    width: 56,
+  },
+  biometricContent: { flex: 1, gap: theme.spacing.xs },
+  biometricTitle: { color: theme.colors.text, fontSize: 18, fontWeight: '800' },
+  biometricDescription: { color: theme.colors.mutedText, fontSize: 14, lineHeight: 20 },
   performanceTitle: {
     color: theme.colors.text,
     fontSize: 18,

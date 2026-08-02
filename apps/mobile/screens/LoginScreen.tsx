@@ -22,7 +22,13 @@ export function LoginScreen({
   route,
 }: NativeStackScreenProps<RootStackParamList, 'Login'>) {
   const { width, height } = useWindowDimensions();
-  const { login, sessionMessage, clearSessionMessage } = useAppSession();
+  const {
+    biometricLoginAvailable,
+    clearSessionMessage,
+    login,
+    loginWithBiometrics,
+    sessionMessage,
+  } = useAppSession();
   const { t } = useLocalization();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -31,6 +37,7 @@ export function LoginScreen({
     route.params?.resetSuccess ? t('passwordResetSuccess') : null
   );
   const [loading, setLoading] = useState(false);
+  const [biometricLoading, setBiometricLoading] = useState(false);
   const isLandscape = width > height;
   useEffect(() => {
     if (sessionMessage) {
@@ -48,6 +55,18 @@ export function LoginScreen({
       setError(reason instanceof Error ? reason.message : t('loginError'));
     } finally {
       setLoading(false);
+    }
+  };
+  const submitBiometricLogin = async () => {
+    setBiometricLoading(true);
+    setError(null);
+    try {
+      const result = await loginWithBiometrics(t('biometricPrompt'));
+      if (result === 'failed') setError(t('biometricLoginError'));
+    } catch {
+      setError(t('biometricLoginError'));
+    } finally {
+      setBiometricLoading(false);
     }
   };
   return (
@@ -96,8 +115,16 @@ export function LoginScreen({
         {notice ? <Text style={styles.notice}>{notice}</Text> : null}
         <PrimaryButton
           label={loading ? t('loading') : t('login')}
+          disabled={loading || biometricLoading}
           onPress={() => void submit()}
         />
+        {biometricLoginAvailable ? (
+          <PrimaryButton
+            disabled={loading || biometricLoading}
+            label={biometricLoading ? t('loading') : t('biometricLogin')}
+            onPress={() => void submitBiometricLogin()}
+          />
+        ) : null}
         <Text
           accessibilityRole="button"
           style={styles.link}

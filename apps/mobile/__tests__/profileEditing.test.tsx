@@ -5,6 +5,8 @@ import { rankingService } from '../services/rankingService';
 import { ProfileScreen } from '../screens/ProfileScreen';
 
 const mockUpdateProfile = jest.fn();
+const mockEnableBiometricLogin = jest.fn();
+const mockDisableBiometricLogin = jest.fn();
 const mockUseFocusEffect = jest.fn();
 let mockFocusCleanup: (() => void) | undefined;
 
@@ -52,6 +54,10 @@ jest.mock('@react-native-picker/picker', () => {
 });
 jest.mock('../context/AppSessionContext', () => ({
   useAppSession: () => ({
+    biometricLoginEnabled: false,
+    biometricLoginSupported: true,
+    disableBiometricLogin: mockDisableBiometricLogin,
+    enableBiometricLogin: mockEnableBiometricLogin,
     user: {
       id: 'me',
       username: 'Maria',
@@ -81,6 +87,10 @@ describe('ProfileScreen editing mode', () => {
     });
     mockUpdateProfile.mockReset();
     mockUpdateProfile.mockResolvedValue(undefined);
+    mockEnableBiometricLogin.mockReset();
+    mockEnableBiometricLogin.mockResolvedValue('success');
+    mockDisableBiometricLogin.mockReset();
+    mockDisableBiometricLogin.mockResolvedValue(undefined);
     (countryApi.list as jest.Mock).mockResolvedValue([
       { id: 'br', name: 'Brasil' },
     ]);
@@ -148,5 +158,23 @@ describe('ProfileScreen editing mode', () => {
     expect(screen.getByLabelText('username').props.editable).toBe(false);
     expect(screen.queryByLabelText('saveProfile')).toBeNull();
     expect(screen.getByLabelText('editProfile')).toBeTruthy();
+  });
+
+  it('allows the player to activate biometric login from the profile', async () => {
+    const screen = render(<ProfileScreen />);
+
+    await waitFor(() =>
+      expect(screen.getByLabelText('biometricLoginTitle')).toBeTruthy()
+    );
+    fireEvent(
+      screen.getByLabelText('biometricLoginTitle'),
+      'valueChange',
+      true
+    );
+
+    await waitFor(() =>
+      expect(mockEnableBiometricLogin).toHaveBeenCalledWith('biometricPrompt')
+    );
+    expect(screen.getByText('biometricLoginEnabled')).toBeTruthy();
   });
 });

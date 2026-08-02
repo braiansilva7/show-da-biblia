@@ -38,9 +38,16 @@ empilhada e Resultado é apresentado como modal. Os parâmetros ficam em
 `navigation/types.ts`; novas rotas devem ser declaradas ali antes do uso.
 
 `AppSessionContext` recupera a sessão guardada em `expo-secure-store` e a
-valida com `GET /auth/me`. `api/client` centraliza o bearer token e, em 401 ou
-403, remove a sessão antes de redirecionar ao login. A aplicação não interpreta
-permissões nem reproduz regras de jogo.
+mantém bloqueada na abertura. Em dispositivos com biometria cadastrada, a
+pessoa ativa esse login no Perfil; a reabertura do app e o retorno após ir ao
+segundo plano solicitam a biometria automaticamente. Se a solicitação for
+cancelada, a tela de Login ainda oferece o desbloqueio biométrico e o acesso
+por e-mail e senha. Após a confirmação local, o app valida a sessão com
+`GET /auth/me`. Em Web ou sem biometria disponível, o login por e-mail e senha
+permanece o único fluxo. O logout remove a preferência biométrica junto da
+sessão. `api/client` centraliza o bearer token e, em 401 ou 403, remove a sessão
+antes de redirecionar ao login. A aplicação não interpreta permissões nem
+reproduz regras de jogo.
 
 Antes do login, `ForgotPassword` conduz a recuperação em três etapas: e-mail,
 código de seis dígitos e nova senha. O token temporário devolvido após a

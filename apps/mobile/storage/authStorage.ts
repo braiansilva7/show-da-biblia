@@ -4,6 +4,7 @@ import type { AuthSession } from '../types/auth';
 
 const TOKEN_KEY = 'show-da-biblia.auth.token';
 const USER_KEY = 'show-da-biblia.auth.user';
+const BIOMETRIC_LOGIN_ENABLED_KEY = 'show-da-biblia.auth.biometric-login-enabled';
 
 function isWebStorageAvailable() {
   return Platform.OS === 'web' && typeof localStorage !== 'undefined';
@@ -53,7 +54,21 @@ export const authStorage = {
       writeValue(USER_KEY, JSON.stringify(session.user)),
     ]);
   },
+  async isBiometricLoginEnabled() {
+    return (await readValue(BIOMETRIC_LOGIN_ENABLED_KEY)) === 'true';
+  },
+  async setBiometricLoginEnabled(enabled: boolean) {
+    if (enabled) {
+      await writeValue(BIOMETRIC_LOGIN_ENABLED_KEY, 'true');
+      return;
+    }
+    await removeValue(BIOMETRIC_LOGIN_ENABLED_KEY);
+  },
   async clear() {
-    await Promise.all([removeValue(TOKEN_KEY), removeValue(USER_KEY)]);
+    await Promise.all([
+      removeValue(TOKEN_KEY),
+      removeValue(USER_KEY),
+      removeValue(BIOMETRIC_LOGIN_ENABLED_KEY),
+    ]);
   },
 };
