@@ -2,27 +2,29 @@ import { fireEvent, render, waitFor } from '@testing-library/react-native';
 import type { ReactNode } from 'react';
 import { AboutScreen } from '../screens/AboutScreen';
 import {
+  getPayPalDonationUrl,
   isPayPalDonationUrl,
   openPayPalDonation,
 } from '../utils/paypalDonation';
 
-jest.mock('../config', () => ({
-  PAYPAL_DONATION_URL:
-    'https://www.paypal.com/donate/?hosted_button_id=button-id',
-}));
 jest.mock('../components/Screen', () => ({
   Screen: ({ children }: { children: ReactNode }) => children,
 }));
 jest.mock('../context/LocalizationContext', () => ({
-  useLocalization: () => ({ t: (key: string) => key }),
+  useLocalization: () => ({ locale: 'pt-BR', t: (key: string) => key }),
 }));
 jest.mock('../utils/paypalDonation', () => ({
+  getPayPalDonationUrl: jest.fn(),
   isPayPalDonationUrl: jest.fn(),
   openPayPalDonation: jest.fn(),
 }));
 
 describe('AboutScreen', () => {
   beforeEach(() => {
+    jest.clearAllMocks();
+    (getPayPalDonationUrl as jest.Mock).mockReturnValue(
+      'https://www.paypal.com/donate/?hosted_button_id=button-id'
+    );
     (isPayPalDonationUrl as jest.Mock).mockReturnValue(true);
     (openPayPalDonation as jest.Mock).mockResolvedValue(true);
   });
@@ -42,7 +44,11 @@ describe('AboutScreen', () => {
 
     fireEvent.press(screen.getByRole('button', { name: 'donate' }));
 
+    expect(getPayPalDonationUrl).toHaveBeenCalledWith('pt-BR');
     await waitFor(() => expect(openPayPalDonation).toHaveBeenCalledTimes(1));
+    expect(openPayPalDonation).toHaveBeenCalledWith(
+      'https://www.paypal.com/donate/?hosted_button_id=button-id'
+    );
   });
 
   it('disables donations when no valid hosted URL is configured', () => {

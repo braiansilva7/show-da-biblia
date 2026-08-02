@@ -20,6 +20,9 @@ function endpoint(path: string) {
   return `${API_URL}${path}`;
 }
 
+const networkErrorMessage =
+  'Não foi possível conectar à API. Verifique se a API está em execução, se a URL configurada está correta e se o celular está na mesma rede.';
+
 export async function request<T>(
   path: string,
   options: RequestOptions = {}
@@ -32,7 +35,12 @@ export async function request<T>(
     ...options.headers,
   };
   if (token) headers.Authorization = `Bearer ${token}`;
-  const response = await fetch(endpoint(path), { ...options, headers });
+  let response: Response;
+  try {
+    response = await fetch(endpoint(path), { ...options, headers });
+  } catch {
+    throw new ApiError(0, networkErrorMessage);
+  }
   if (response.status === 401 || response.status === 403) {
     await authStorage.clear();
     emitSessionExpiration();

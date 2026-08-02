@@ -1,5 +1,6 @@
 import { Linking } from 'react-native';
 import {
+  getPayPalDonationUrl,
   isPayPalDonationUrl,
   openPayPalDonation,
 } from '../utils/paypalDonation';
@@ -13,6 +14,18 @@ jest.mock('react-native', () => ({
 
 describe('PayPal donations', () => {
   beforeEach(() => jest.clearAllMocks());
+
+  it('uses the Brazilian donation URL only for Portuguese', () => {
+    expect(getPayPalDonationUrl('pt-BR')).toBe(
+      'https://www.paypal.com/donate/?hosted_button_id=3TZJCZPDRAGKN'
+    );
+    expect(getPayPalDonationUrl('en')).toBe(
+      'https://www.paypal.com/donate/?hosted_button_id=KM37LUFQRDAZW'
+    );
+    expect(getPayPalDonationUrl('es')).toBe(
+      'https://www.paypal.com/donate/?hosted_button_id=KM37LUFQRDAZW'
+    );
+  });
 
   it('accepts secure PayPal-hosted donation URLs only', () => {
     expect(

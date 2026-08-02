@@ -28,12 +28,16 @@ variáveis públicas nele. O Expo é iniciado a partir de `apps/mobile`, portant
 ele não lê automaticamente o `.env` da raiz:
 
 ```text
-EXPO_PUBLIC_API_URL=http://192.168.1.3:3000/api/v1
+EXPO_PUBLIC_API_URL=http://192.168.1.3:3010/api/v1
 ```
 
 `EXPO_PUBLIC_API_URL` deve terminar em `/api/v1`. O Mobile consome apenas as
 rotas documentadas no Swagger: cadastro, login, recuperação de senha, sessão,
 perfil e países.
+
+O botão de doação usa uma URL HTTPS hospedada pelo PayPal conforme o idioma
+selecionado: português (`pt-BR`) usa a conta brasileira; inglês e espanhol usam
+a conta internacional. Não requer variável de ambiente.
 
 No Android, o app permite HTTP somente para este fluxo de desenvolvimento em
 rede local. Em homologação e produção, publique a API e o MinIO com HTTPS e

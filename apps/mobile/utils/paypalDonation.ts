@@ -1,4 +1,15 @@
 import { Linking } from 'react-native';
+import type { Locale } from '../types/game';
+
+const PAYPAL_DONATION_URLS: Record<Locale, string> = {
+  'pt-BR': 'https://www.paypal.com/donate/?hosted_button_id=3TZJCZPDRAGKN',
+  en: 'https://www.paypal.com/donate/?hosted_button_id=KM37LUFQRDAZW',
+  es: 'https://www.paypal.com/donate/?hosted_button_id=KM37LUFQRDAZW',
+};
+
+export function getPayPalDonationUrl(locale: Locale) {
+  return PAYPAL_DONATION_URLS[locale];
+}
 
 function isPayPalHost(hostname: string) {
   return hostname === 'paypal.com' || hostname.endsWith('.paypal.com');

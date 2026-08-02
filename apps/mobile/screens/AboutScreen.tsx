@@ -1,22 +1,23 @@
 import { useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { PAYPAL_DONATION_URL } from '../config';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { Screen } from '../components/Screen';
 import { useLocalization } from '../context/LocalizationContext';
 import { theme } from '../theme';
 import {
+  getPayPalDonationUrl,
   isPayPalDonationUrl,
   openPayPalDonation,
 } from '../utils/paypalDonation';
 
 export function AboutScreen() {
-  const { t } = useLocalization();
+  const { locale, t } = useLocalization();
   const [donationError, setDonationError] = useState(false);
-  const donationAvailable = isPayPalDonationUrl(PAYPAL_DONATION_URL);
+  const donationUrl = getPayPalDonationUrl(locale);
+  const donationAvailable = isPayPalDonationUrl(donationUrl);
   const donate = async () => {
     setDonationError(false);
-    if (!(await openPayPalDonation(PAYPAL_DONATION_URL))) {
+    if (!(await openPayPalDonation(donationUrl))) {
       setDonationError(true);
     }
   };
