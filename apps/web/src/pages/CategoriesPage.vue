@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
+import AppIcon from '@/components/common/AppIcon.vue';
 import CategoryDeleteDialog from '@/components/category/CategoryDeleteDialog.vue';
 import CategoryFormDialog from '@/components/category/CategoryFormDialog.vue';
 import type { Category, CategoryFormInput } from '@/types/category';
@@ -106,13 +107,7 @@ async function confirmDelete() {
           <p>{{ $t('categories_found', { count: total }) }}</p>
         </div>
         <label class="users-filter">
-          <svg
-            class="users-filter-icon"
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-          >
-            <path d="M4 6h16M7 12h10M10 18h4" />
-          </svg>
+          <AppIcon class="users-filter-icon" name="search" :size="18" />
           <input
             v-model="searchTerm"
             type="search"
@@ -164,11 +159,7 @@ async function confirmDelete() {
                       type="button"
                       variant="text"
                       @click="openEdit(category)"
-                      ><svg viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M4 16.5V20h3.5L18 9.5 14.5 6 4 16.5Z" />
-                        <path
-                          d="m13.5 7 3.5 3.5"
-                        /></svg></v-btn></template></v-tooltip
+                      ><AppIcon name="edit" :size="18" /></v-btn></template></v-tooltip
                 ><v-tooltip v-if="canDelete" :text="$t('delete')" location="top"
                   ><template #activator="{ props: tooltipProps }"
                     ><v-btn
@@ -179,10 +170,7 @@ async function confirmDelete() {
                       type="button"
                       variant="text"
                       @click="categoryPendingDeletion = category"
-                      ><svg viewBox="0 0 24 24" aria-hidden="true">
-                        <path
-                          d="M5 7h14M10 11v5M14 11v5M9 7l1-2h4l1 2M7 7l1 13h8l1-13"
-                        /></svg></v-btn></template
+                      ><AppIcon name="delete" :size="18" /></v-btn></template
                 ></v-tooltip>
               </td>
             </tr>

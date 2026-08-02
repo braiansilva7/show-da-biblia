@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
+import AppIcon from '@/components/common/AppIcon.vue';
 import type { AuthenticatedUser } from '@/types/user';
 import type { DashboardSummary } from '@/types/dashboard';
 
@@ -34,24 +35,24 @@ const isPlayer = computed(() => props.user.permission_role?.code === 'PLAYER');
       </p>
       <div v-else-if="summary" class="dashboard-metrics">
         <article class="metric-card">
-          <span>{{ $t('active_users') }}</span
-          ><strong>{{ summary.activeUsers }}</strong>
+          <span class="metric-icon"><AppIcon name="users" :size="20" /></span>
+          <span>{{ $t('active_users') }}</span><strong>{{ summary.activeUsers }}</strong>
         </article>
         <article class="metric-card">
-          <span>{{ $t('published_questions') }}</span
-          ><strong>{{ summary.publishedQuestions }}</strong>
+          <span class="metric-icon"><AppIcon name="questions" :size="20" /></span>
+          <span>{{ $t('published_questions') }}</span><strong>{{ summary.publishedQuestions }}</strong>
         </article>
         <article class="metric-card">
-          <span>{{ $t('questions_easy') }}</span
-          ><strong>{{ summary.questionsByDifficulty.easy }}</strong>
+          <span class="metric-icon"><AppIcon name="book" :size="20" /></span>
+          <span>{{ $t('questions_easy') }}</span><strong>{{ summary.questionsByDifficulty.easy }}</strong>
         </article>
         <article class="metric-card">
-          <span>{{ $t('questions_medium') }}</span
-          ><strong>{{ summary.questionsByDifficulty.medium }}</strong>
+          <span class="metric-icon"><AppIcon name="book" :size="20" /></span>
+          <span>{{ $t('questions_medium') }}</span><strong>{{ summary.questionsByDifficulty.medium }}</strong>
         </article>
         <article class="metric-card">
-          <span>{{ $t('questions_hard') }}</span
-          ><strong>{{ summary.questionsByDifficulty.hard }}</strong>
+          <span class="metric-icon"><AppIcon name="book" :size="20" /></span>
+          <span>{{ $t('questions_hard') }}</span><strong>{{ summary.questionsByDifficulty.hard }}</strong>
         </article>
       </div>
       <p v-else class="empty-state">{{ $t('dashboard_empty') }}</p>

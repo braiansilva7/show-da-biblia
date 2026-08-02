@@ -151,6 +151,7 @@
   "save_changes": "Save changes",
   "register": "Register",
   "cancel": "Cancel",
+  "close": "Close",
   "delete_user_question": "Delete user?",
   "delete_user_confirmation": "Do you want to delete {name}? This action cannot be undone.",
   "delete_user": "Delete user",

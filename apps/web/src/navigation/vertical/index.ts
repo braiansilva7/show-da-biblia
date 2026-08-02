@@ -1,10 +1,11 @@
 import type { Page } from '@/types/navigation';
+import type { AppIconName } from '@/types/icon';
 import type { PermissionAction } from '@/types/user';
 
 export interface NavigationItem {
   page: Page;
   title: string;
-  icon: string;
+  icon: AppIconName;
   permissions?: PermissionAction[];
 }
 
@@ -12,40 +13,40 @@ const verticalNavigation: NavigationItem[] = [
   {
     page: 'dashboard',
     title: 'home',
-    icon: 'mdi-home-variant-outline',
+    icon: 'home',
   },
   {
     page: 'ranking',
     title: 'ranking',
-    icon: 'mdi-trophy-outline',
+    icon: 'ranking',
   },
   {
     page: 'game',
     title: 'start_game',
-    icon: 'mdi-play-circle-outline',
+    icon: 'play',
   },
   {
     page: 'users',
     title: 'users',
-    icon: 'mdi-account-group-outline',
+    icon: 'users',
     permissions: ['users.view'],
   },
   {
     page: 'categories',
     title: 'categories',
-    icon: 'mdi-shape-outline',
+    icon: 'categories',
     permissions: ['categories.view'],
   },
   {
     page: 'questions',
     title: 'questions',
-    icon: 'mdi-help-circle-outline',
+    icon: 'questions',
     permissions: ['questions.view'],
   },
   {
     page: 'about',
     title: 'about',
-    icon: 'mdi-information-outline',
+    icon: 'about',
   },
 ];
 

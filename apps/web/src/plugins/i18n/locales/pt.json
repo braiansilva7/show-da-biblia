@@ -151,6 +151,7 @@
   "save_changes": "Salvar alterações",
   "register": "Cadastrar",
   "cancel": "Cancelar",
+  "close": "Fechar",
   "delete_user_question": "Excluir usuário?",
   "delete_user_confirmation": "Você deseja apagar o usuário {name}? Esta ação não pode ser desfeita.",
   "delete_user": "Excluir usuário",

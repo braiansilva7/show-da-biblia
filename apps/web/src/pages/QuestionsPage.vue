@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
+import AppIcon from '@/components/common/AppIcon.vue';
 import { difficultyLevelOptions } from '@/types/difficulty';
 import type {
   QuestionCategoryFilter,
@@ -241,10 +242,7 @@ function confirmRemoval() {
                         variant="text"
                         @click="emit('edit', question.id)"
                       >
-                        <svg viewBox="0 0 24 24" aria-hidden="true">
-                          <path d="M4 16.5V20h3.5L18 9.5 14.5 6 4 16.5Z" />
-                          <path d="m13.5 7 3.5 3.5" />
-                        </svg>
+                        <AppIcon name="edit" :size="18" />
                       </v-btn>
                     </template>
                   </v-tooltip>
@@ -264,11 +262,7 @@ function confirmRemoval() {
                         :loading="isPublishing"
                         @click="emit('publish', question.id)"
                       >
-                        <svg viewBox="0 0 24 24" aria-hidden="true">
-                          <path d="M12 16V6" />
-                          <path d="m8 10 4-4 4 4" />
-                          <path d="M5 18h14" />
-                        </svg>
+                        <AppIcon name="publish" :size="18" />
                       </v-btn>
                     </template>
                   </v-tooltip>
@@ -288,11 +282,7 @@ function confirmRemoval() {
                         :loading="isUnpublishing"
                         @click="emit('unpublish', question.id)"
                       >
-                        <svg viewBox="0 0 24 24" aria-hidden="true">
-                          <path d="M12 8v10" />
-                          <path d="m8 14 4 4 4-4" />
-                          <path d="M5 6h14" />
-                        </svg>
+                        <AppIcon name="unpublish" :size="18" />
                       </v-btn>
                     </template>
                   </v-tooltip>
@@ -311,11 +301,7 @@ function confirmRemoval() {
                         variant="text"
                         @click="removalTarget = question"
                       >
-                        <svg viewBox="0 0 24 24" aria-hidden="true">
-                          <path
-                            d="M5 7h14M10 11v5M14 11v5M9 7l1-2h4l1 2M7 7l1 13h8l1-13"
-                          />
-                        </svg>
+                        <AppIcon name="delete" :size="18" />
                       </v-btn>
                     </template>
                   </v-tooltip>
