@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
 import LoginForm from '@/components/auth/LoginForm.vue';
+import OwnProfileDialog from '@/components/auth/OwnProfileDialog.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import DashboardPage from '@/pages/DashboardPage.vue';
 import RankingsPage from '@/pages/RankingsPage.vue';
@@ -13,7 +14,7 @@ import GameResultPage from '@/pages/GameResultPage.vue';
 import AboutPage from '@/pages/AboutPage.vue';
 import { useManagerApi } from '@/composables/useManagerApi';
 import type { Page } from '@/types/navigation';
-import type { ManagedUser, UserFormInput } from '@/types/user';
+import type { ManagedUser, OwnProfileInput, UserFormInput } from '@/types/user';
 import type { Category, CategoryFormInput } from '@/types/category';
 import type { EditableQuestion, QuestionFormInput } from '@/types/question';
 import type { RankingScope } from '@/types/ranking';
@@ -36,6 +37,8 @@ const {
   isLoadingUsers,
   isSavingUser,
   isDeletingUser,
+  ownProfileError,
+  isSavingOwnProfile,
   dashboardSummary,
   dashboardError,
   isLoadingDashboard,
@@ -76,6 +79,7 @@ const {
 const currentPage = ref<Page>('dashboard');
 const activeGameSessionId = ref<string | null>(null);
 const currentGameSummary = ref<GameSummary | null>(null);
+const isOwnProfileDialogOpen = ref(false);
 const canManageUsers = computed(
   () => user.value?.permissions.includes('users.view') ?? false
 );
@@ -202,6 +206,21 @@ async function saveUser(input: UserFormInput, target: ManagedUser | null) {
 async function deleteUser(user: ManagedUser) {
   return api.deleteUser(user);
 }
+async function openOwnProfile() {
+  api.clearOwnProfileError();
+  try {
+    await api.loadCountries();
+  } catch {
+    // The current selection stays visible even if the country list cannot load.
+  }
+  isOwnProfileDialogOpen.value = true;
+}
+async function saveOwnProfile(input: OwnProfileInput) {
+  const passwordChanged = await api.saveOwnProfile(input);
+  if (passwordChanged === null) return;
+  isOwnProfileDialogOpen.value = false;
+  if (passwordChanged) await logout();
+}
 async function saveCategory(input: CategoryFormInput, target: Category | null) {
   return api.saveCategory(input, target);
 }
@@ -234,6 +253,7 @@ onMounted(async () => {
       :current-page="currentPage"
       @navigate="navigate"
       @logout="logout"
+      @edit-profile="openOwnProfile"
     >
       <AboutPage v-if="currentPage === 'about'" />
       <template v-else>
@@ -346,5 +366,14 @@ onMounted(async () => {
         />
       </template>
     </AppLayout>
+    <OwnProfileDialog
+      v-if="user"
+      v-model="isOwnProfileDialogOpen"
+      :countries="countries"
+      :error="ownProfileError"
+      :is-saving="isSavingOwnProfile"
+      :user="user"
+      @submit="saveOwnProfile"
+    />
   </v-app>
 </template>

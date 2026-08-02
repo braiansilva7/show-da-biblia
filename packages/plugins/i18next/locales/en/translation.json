@@ -10,6 +10,8 @@
   "forgot_password_code_expired": "The code has expired. Request a new code.",
   "forgot_password_too_many_attempts": "You exceeded the attempt limit. Request a new code.",
   "forgot_password_passwords_do_not_match": "Passwords do not match.",
+  "current_password_invalid": "The current password is incorrect.",
+  "password_confirmation_mismatch": "The new password confirmation does not match.",
   "auth_unauthorized_user": "Unauthorized user.",
   "auth_admin_access_only": "Access is restricted to administrators.",
   "auth_permission_denied": "You do not have permission to perform this action.",

@@ -10,6 +10,8 @@
   "forgot_password_code_expired": "O código expirou. Solicite um novo código.",
   "forgot_password_too_many_attempts": "Você excedeu o limite de tentativas. Solicite um novo código.",
   "forgot_password_passwords_do_not_match": "As senhas não coincidem.",
+  "current_password_invalid": "A senha atual informada está incorreta.",
+  "password_confirmation_mismatch": "A confirmação da nova senha não coincide.",
   "auth_unauthorized_user": "Usuário não autorizado.",
   "auth_admin_access_only": "Acesso restrito a administradores.",
   "auth_permission_denied": "Você não tem permissão para executar esta ação.",

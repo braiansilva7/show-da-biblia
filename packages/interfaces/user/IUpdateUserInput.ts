@@ -5,6 +5,8 @@ export interface IUpdateUserInput {
   username?: string;
   email?: string;
   password?: string;
+  currentPassword?: string;
+  passwordConfirmation?: string;
   permissionRoleId?: string;
   languageCode?: LanguageCode;
   countryId?: string;

@@ -23,6 +23,14 @@ export function parseOwnProfileInput(
   const email = readString(fields, 'email');
   const password =
     typeof fields.password === 'string' ? fields.password : undefined;
+  const currentPassword =
+    typeof fields.current_password === 'string'
+      ? fields.current_password
+      : undefined;
+  const passwordConfirmation =
+    typeof fields.confirm_password === 'string'
+      ? fields.confirm_password
+      : undefined;
   const countryId = readString(fields, 'country_id');
   const languageCode = readString(fields, 'language_code');
   const remove =
@@ -36,9 +44,21 @@ export function parseOwnProfileInput(
     if (!email) return null;
     input.email = email;
   }
-  if (password !== undefined) {
-    if (password.length < 8) return null;
+  if (
+    password !== undefined ||
+    currentPassword !== undefined ||
+    passwordConfirmation !== undefined
+  ) {
+    if (
+      !password ||
+      password.length < 8 ||
+      !currentPassword ||
+      passwordConfirmation === undefined
+    )
+      return null;
     input.password = password;
+    input.currentPassword = currentPassword;
+    input.passwordConfirmation = passwordConfirmation;
   }
   if (countryId !== undefined) {
     if (!uuidPattern.test(countryId)) return null;
@@ -56,7 +76,7 @@ export function parseOwnProfileInput(
 
 export const updateOwnProfileSchema = {
   description:
-    'Atualiza somente o perfil do usuário autenticado. Papel e status não podem ser alterados por esta rota.',
+    'Atualiza somente o perfil do usuário autenticado. Papel e status não podem ser alterados por esta rota. A troca de senha exige senha atual e confirmação.',
   tags: [ETagSwagger.auth],
   consumes: ['multipart/form-data', 'application/json'],
   security: [{ authenticateJwt: [] }],

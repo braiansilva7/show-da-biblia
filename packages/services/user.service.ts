@@ -102,6 +102,14 @@ export class UserService {
     ) {
       throw new Error('COUNTRY_NOT_FOUND');
     }
+    if (input.currentPassword !== undefined) {
+      if (!input.password || !input.passwordConfirmation)
+        throw new Error('PASSWORD_CHANGE_INVALID');
+      if (!(await verifyPassword(input.currentPassword, current.passwordHash)))
+        throw new Error('CURRENT_PASSWORD_INVALID');
+      if (input.password !== input.passwordConfirmation)
+        throw new Error('PASSWORD_CONFIRMATION_MISMATCH');
+    }
 
     let profilePictureUrl: string | null | undefined;
     let uploadedProfilePictureUrl: string | null = null;
@@ -126,6 +134,8 @@ export class UserService {
         countryId: input.countryId,
         profilePictureUrl,
         active: input.active,
+        incrementSessionVersion:
+          id === authenticatedUser.id && input.password !== undefined,
       });
     } catch (error) {
       if (uploadedProfilePictureUrl)

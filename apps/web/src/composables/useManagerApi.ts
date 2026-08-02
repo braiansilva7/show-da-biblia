@@ -5,6 +5,7 @@ import type {
   AuthenticatedUser,
   Country,
   ManagedUser,
+  OwnProfileInput,
   PermissionRole,
   UserFormInput,
   UsersListResponse,
@@ -187,6 +188,8 @@ export function useManagerApi() {
   const isLoadingUsers = ref(false);
   const isSavingUser = ref(false);
   const isDeletingUser = ref(false);
+  const ownProfileError = ref('');
+  const isSavingOwnProfile = ref(false);
   const categoriesError = ref('');
   const saveCategoryError = ref('');
   const isLoadingCategories = ref(false);
@@ -817,13 +820,54 @@ export function useManagerApi() {
   }
 
   async function loadCountries() {
-    const response = await fetch(`${apiUrl}/api/v1/countries`, {
-      headers: authorizationHeaders(),
-    });
+    const response = await fetch(`${apiUrl}/api/v1/public/countries`);
     const data = (await response.json().catch(() => null)) as {
       countries?: Country[];
     } | null;
     if (response.ok && data?.countries) countries.value = data.countries;
+  }
+
+  async function saveOwnProfile(input: OwnProfileInput): Promise<boolean | null> {
+    ownProfileError.value = '';
+    isSavingOwnProfile.value = true;
+    try {
+      const payload = new FormData();
+      payload.set('username', input.username);
+      payload.set('country_id', input.country_id);
+      payload.set('language_code', input.language_code);
+      if (input.profile_picture)
+        payload.set('profile_picture', input.profile_picture);
+      if (input.remove_profile_picture)
+        payload.set('remove_profile_picture', 'true');
+      if (input.password) {
+        payload.set('current_password', input.current_password);
+        payload.set('password', input.password);
+        payload.set('confirm_password', input.confirm_password);
+      }
+      const response = await fetch(`${apiUrl}/api/v1/auth/me`, {
+        method: 'PATCH',
+        headers: authorizationHeaders(),
+        body: payload,
+      });
+      const data = (await response.json().catch(() => null)) as
+        ({ user?: AuthenticatedUser } & ApiMessage) | null;
+      if (!response.ok || !data?.user) {
+        ownProfileError.value = getMessage(data, t('save_profile_failed'));
+        return null;
+      }
+      user.value = data.user;
+      setUserLanguage(data.user);
+      return Boolean(input.password);
+    } catch {
+      ownProfileError.value = t('save_profile_connection_failed');
+      return null;
+    } finally {
+      isSavingOwnProfile.value = false;
+    }
+  }
+
+  function clearOwnProfileError() {
+    ownProfileError.value = '';
   }
 
   async function saveUser(
@@ -956,6 +1000,8 @@ export function useManagerApi() {
     isLoadingUsers,
     isSavingUser,
     isDeletingUser,
+    ownProfileError,
+    isSavingOwnProfile,
     categoriesError,
     saveCategoryError,
     isLoadingCategories,
@@ -992,6 +1038,8 @@ export function useManagerApi() {
     loadRankings,
     loadRoles,
     loadCountries,
+    saveOwnProfile,
+    clearOwnProfileError,
     loadCategories,
     loadQuestions,
     loadQuestion,

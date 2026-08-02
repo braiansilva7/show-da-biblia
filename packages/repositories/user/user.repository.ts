@@ -181,6 +181,7 @@ export class UserRepository {
       countryId: string;
       profilePictureUrl: string | null;
       active: boolean;
+      incrementSessionVersion: boolean;
     }>
   ): Promise<UserListItem | null> {
     const currentLanguage =
@@ -208,7 +209,11 @@ export class UserRepository {
 
     const [row] = await this.db
       .update(users)
-      .set(patch)
+      .set(
+        input.incrementSessionVersion
+          ? { ...patch, session_version: sql`${users.session_version} + 1` }
+          : patch
+      )
       .where(eq(users.id, id))
       .returning();
     if (!row) return null;

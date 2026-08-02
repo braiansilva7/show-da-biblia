@@ -42,8 +42,20 @@ export interface AuthenticatedUser {
   permission_role_id: string;
   permission_role?: PermissionRole;
   permissions: PermissionAction[];
+  country_id: string;
   language_code: LanguageCode;
   profile_picture_url?: string | null;
+}
+
+export interface OwnProfileInput {
+  username: string;
+  country_id: string;
+  language_code: LanguageCode;
+  profile_picture: File | null;
+  remove_profile_picture: boolean;
+  current_password: string;
+  password: string;
+  confirm_password: string;
 }
 
 export interface ManagedUser extends AuthenticatedUser {

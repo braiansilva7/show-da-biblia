@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import 'reflect-metadata';
 import { UserService } from './user.service.js';
+import { hashPassword } from '@core/common/functions/password.js';
 
 const administrator = { id: 'administrator-1' };
 
@@ -71,4 +72,53 @@ test('keeps the successful deletion when profile image removal fails after commi
     'delete:player-1:administrator-1',
     'storage:https://cdn.example.test/avatar.png',
   ]);
+});
+
+test('requires the current password and increments the session version for an own password change', async () => {
+  const current = {
+    id: 'administrator-1',
+    passwordHash: await hashPassword('current-password'),
+  };
+  let updateInput: Record<string, unknown> | undefined;
+  const repository = {
+    findById: async () => current,
+    existsByUsername: async () => false,
+    update: async (_id: string, input: Record<string, unknown>) => {
+      updateInput = input;
+      return {};
+    },
+  };
+  const service = new UserService(
+    repository as never,
+    { deleteByUrl: async () => undefined } as never,
+    { existsActiveById: async () => true } as never,
+    {} as never
+  );
+
+  await assert.rejects(
+    () =>
+      service.update(
+        current.id,
+        {
+          currentPassword: 'wrong-password',
+          password: 'new-password',
+          passwordConfirmation: 'new-password',
+        },
+        current as never
+      ),
+    { message: 'CURRENT_PASSWORD_INVALID' }
+  );
+
+  await service.update(
+    current.id,
+    {
+      currentPassword: 'current-password',
+      password: 'new-password',
+      passwordConfirmation: 'new-password',
+    },
+    current as never
+  );
+
+  assert.equal(updateInput?.incrementSessionVersion, true);
+  assert.equal(typeof updateInput?.passwordHash, 'string');
 });

@@ -260,6 +260,17 @@ export class AuthController {
         return reply
           .code(409)
           .send({ message: request.t('username_already_exists') });
+      if (error instanceof Error && error.message === 'CURRENT_PASSWORD_INVALID')
+        return reply
+          .code(400)
+          .send({ message: request.t('current_password_invalid') });
+      if (
+        error instanceof Error &&
+        error.message === 'PASSWORD_CONFIRMATION_MISMATCH'
+      )
+        return reply
+          .code(400)
+          .send({ message: request.t('password_confirmation_mismatch') });
       if (error instanceof Error && error.message === 'INVALID_PROFILE_PICTURE')
         return reply
           .code(400)

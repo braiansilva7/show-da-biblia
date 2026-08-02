@@ -264,12 +264,56 @@ select:focus {
   margin: 1rem 0 0;
 }
 .sidebar-footer {
+  align-items: center;
+  background: transparent;
   border-top: 1px solid #e7e5ef;
-  display: grid;
+  border-left: 0;
+  border-right: 0;
+  border-bottom: 0;
+  color: inherit;
+  cursor: pointer;
+  display: flex;
   gap: 0.25rem;
   margin-top: auto;
   padding: 1rem 0.75rem 0.25rem;
+  text-align: left;
+  width: 100%;
 }
+.sidebar-footer-details {
+  display: grid;
+  gap: 0.25rem;
+  margin-right: auto;
+}
+.settings-icon,
+.menu-icon {
+  color: #7f4f24;
+  flex: 0 0 auto;
+  height: 20px;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+  width: 20px;
+}
+.settings-icon {
+  background: #f5eadc;
+  border: 1px solid #e6c8a7;
+  border-radius: 12px;
+  box-sizing: border-box;
+  height: 40px;
+  padding: 8px;
+  transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
+  width: 40px;
+}
+.sidebar-footer:hover .settings-icon,
+.sidebar-footer:focus-visible .settings-icon {
+  background: #7f4f24;
+  border-color: #7f4f24;
+  color: #fff;
+  transform: rotate(20deg);
+}
+.sidebar-footer:focus-visible { outline: 2px solid #7f4f24; outline-offset: 3px; }
+.menu-icon { margin-right: 0.4rem; }
 .sidebar-footer span,
 .topbar-user span {
   color: #797586;
@@ -290,6 +334,10 @@ select:focus {
 }
 .topbar-user {
   align-items: center;
+  background: transparent;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
   display: flex;
   gap: 1rem;
 }
