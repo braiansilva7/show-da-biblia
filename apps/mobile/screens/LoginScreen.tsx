@@ -2,11 +2,14 @@ import { useEffect, useState } from 'react';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import {
   Image,
+  KeyboardAvoidingView,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
   useWindowDimensions,
 } from 'react-native';
+import { AppCard } from '../components/AppCard';
 import { FormField } from '../components/FormField';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { Screen } from '../components/Screen';
@@ -74,6 +77,7 @@ export function LoginScreen({
       backgroundColor={loginBackground}
       style={isLandscape ? styles.landscapeScreen : undefined}
     >
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.keyboard}>
       <ScrollView
         contentContainerStyle={[
           styles.content,
@@ -83,19 +87,10 @@ export function LoginScreen({
         scrollEnabled={!isLandscape}
         showsVerticalScrollIndicator={false}
       >
-        {!isLandscape ? (
-          <Image
-            accessibilityLabel={t('appName')}
-            resizeMode="contain"
-            source={require('../assets/show_biblia.png')}
-            style={styles.logo}
-          />
-        ) : null}
-        <Text
-          style={[styles.brand, isLandscape ? styles.landscapeBrand : null]}
-        >
-          {t('appName')}
-        </Text>
+        {!isLandscape ? <Image accessibilityLabel={t('appName')} resizeMode="contain" source={require('../assets/show_biblia.png')} style={styles.logo} /> : null}
+        <AppCard style={[styles.card, isLandscape ? styles.landscapeCard : null]}>
+        <Text style={styles.eyebrow}>{t('appName')}</Text>
+        <Text style={styles.loginDescription}>{t('login')}</Text>
         <FormField
           label={t('email')}
           value={email}
@@ -123,6 +118,8 @@ export function LoginScreen({
             disabled={loading || biometricLoading}
             label={biometricLoading ? t('loading') : t('biometricLogin')}
             onPress={() => void submitBiometricLogin()}
+            variant="secondary"
+            icon="fingerprint"
           />
         ) : null}
         <Text
@@ -139,21 +136,26 @@ export function LoginScreen({
         >
           {t('createAccount')}
         </Text>
+        </AppCard>
       </ScrollView>
+      </KeyboardAvoidingView>
     </Screen>
   );
 }
 const styles = StyleSheet.create({
-  content: { flexGrow: 1, gap: theme.spacing.md, justifyContent: 'center' },
+  keyboard: { flex: 1 },
+  content: { flexGrow: 1, gap: theme.spacing.lg, justifyContent: 'center', paddingVertical: theme.spacing.lg },
   landscapeContent: {
     gap: theme.spacing.xs,
     justifyContent: 'flex-start',
     paddingVertical: 0,
   },
   landscapeScreen: { padding: theme.spacing.sm },
-  logo: { alignSelf: 'center', height: 200, width: 200 },
-  brand: { color: theme.colors.secondary, fontSize: 20, fontWeight: '700' },
-  landscapeBrand: { fontSize: 28, textAlign: 'center' },
+  logo: { alignSelf: 'center', height: 190, width: 240 },
+  card: { gap: theme.spacing.md, padding: theme.spacing.lg },
+  landscapeCard: { maxWidth: 520, width: '100%' },
+  eyebrow: { color: theme.colors.primary, ...theme.typography.overline },
+  loginDescription: { color: theme.colors.mutedText, ...theme.typography.body },
   error: { color: theme.colors.error },
   notice: { color: theme.colors.success },
   link: { color: theme.colors.primary, fontWeight: '700', textAlign: 'center' },

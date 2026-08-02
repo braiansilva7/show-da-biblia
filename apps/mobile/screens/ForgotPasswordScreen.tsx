@@ -1,9 +1,11 @@
 import { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, StyleSheet, Text, View } from 'react-native';
+import { AppCard } from '../components/AppCard';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { authApi } from '../api/authApi';
 import { FormField } from '../components/FormField';
 import { PrimaryButton } from '../components/PrimaryButton';
+import { PageHeader } from '../components/PageHeader';
 import { Screen } from '../components/Screen';
 import { useLocalization } from '../context/LocalizationContext';
 import type { RootStackParamList } from '../navigation/types';
@@ -68,15 +70,17 @@ export function ForgotPasswordScreen({
 
   return (
     <Screen>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.keyboard}>
       <View style={styles.content}>
-        <Text style={styles.title}>{t('forgotPassword')}</Text>
-        <Text style={styles.description}>
-          {step === 'email'
+        <AppCard style={styles.card}>
+        <View style={styles.step}><Text style={styles.stepText}>{step === 'email' ? '1' : step === 'code' ? '2' : '3'}</Text></View>
+        <PageHeader title={t('forgotPassword')} description={
+          step === 'email'
             ? t('forgotPasswordEmailDescription')
             : step === 'code'
               ? t('forgotPasswordCodeDescription')
               : t('forgotPasswordNewPasswordDescription')}
-        </Text>
+        />
         {step === 'email' ? (
           <FormField
             label={t('email')}
@@ -150,14 +154,18 @@ export function ForgotPasswordScreen({
         >
           {t('backToLogin')}
         </Text>
+        </AppCard>
       </View>
+      </KeyboardAvoidingView>
     </Screen>
   );
 }
 const styles = StyleSheet.create({
-  content: { flex: 1, gap: theme.spacing.md, justifyContent: 'center' },
-  title: { color: theme.colors.text, fontSize: 30, fontWeight: '800' },
-  description: { color: theme.colors.mutedText },
+  keyboard: { flex: 1 },
+  content: { flex: 1, justifyContent: 'center' },
+  card: { gap: theme.spacing.md, padding: theme.spacing.lg },
+  step: { alignItems: 'center', alignSelf: 'flex-start', backgroundColor: theme.colors.primary, borderRadius: theme.radius.pill, height: 32, justifyContent: 'center', width: 32 },
+  stepText: { color: theme.colors.onPrimary, fontWeight: '800' },
   error: { color: theme.colors.error },
   message: { color: theme.colors.success },
   link: { color: theme.colors.primary, fontWeight: '700', textAlign: 'center' },

@@ -2,12 +2,15 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import * as ImagePicker from 'expo-image-picker';
 import { Picker } from '@react-native-picker/picker';
-import { Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { AppCard } from '../components/AppCard';
 import { countryApi } from '../api/countryApi';
 import { authApi } from '../api/authApi';
 import { AvatarCropper } from '../components/AvatarCropper';
 import { FormField } from '../components/FormField';
 import { PrimaryButton } from '../components/PrimaryButton';
+import { PageHeader } from '../components/PageHeader';
 import { Screen } from '../components/Screen';
 import { gameLanguages } from '../constants/languages';
 import { useAppSession } from '../context/AppSessionContext';
@@ -22,6 +25,7 @@ export function RegisterScreen({
 }: NativeStackScreenProps<RootStackParamList, 'Register'>) {
   const { register } = useAppSession();
   const { t } = useLocalization();
+  const insets = useSafeAreaInsets();
   const [countries, setCountries] = useState<Country[]>([]);
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
@@ -119,18 +123,33 @@ export function RegisterScreen({
   };
   return (
     <Screen>
-      <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.title}>{verificationRequested ? t('verifyEmailTitle') : t('register')}</Text>
+      <ScrollView
+        contentContainerStyle={[
+          styles.content,
+          { paddingBottom: Math.max(theme.spacing.xxl, insets.bottom + theme.spacing.xl) },
+        ]}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <PageHeader title={verificationRequested ? t('verifyEmailTitle') : t('register')} eyebrow={t('appName')} />
         {verificationRequested ? (
-          <>
+          <AppCard style={styles.card}>
             <Text style={styles.description}>{t('verifyEmailDescription')}</Text>
             <FormField label={t('verificationCode')} value={verificationCode} onChangeText={setVerificationCode} keyboardType="number-pad" autoCapitalize="none" />
             {error ? <Text style={styles.error}>{error}</Text> : null}
             <PrimaryButton label={loading ? t('loading') : t('verifyAndCreateAccount')} onPress={() => void verifyAndRegister()} />
             <Text accessibilityRole="button" style={styles.link} onPress={() => void requestCode()}>{t('resendCode')}</Text>
             <Text accessibilityRole="button" style={styles.link} onPress={() => { setVerificationRequested(false); setVerificationCode(''); setError(null); }}>{t('changeEmail')}</Text>
-          </>
+          </AppCard>
         ) : <>
+        <AppCard style={styles.photoCard}>
+          <View style={styles.photoInfo}>
+            <View style={styles.photoPreview}>{picture ? <Image source={{ uri: picture.uri }} style={styles.avatar} /> : <Text style={styles.avatarText}>{t('choosePhoto')}</Text>}</View>
+            <View style={styles.photoCopy}><Text style={styles.photoTitle}>{t('choosePhoto')}</Text><Text style={styles.description}>{t('profilePictureOptional')}</Text></View>
+          </View>
+          <PrimaryButton label={t('choosePhoto')} onPress={() => void choosePicture()} variant="secondary" icon="image" />
+        </AppCard>
+        <AppCard style={styles.card}>
         <FormField
           label={t('username')}
           value={username}
@@ -200,24 +219,22 @@ export function RegisterScreen({
             </Text>
           </View>
         ) : null}
-        <PrimaryButton
-          label={picture ? t('choosePhoto') : t('choosePhoto')}
-          onPress={() => void choosePicture()}
-        />
         {error ? <Text style={styles.error}>{error}</Text> : null}
         <PrimaryButton
           label={loading ? t('loading') : t('sendVerificationCode')}
           onPress={() => void requestCode()}
           disabled={usernameStatus === 'taken'}
         />
+        </AppCard>
         </>}
-        <Text
+        <Pressable
           accessibilityRole="button"
-          style={styles.link}
+          accessibilityLabel={t('alreadyHaveAccount')}
+          hitSlop={theme.spacing.xs}
           onPress={() => navigation.goBack()}
         >
-          {t('alreadyHaveAccount')}
-        </Text>
+          <Text style={styles.accountLink}>{t('alreadyHaveAccount')}</Text>
+        </Pressable>
       </ScrollView>
       {pictureToCrop ? (
         <AvatarCropper
@@ -233,11 +250,18 @@ export function RegisterScreen({
   );
 }
 const styles = StyleSheet.create({
-  content: { gap: theme.spacing.md, paddingBottom: theme.spacing.xl },
-  title: { color: theme.colors.text, fontSize: 28, fontWeight: '800' },
+  content: { flexGrow: 1, gap: theme.spacing.md },
   description: { color: theme.colors.text },
+  card: { gap: theme.spacing.md },
+  photoCard: { gap: theme.spacing.md, padding: theme.spacing.md },
+  photoInfo: { alignItems: 'center', flexDirection: 'row', gap: theme.spacing.md },
+  photoPreview: { alignItems: 'center', backgroundColor: theme.colors.surfaceAccent, borderRadius: theme.radius.pill, height: 58, justifyContent: 'center', overflow: 'hidden', width: 58 },
+  avatar: { height: 58, width: 58 },
+  avatarText: { color: theme.colors.mutedText, fontSize: 10, paddingHorizontal: 6, textAlign: 'center' },
+  photoCopy: { flex: 1, gap: theme.spacing.xs },
+  photoTitle: { color: theme.colors.text, ...theme.typography.label },
   available: { color: theme.colors.primary, fontWeight: '600' },
-  label: { color: theme.colors.text, fontWeight: '600' },
+  label: { color: theme.colors.text, ...theme.typography.label },
   select: {
     backgroundColor: theme.colors.surface,
     borderColor: theme.colors.border,
@@ -249,5 +273,6 @@ const styles = StyleSheet.create({
   error: { color: theme.colors.error },
   countryError: { gap: theme.spacing.xs },
   link: { color: theme.colors.primary, fontWeight: '700', textAlign: 'center' },
+  accountLink: { color: theme.colors.primary, fontWeight: '800', minHeight: theme.layout.touchTarget, paddingVertical: theme.spacing.sm, textAlign: 'center' },
   retry: { color: theme.colors.primary, fontWeight: '700' },
 });

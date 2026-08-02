@@ -148,6 +148,7 @@ export const es: TranslationDictionary = {
   sessionExpired: 'Tu sesión expiró. Inicia sesión nuevamente.',
   requiredFields: 'Completa todos los campos obligatorios.',
   permissionDenied: 'Se denegó el permiso para acceder a las fotos.',
+  profilePictureOptional: 'Puedes cambiar tu foto en cualquier momento.',
   forgotPassword: 'Olvidé mi contraseña',
   forgotPasswordEmailDescription:
     'Ingresa tu correo para recibir un código de recuperación.',

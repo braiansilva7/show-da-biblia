@@ -14,9 +14,11 @@ import {
   View,
 } from 'react-native';
 import { countryApi } from '../api/countryApi';
+import { AppCard } from '../components/AppCard';
 import { AvatarCropper } from '../components/AvatarCropper';
 import { FormField } from '../components/FormField';
 import { PrimaryButton } from '../components/PrimaryButton';
+import { PageHeader } from '../components/PageHeader';
 import { Screen } from '../components/Screen';
 import { PROFILE_SUCCESS_MESSAGE_DURATION_MS } from '../constants/app';
 import { gameLanguages } from '../constants/languages';
@@ -177,12 +179,17 @@ export function ProfileScreen() {
   return (
     <Screen>
       <ScrollView contentContainerStyle={styles.content}>
-        {photoUri ? (
-          <View style={styles.photoSection}>
+        <AppCard tone="accent" style={styles.profileHero}>
+          {photoUri ? (
             <Image
               source={{ uri: photoUri }}
               style={[styles.avatar, removePicture && styles.avatarMarked]}
             />
+          ) : <View style={styles.avatarFallback}><Text style={styles.avatarInitial}>{user.username.slice(0, 1).toUpperCase()}</Text></View>}
+          <View style={styles.profileCopy}><Text style={styles.profileName}>{user.username}</Text><Text style={styles.profileEmail}>{user.email}</Text></View>
+        </AppCard>
+        {photoUri ? (
+          <View style={styles.photoSection}>
             <Pressable
               accessibilityRole="checkbox"
               accessibilityState={{
@@ -210,8 +217,8 @@ export function ProfileScreen() {
             </Pressable>
           </View>
         ) : null}
-        <Text style={styles.title}>{t('profileTitle')}</Text>
-        <View style={styles.performance}>
+        <PageHeader title={t('profileTitle')} />
+        <AppCard style={styles.performance}>
           <Text style={styles.performanceTitle}>{t('performanceTitle')}</Text>
           <View style={styles.performanceRow}>
             <View style={styles.performanceItem}>
@@ -263,8 +270,8 @@ export function ProfileScreen() {
               </Text>
             </View>
           ) : null}
-        </View>
-        <View style={styles.biometricCard}>
+        </AppCard>
+        <AppCard style={styles.biometricCard}>
           <View style={styles.biometricMainRow}>
             <View style={styles.biometricIcon}>
               <Ionicons
@@ -300,7 +307,7 @@ export function ProfileScreen() {
           {biometricMessage ? (
             <Text style={styles.message}>{biometricMessage}</Text>
           ) : null}
-        </View>
+        </AppCard>
         <FormField
           label={t('username')}
           value={username}
@@ -366,6 +373,7 @@ export function ProfileScreen() {
           <PrimaryButton
             label={t('editProfile')}
             onPress={() => setIsEditing(true)}
+            icon="edit"
           />
         ) : null}
         {successMessage ? (
@@ -377,6 +385,8 @@ export function ProfileScreen() {
             <PrimaryButton
               label={t('choosePhoto')}
               onPress={() => void choosePicture()}
+              variant="secondary"
+              icon="image"
             />
             <PrimaryButton
               disabled={loading}
@@ -385,13 +395,7 @@ export function ProfileScreen() {
             />
           </>
         ) : null}
-        <Text
-          accessibilityRole="button"
-          style={styles.logout}
-          onPress={() => void logout()}
-        >
-          {t('logout')}
-        </Text>
+        <PrimaryButton label={t('logout')} onPress={() => void logout()} variant="text" icon="logout" />
       </ScrollView>
       {pictureToCrop ? (
         <AvatarCropper
@@ -409,8 +413,14 @@ export function ProfileScreen() {
 }
 const styles = StyleSheet.create({
   content: { gap: theme.spacing.md, paddingBottom: theme.spacing.xl },
+  profileHero: { alignItems: 'center', flexDirection: 'row', gap: theme.spacing.md },
+  profileCopy: { flex: 1, gap: 2 },
+  profileName: { color: theme.colors.text, ...theme.typography.heading },
+  profileEmail: { color: theme.colors.mutedText, ...theme.typography.caption },
   photoSection: { alignItems: 'center', gap: theme.spacing.sm },
   avatar: { alignSelf: 'center', borderRadius: 48, height: 96, width: 96 },
+  avatarFallback: { alignItems: 'center', backgroundColor: theme.colors.secondary, borderRadius: 48, height: 96, justifyContent: 'center', width: 96 },
+  avatarInitial: { color: theme.colors.text, fontSize: 34, fontWeight: '800' },
   avatarMarked: { opacity: 0.45 },
   removeOption: { alignItems: 'center', flexDirection: 'row', gap: 8 },
   optionDisabled: { opacity: 0.5 },
@@ -429,8 +439,7 @@ const styles = StyleSheet.create({
   },
   checkmark: { color: theme.colors.surface, fontWeight: '800' },
   removeLabel: { color: theme.colors.error, fontWeight: '600' },
-  title: { color: theme.colors.text, fontSize: 28, fontWeight: '800' },
-  label: { color: theme.colors.text, fontWeight: '600' },
+  label: { color: theme.colors.text, ...theme.typography.label },
   select: {
     backgroundColor: theme.colors.surface,
     borderColor: theme.colors.border,
@@ -442,22 +451,8 @@ const styles = StyleSheet.create({
   message: { color: theme.colors.success },
   error: { color: theme.colors.error },
   countryError: { gap: theme.spacing.xs },
-  performance: {
-    backgroundColor: theme.colors.surface,
-    borderColor: theme.colors.border,
-    borderRadius: theme.radius.md,
-    borderWidth: 1,
-    gap: theme.spacing.sm,
-    padding: theme.spacing.md,
-  },
-  biometricCard: {
-    backgroundColor: theme.colors.surface,
-    borderColor: theme.colors.border,
-    borderRadius: theme.radius.md,
-    borderWidth: 1,
-    gap: theme.spacing.sm,
-    padding: theme.spacing.md,
-  },
+  performance: { gap: theme.spacing.sm },
+  biometricCard: { gap: theme.spacing.sm },
   biometricMainRow: { alignItems: 'center', flexDirection: 'row', gap: theme.spacing.sm },
   biometricIcon: {
     alignItems: 'center',
@@ -484,6 +479,5 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   rankingError: { gap: theme.spacing.xs },
-  logout: { color: theme.colors.error, fontWeight: '700', textAlign: 'center' },
   retry: { color: theme.colors.primary, fontWeight: '700' },
 });

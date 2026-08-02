@@ -1,4 +1,6 @@
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { StyleSheet, Text, View } from 'react-native';
+import { AppCard } from './AppCard';
 import { theme } from '../theme';
 
 export function EmptyState({
@@ -9,24 +11,22 @@ export function EmptyState({
   description: string;
 }) {
   return (
-    <View style={styles.container}>
+    <AppCard style={styles.container}>
+      <View style={styles.icon}><MaterialCommunityIcons color={theme.colors.primary} name="book-open-page-variant-outline" size={28} /></View>
       <Text style={styles.title}>{title}</Text>
       <Text style={styles.description}>{description}</Text>
-    </View>
+    </AppCard>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
-    backgroundColor: theme.colors.surface,
-    borderColor: theme.colors.border,
-    borderRadius: theme.radius.md,
-    borderWidth: 1,
     gap: theme.spacing.sm,
     padding: theme.spacing.lg,
   },
-  title: { color: theme.colors.text, fontSize: 18, fontWeight: '700' },
+  icon: { alignItems: 'center', backgroundColor: theme.colors.surfaceAccent, borderRadius: theme.radius.pill, height: 52, justifyContent: 'center', width: 52 },
+  title: { color: theme.colors.text, ...theme.typography.heading },
   description: {
     color: theme.colors.mutedText,
     lineHeight: 22,

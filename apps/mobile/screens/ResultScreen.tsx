@@ -175,12 +175,13 @@ const styles = StyleSheet.create({
   content: { gap: theme.spacing.md, paddingBottom: theme.spacing.xl },
   hero: {
     alignItems: 'center',
-    backgroundColor: '#F7E9D6',
+    backgroundColor: theme.colors.surfaceAccent,
     borderColor: theme.colors.secondary,
     borderRadius: theme.radius.lg,
     borderWidth: 1,
     gap: theme.spacing.xs,
     padding: theme.spacing.lg,
+    ...theme.shadow.floating,
   },
   heroIcon: {
     alignItems: 'center',
@@ -196,7 +197,7 @@ const styles = StyleSheet.create({
     gap: theme.spacing.md,
   },
   victoryHero: {
-    backgroundColor: '#FFF4CC',
+    backgroundColor: theme.colors.warningSurface,
     borderColor: '#D89B16',
     borderWidth: 2,
   },
@@ -242,6 +243,7 @@ const styles = StyleSheet.create({
     gap: 4,
     minWidth: 140,
     padding: theme.spacing.md,
+    ...theme.shadow.card,
   },
   metricLabel: {
     color: theme.colors.mutedText,
@@ -256,6 +258,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     gap: theme.spacing.sm,
     padding: theme.spacing.md,
+    ...theme.shadow.card,
   },
   itemsTitle: { color: theme.colors.text, fontSize: 18, fontWeight: '800' },
   itemSummary: { flexDirection: 'row', justifyContent: 'space-between' },

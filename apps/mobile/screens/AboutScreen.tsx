@@ -1,95 +1,32 @@
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { AppCard } from '../components/AppCard';
+import { PageHeader } from '../components/PageHeader';
 import { PrimaryButton } from '../components/PrimaryButton';
 import { Screen } from '../components/Screen';
 import { useLocalization } from '../context/LocalizationContext';
 import { theme } from '../theme';
-import {
-  getPayPalDonationUrl,
-  isPayPalDonationUrl,
-  openPayPalDonation,
-} from '../utils/paypalDonation';
+import { getPayPalDonationUrl, isPayPalDonationUrl, openPayPalDonation } from '../utils/paypalDonation';
 
 export function AboutScreen() {
   const { locale, t } = useLocalization();
   const [donationError, setDonationError] = useState(false);
   const donationUrl = getPayPalDonationUrl(locale);
   const donationAvailable = isPayPalDonationUrl(donationUrl);
-  const donate = async () => {
-    setDonationError(false);
-    if (!(await openPayPalDonation(donationUrl))) {
-      setDonationError(true);
-    }
-  };
-  return (
-    <Screen>
-      <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.title}>{t('aboutTitle')}</Text>
-        <Text style={styles.description}>{t('aboutMission')}</Text>
-        <Text style={styles.description}>{t('aboutCollaboration')}</Text>
-
-        <View style={styles.contact}>
-          <Text style={styles.contactText}>{t('aboutContact')}</Text>
-          <Text style={styles.email}>{t('aboutContactEmail')}</Text>
-        </View>
-
-        <View style={styles.donationCard}>
-          <Text style={styles.donationTitle}>{t('aboutSupportTitle')}</Text>
-          <Text style={styles.donationDescription}>
-            {t('aboutSupportDescription')}
-          </Text>
-          <PrimaryButton
-            disabled={!donationAvailable}
-            label={t('donate')}
-            onPress={() => void donate()}
-          />
-          {!donationAvailable ? (
-            <Text style={styles.unavailable}>{t('donationUnavailable')}</Text>
-          ) : null}
-          {donationError ? (
-            <Text style={styles.error}>{t('donationError')}</Text>
-          ) : null}
-        </View>
-      </ScrollView>
-    </Screen>
-  );
+  const donate = async () => { setDonationError(false); if (!(await openPayPalDonation(donationUrl))) setDonationError(true); };
+  return <Screen><ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+    <PageHeader eyebrow={t('appName')} title={t('aboutTitle')} />
+    <AppCard tone="accent" style={styles.mission}><View style={styles.missionIcon}><MaterialCommunityIcons color={theme.colors.secondary} name="book-cross" size={30} /></View><Text style={styles.description}>{t('aboutMission')}</Text></AppCard>
+    <AppCard><Text style={styles.description}>{t('aboutCollaboration')}</Text></AppCard>
+    <AppCard style={styles.contact}><MaterialCommunityIcons color={theme.colors.primary} name="email-outline" size={24} /><View style={styles.contactCopy}><Text style={styles.contactText}>{t('aboutContact')}</Text><Text style={styles.email}>{t('aboutContactEmail')}</Text></View></AppCard>
+    <AppCard tone="warning" style={styles.donationCard}><View style={styles.donationHeader}><MaterialCommunityIcons color={theme.colors.primary} name="hand-heart" size={26} /><Text style={styles.donationTitle}>{t('aboutSupportTitle')}</Text></View><Text style={styles.description}>{t('aboutSupportDescription')}</Text><PrimaryButton disabled={!donationAvailable} icon="heart" label={t('donate')} onPress={() => void donate()} />{!donationAvailable ? <Text style={styles.unavailable}>{t('donationUnavailable')}</Text> : null}{donationError ? <Text style={styles.error}>{t('donationError')}</Text> : null}</AppCard>
+  </ScrollView></Screen>;
 }
 
 const styles = StyleSheet.create({
-  content: { gap: theme.spacing.lg, paddingBottom: theme.spacing.xl },
-  title: { color: theme.colors.text, fontSize: 28, fontWeight: '800' },
-  description: {
-    color: theme.colors.mutedText,
-    fontSize: 16,
-    lineHeight: 24,
-    textAlign: 'justify',
-  },
-  contact: {
-    backgroundColor: theme.colors.surface,
-    borderColor: theme.colors.border,
-    borderRadius: theme.radius.md,
-    borderWidth: 1,
-    gap: theme.spacing.xs,
-    padding: theme.spacing.md,
-  },
-  contactText: { color: theme.colors.text, fontSize: 15, lineHeight: 22 },
-  email: { color: theme.colors.primary, fontSize: 16, fontWeight: '800' },
-  donationCard: {
-    backgroundColor: '#F7E9D6',
-    borderColor: theme.colors.secondary,
-    borderRadius: theme.radius.lg,
-    borderWidth: 1,
-    gap: theme.spacing.md,
-    padding: theme.spacing.lg,
-  },
-  donationTitle: { color: theme.colors.text, fontSize: 21, fontWeight: '800' },
-  donationDescription: {
-    color: theme.colors.text,
-    fontSize: 16,
-    fontStyle: 'italic',
-    lineHeight: 24,
-    textAlign: 'justify',
-  },
-  unavailable: { color: theme.colors.mutedText, fontSize: 13, lineHeight: 19 },
-  error: { color: theme.colors.error, fontSize: 13, lineHeight: 19 },
+  content: { gap: theme.spacing.md, paddingBottom: theme.spacing.xl }, mission: { alignItems: 'center', gap: theme.spacing.md }, missionIcon: { alignItems: 'center', backgroundColor: theme.colors.primary, borderRadius: theme.radius.pill, height: 58, justifyContent: 'center', width: 58 },
+  description: { color: theme.colors.mutedText, ...theme.typography.body },
+  contact: { alignItems: 'center', flexDirection: 'row', gap: theme.spacing.sm }, contactCopy: { flex: 1, gap: 2 }, contactText: { color: theme.colors.text, ...theme.typography.label }, email: { color: theme.colors.primary, fontWeight: '800' },
+  donationCard: { gap: theme.spacing.md }, donationHeader: { alignItems: 'center', flexDirection: 'row', gap: theme.spacing.sm }, donationTitle: { color: theme.colors.text, ...theme.typography.heading }, unavailable: { color: theme.colors.mutedText, ...theme.typography.caption }, error: { color: theme.colors.error, ...theme.typography.caption },
 });

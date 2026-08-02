@@ -113,6 +113,7 @@ export const ptBR = {
   confirmCrop: 'Usar recorte',
   cancel: 'Cancelar',
   removePhoto: 'Remover foto',
+  profilePictureOptional: 'Você poderá alterar sua foto a qualquer momento.',
   countriesLoading: 'Carregando países...',
   selectCountry: 'Selecione seu país',
   selectLanguage: 'Selecione o idioma do jogo',
