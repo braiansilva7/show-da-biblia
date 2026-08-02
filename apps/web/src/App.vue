@@ -8,12 +8,15 @@ import UsersPage from '@/pages/UsersPage.vue';
 import CategoriesPage from '@/pages/CategoriesPage.vue';
 import QuestionsPage from '@/pages/QuestionsPage.vue';
 import QuestionFormPage from '@/pages/QuestionFormPage.vue';
+import GamePage from '@/pages/GamePage.vue';
+import GameResultPage from '@/pages/GameResultPage.vue';
 import { useManagerApi } from '@/composables/useManagerApi';
 import type { Page } from '@/types/navigation';
 import type { ManagedUser, UserFormInput } from '@/types/user';
 import type { Category, CategoryFormInput } from '@/types/category';
 import type { EditableQuestion, QuestionFormInput } from '@/types/question';
 import type { RankingScope } from '@/types/ranking';
+import type { GameSummary } from '@/types/game';
 
 const api = useManagerApi();
 const {
@@ -70,6 +73,8 @@ const {
   isLoadingMoreRanking,
 } = api;
 const currentPage = ref<Page>('dashboard');
+const activeGameSessionId = ref<string | null>(null);
+const currentGameSummary = ref<GameSummary | null>(null);
 const canManageUsers = computed(
   () => user.value?.permissions.includes('users.view') ?? false
 );
@@ -148,7 +153,16 @@ async function removeQuestion(id: string) {
   await api.removeQuestion(id);
 }
 
-function navigate(page: Page) {
+async function abandonActiveGame() {
+  const sessionId = activeGameSessionId.value;
+  activeGameSessionId.value = null;
+  if (sessionId) {
+    try { await api.abandonGame(sessionId); } catch { /* A new game closes a stale session server-side. */ }
+  }
+}
+async function navigate(page: Page) {
+  if (currentPage.value === 'game' && page !== 'game') await abandonActiveGame();
+  if (page === 'game') currentGameSummary.value = null;
   if (page === 'users') void openUsers();
   else if (page === 'categories') void openCategories();
   else if (page === 'questions') void openQuestions();
@@ -193,7 +207,8 @@ async function saveCategory(input: CategoryFormInput, target: Category | null) {
 async function deleteCategory(category: Category) {
   return api.deleteCategory(category);
 }
-function logout() {
+async function logout() {
+  await abandonActiveGame();
   api.logout();
   currentPage.value = 'dashboard';
 }
@@ -241,6 +256,22 @@ onMounted(async () => {
         :is-loading="isLoadingRanking"
         :is-loading-more="isLoadingMoreRanking"
         @load="openRankings"
+      />
+      <GamePage
+        v-else-if="currentPage === 'game'"
+        :start="api.startGame"
+        :answer="api.answerGame"
+        :skip="api.skipGameQuestion"
+        :use-joker="api.useGameJoker"
+        :finish="api.finishGame"
+        @active="activeGameSessionId = $event"
+        @finished="(summary) => { currentGameSummary = summary; currentPage = 'game-result' }"
+      />
+      <GameResultPage
+        v-else-if="currentPage === 'game-result' && currentGameSummary"
+        :summary="currentGameSummary"
+        :refresh-user="api.refreshUser"
+        @home="navigate('dashboard')"
       />
       <UsersPage
         v-else-if="currentPage === 'users'"

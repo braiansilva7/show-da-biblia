@@ -232,6 +232,11 @@ MinIO somente após o commit da transação.
 
 ## Progresso e partidas
 
+Mobile e Web consomem os mesmos endpoints autenticados de partidas. As duas
+interfaces iniciam a sessão, exibem a questão pelo idioma do jogador, aplicam
+pulos e coringas pelo servidor e usam o resumo retornado para apresentar o
+resultado; a regra de pontuação nunca é reproduzida no cliente.
+
 Ao receber o papel de sistema `PLAYER`, o usuário ganha automaticamente um
 único registro em `player_progress`, iniciado no nível 1 com os contadores em
 zero. O registro é preservado caso o papel seja alterado depois, para não perder

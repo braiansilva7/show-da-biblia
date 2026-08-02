@@ -20,6 +20,11 @@ const verticalNavigation: NavigationItem[] = [
     icon: 'mdi-trophy-outline',
   },
   {
+    page: 'game',
+    title: 'start_game',
+    icon: 'mdi-play-circle-outline',
+  },
+  {
     page: 'users',
     title: 'users',
     icon: 'mdi-account-group-outline',

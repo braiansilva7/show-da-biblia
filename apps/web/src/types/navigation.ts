@@ -4,4 +4,6 @@ export type Page =
   | 'categories'
   | 'questions'
   | 'question-form'
-  | 'ranking';
+  | 'ranking'
+  | 'game'
+  | 'game-result';

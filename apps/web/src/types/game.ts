@@ -1,0 +1,40 @@
+export type JokerCode =
+  | 'ELIMINATE_1'
+  | 'ELIMINATE_2'
+  | 'ELIMINATE_3'
+  | 'REVEAL_ANSWER';
+
+export type GameAnswer = { id: string; position: number; content: string };
+export type GameQuestion = {
+  sessionQuestionId: string;
+  orderNumber: number;
+  difficultyLevel: 1 | 2 | 3;
+  presentedAt: string;
+  statement: string;
+  answers: GameAnswer[];
+};
+export type GameSession = {
+  id: string;
+  status: 'IN_PROGRESS' | 'FINISHED';
+  score: number;
+  skipsRemaining: number;
+  currentLevel: 1 | 2 | 3;
+};
+export type Joker = { code: JokerCode; quantityAvailable: number };
+export type GameStart = { session: GameSession; question: GameQuestion; jokers: Joker[] };
+export type AnswerFeedback = { correctAnswerOptionId: string; explanation: string };
+export type GameSummary = {
+  id: string;
+  endReason: 'TIMEOUT' | 'WRONG_ANSWER' | 'COMPLETED';
+  score: number;
+  correctAnswers: number;
+  answeredQuestions: number;
+  skipsUsed: number;
+  jokers: Array<{ code: JokerCode; quantityUsed: number }>;
+  highestUnlockedLevel: 1 | 2 | 3;
+  durationSeconds: number | null;
+};
+export type AnswerResult =
+  | { finished: true; summary: GameSummary; feedback: AnswerFeedback }
+  | { finished: false; session: GameSession; question: GameQuestion; feedback: AnswerFeedback };
+export type JokerEffect = { joker: Joker; eliminatedOptionIds: string[]; revealedOptionId?: string };

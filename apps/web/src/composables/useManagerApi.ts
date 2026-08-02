@@ -34,6 +34,17 @@ import type {
   RankingPage,
   RankingScope,
 } from '@/types/ranking';
+import type {
+  AnswerFeedback,
+  AnswerResult,
+  GameQuestion,
+  GameSession,
+  GameStart,
+  GameSummary,
+  Joker,
+  JokerCode,
+  JokerEffect,
+} from '@/types/game';
 
 const apiUrl = (
   import.meta.env.VITE_API_URL ?? 'http://localhost:3010'
@@ -138,6 +149,12 @@ function playerRanking(value: ApiPlayerRanking): PlayerRanking {
   };
 }
 
+const gameSession = (value: any): GameSession => ({ id: value.id, status: value.status, score: value.score, skipsRemaining: value.skips_remaining, currentLevel: value.current_level });
+const gameQuestion = (value: any): GameQuestion => ({ sessionQuestionId: value.session_question_id, orderNumber: value.order_number, difficultyLevel: value.difficulty_level, presentedAt: value.presented_at, statement: value.statement, answers: value.answers });
+const gameJoker = (value: any): Joker => ({ code: value.code, quantityAvailable: value.quantity_available });
+const gameFeedback = (value: any): AnswerFeedback => ({ correctAnswerOptionId: value.correct_answer_option_id, explanation: value.explanation });
+const gameSummary = (value: any): GameSummary => ({ id: value.id, endReason: value.end_reason, score: value.score, correctAnswers: value.correct_answers, answeredQuestions: value.answered_questions, skipsUsed: value.skips_used, jokers: value.jokers.map((item: any) => ({ code: item.code, quantityUsed: item.quantity_used })), highestUnlockedLevel: value.highest_unlocked_level, durationSeconds: value.duration_seconds });
+
 export function useManagerApi() {
   const { locale, t } = useI18n();
   const user = ref<AuthenticatedUser | null>(null);
@@ -220,6 +237,55 @@ export function useManagerApi() {
     };
   }
 
+  async function gameRequest<T>(path: string, init: RequestInit = {}): Promise<T> {
+    const response = await fetch(`${apiUrl}/api/v1${path}`, {
+      ...init,
+      headers: { ...authorizationHeaders(), ...init.headers },
+    });
+    const data = await response.json().catch(() => null) as (T & ApiMessage) | null;
+    if (!response.ok || !data) throw new Error(getMessage(data, t('game_action_failed')));
+    return data;
+  }
+
+  async function startGame(): Promise<GameStart> {
+    const data = await gameRequest<any>('/game-sessions', { method: 'POST' });
+    return { session: gameSession(data.session), question: gameQuestion(data.question), jokers: data.jokers.map(gameJoker) };
+  }
+  async function answerGame(sessionId: string, sessionQuestionId: string, answerOptionId: string): Promise<AnswerResult> {
+    const data = await gameRequest<any>(`/game-sessions/${sessionId}/answers`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ session_question_id: sessionQuestionId, answer_option_id: answerOptionId }) });
+    return data.finished
+      ? { finished: true, summary: gameSummary(data.summary), feedback: gameFeedback(data.feedback) }
+      : { finished: false, session: gameSession(data.session), question: gameQuestion(data.question), feedback: gameFeedback(data.feedback) };
+  }
+  async function skipGameQuestion(sessionId: string, sessionQuestionId: string) {
+    const data = await gameRequest<any>(`/game-sessions/${sessionId}/skip`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ session_question_id: sessionQuestionId }) });
+    return { session: gameSession(data.session), question: gameQuestion(data.question) };
+  }
+  async function useGameJoker(sessionId: string, sessionQuestionId: string, code: JokerCode): Promise<JokerEffect> {
+    const data = await gameRequest<any>(`/game-sessions/${sessionId}/jokers/use`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ session_question_id: sessionQuestionId, joker_type_code: code }) });
+    return { joker: { code: data.session_joker.joker_type_code, quantityAvailable: data.session_joker.quantity_available }, eliminatedOptionIds: data.effect.eliminated_answer_option_ids, revealedOptionId: data.effect.revealed_answer_option_id };
+  }
+  async function finishGame(sessionId: string) {
+    const data = await gameRequest<any>(`/game-sessions/${sessionId}/finish`, { method: 'POST' });
+    return { summary: gameSummary(data.summary), feedback: gameFeedback(data.feedback) };
+  }
+  async function abandonGame(sessionId: string) {
+    const response = await fetch(`${apiUrl}/api/v1/game-sessions/${sessionId}/abandon`, { method: 'POST', headers: authorizationHeaders() });
+    if (!response.ok && response.status !== 404) {
+      const data = await response.json().catch(() => null);
+      throw new Error(getMessage(data, t('game_action_failed')));
+    }
+  }
+
+  async function refreshUser(): Promise<boolean> {
+    const response = await fetch(`${apiUrl}/api/v1/auth/me`, { headers: authorizationHeaders() });
+    const data = await response.json().catch(() => null) as { user?: AuthenticatedUser } | null;
+    if (!response.ok || !data?.user) return false;
+    user.value = data.user;
+    setUserLanguage(data.user);
+    return true;
+  }
+
   async function login(email: string, password: string) {
     loginError.value = '';
     if (!email.trim() || !password) {
@@ -260,18 +326,10 @@ export function useManagerApi() {
   async function restoreSession() {
     if (!sessionStorage.getItem(tokenStorageKey)) return;
     try {
-      const response = await fetch(`${apiUrl}/api/v1/auth/me`, {
-        headers: authorizationHeaders(),
-      });
-      const data = (await response.json().catch(() => null)) as {
-        user?: AuthenticatedUser;
-      } | null;
-      if (!response.ok || !data?.user) {
+      if (!(await refreshUser())) {
         sessionStorage.removeItem(tokenStorageKey);
         return;
       }
-      user.value = data.user;
-      setUserLanguage(data.user);
     } catch {
       sessionStorage.removeItem(tokenStorageKey);
     }
@@ -924,6 +982,13 @@ export function useManagerApi() {
     restoreSession,
     loadUsers,
     loadDashboard,
+    startGame,
+    answerGame,
+    skipGameQuestion,
+    useGameJoker,
+    finishGame,
+    abandonGame,
+    refreshUser,
     loadRankings,
     loadRoles,
     loadCountries,
