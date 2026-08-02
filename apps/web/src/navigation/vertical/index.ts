@@ -42,6 +42,11 @@ const verticalNavigation: NavigationItem[] = [
     icon: 'mdi-help-circle-outline',
     permissions: ['questions.view'],
   },
+  {
+    page: 'about',
+    title: 'about',
+    icon: 'mdi-information-outline',
+  },
 ];
 
 export default verticalNavigation;

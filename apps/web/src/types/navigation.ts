@@ -6,4 +6,5 @@ export type Page =
   | 'question-form'
   | 'ranking'
   | 'game'
-  | 'game-result';
+  | 'game-result'
+  | 'about';

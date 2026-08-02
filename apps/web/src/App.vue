@@ -10,6 +10,7 @@ import QuestionsPage from '@/pages/QuestionsPage.vue';
 import QuestionFormPage from '@/pages/QuestionFormPage.vue';
 import GamePage from '@/pages/GamePage.vue';
 import GameResultPage from '@/pages/GameResultPage.vue';
+import AboutPage from '@/pages/AboutPage.vue';
 import { useManagerApi } from '@/composables/useManagerApi';
 import type { Page } from '@/types/navigation';
 import type { ManagedUser, UserFormInput } from '@/types/user';
@@ -234,8 +235,10 @@ onMounted(async () => {
       @navigate="navigate"
       @logout="logout"
     >
-      <DashboardPage
-        v-if="currentPage === 'dashboard'"
+      <AboutPage v-if="currentPage === 'about'" />
+      <template v-else>
+        <DashboardPage
+          v-if="currentPage === 'dashboard'"
         :user="user"
         :summary="dashboardSummary"
         :error="dashboardError"
@@ -332,15 +335,16 @@ onMounted(async () => {
         @unpublish="unpublishQuestion"
         @remove="removeQuestion"
       />
-      <QuestionFormPage
-        v-else-if="currentPage === 'question-form'"
-        :question="editingQuestion"
-        :categories="questionCategories"
-        :error="questionFormError"
-        :is-saving="isSavingQuestion"
-        @save="saveQuestion"
-        @cancel="openQuestions"
-      />
+        <QuestionFormPage
+          v-else-if="currentPage === 'question-form'"
+          :question="editingQuestion"
+          :categories="questionCategories"
+          :error="questionFormError"
+          :is-saving="isSavingQuestion"
+          @save="saveQuestion"
+          @cancel="openQuestions"
+        />
+      </template>
     </AppLayout>
   </v-app>
 </template>
