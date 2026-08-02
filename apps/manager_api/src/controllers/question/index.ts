@@ -195,6 +195,13 @@ export class QuestionController {
   };
 
   create = async (request: FastifyRequest, reply: FastifyReply) => {
+    if (
+      request.authenticatedUser?.permissionRole?.code !== 'ADMINISTRATOR'
+    ) {
+      return reply
+        .code(403)
+        .send({ message: request.t('auth_permission_denied') });
+    }
     const input = parseMutation(request.body);
     if (!input)
       return reply

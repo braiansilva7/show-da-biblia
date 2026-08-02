@@ -223,6 +223,13 @@ aceita JPEG, PNG, WEBP e GIF, com limite de 5 MB, armazena o objeto no MinIO em
 `users.profile_picture_url`. Ao substituir ou excluir um usuário, o objeto
 anterior é removido do MinIO.
 
+Somente o papel de sistema `ADMINISTRATOR` pode criar questões; a permissão
+`questions.create` em papéis personalizados não concede esse acesso. Ao excluir
+um usuário, a operação de banco é transacional: eventos de pontuação, partidas
+e suas respostas são removidos, enquanto questões que ele tenha criado são
+transferidas ao administrador que executou a exclusão. A foto é removida do
+MinIO somente após o commit da transação.
+
 ## Progresso e partidas
 
 Ao receber o papel de sistema `PLAYER`, o usuário ganha automaticamente um
@@ -233,6 +240,11 @@ o histórico do jogador.
 As partidas começam com três pulos. As consultas de questões por partida e
 status usam o índice `(game_session_id, status, order_number)`; o índice parcial
 de questões pendentes continua atendendo a busca da próxima questão.
+
+A remoção administrativa de uma questão também é transacional. Questões sem
+respostas em partidas são apagadas definitivamente com suas alternativas e
+traduções; questões já usadas são arquivadas para preservar o histórico de
+respostas e pontuação.
 
 O pulo de uma questão marca o item atual como `SKIPPED`, reduz um pulo e cria
 uma nova questão pendente da mesma dificuldade, sem repetir uma questão já

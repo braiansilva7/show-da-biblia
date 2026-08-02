@@ -252,23 +252,32 @@ export class QuestionRepository {
     return this.findForEdit(id);
   }
 
-  async remove(id: string): Promise<'deleted' | 'archived'> {
-    const usage = await this.db.execute<{ total: number }>(
-      sql`SELECT count(*)::int AS total FROM session_questions WHERE question_id = ${id}`
-    );
-    if (Number(usage.rows[0]?.total ?? 0) > 0) {
-      await this.db
-        .update(questions)
-        .set({
-          status: 'ARCHIVED',
-          published_at: null,
-          updated_at: new Date().toISOString(),
-        })
-        .where(eq(questions.id, id));
-      return 'archived';
-    }
-    await this.db.delete(questions).where(eq(questions.id, id));
-    return 'deleted';
+  async remove(id: string): Promise<'deleted' | 'archived' | null> {
+    return this.db.transaction(async (tx) => {
+      const lockedQuestion = await tx.execute<{ id: string }>(sql`
+        SELECT id FROM questions WHERE id = ${id} FOR UPDATE
+      `);
+      if (!lockedQuestion.rows[0]) return null;
+      const usage = await tx.execute<{ total: number }>(
+        sql`SELECT count(*)::int AS total FROM session_questions WHERE question_id = ${id}`
+      );
+      if (Number(usage.rows[0]?.total ?? 0) > 0) {
+        await tx
+          .update(questions)
+          .set({
+            status: 'ARCHIVED',
+            published_at: null,
+            updated_at: new Date().toISOString(),
+          })
+          .where(eq(questions.id, id));
+        return 'archived';
+      }
+      const deleted = await tx
+        .delete(questions)
+        .where(eq(questions.id, id))
+        .returning({ id: questions.id });
+      return deleted.length ? 'deleted' : null;
+    });
   }
 
   /** Shared game selector: drafts and archived questions are never eligible. */

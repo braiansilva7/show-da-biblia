@@ -80,7 +80,9 @@ const canViewQuestions = computed(
   () => user.value?.permissions.includes('questions.view') ?? false
 );
 const canCreateQuestions = computed(
-  () => user.value?.permissions.includes('questions.create') ?? false
+  () =>
+    user.value?.permission_role?.code === 'ADMINISTRATOR' &&
+    (user.value.permissions.includes('questions.create') ?? false)
 );
 const canUpdateQuestions = computed(
   () => user.value?.permissions.includes('questions.update') ?? false

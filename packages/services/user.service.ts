@@ -143,12 +143,19 @@ export class UserService {
 
   async delete(id: string, authenticatedUser: User) {
     if (id === authenticatedUser.id) return { error: 'SELF_DELETE' as const };
-    const current = await this.userRepository.findById(id);
-    if (!current) return { deleted: false };
-    const deleted = await this.userRepository.delete(id);
-    if (deleted)
-      await this.storageService.deleteByUrl(current.profilePictureUrl);
-    return { deleted };
+    const result = await this.userRepository.deleteWithDependencies(
+      id,
+      authenticatedUser.id
+    );
+    if (result.deleted) {
+      try {
+        await this.storageService.deleteByUrl(result.profilePictureUrl);
+      } catch {
+        // The database transaction has already committed. An orphaned object
+        // must not turn a successful deletion into a failed HTTP request.
+      }
+    }
+    return { deleted: result.deleted };
   }
 
   async resetPassword(id: string, password: string): Promise<User | null> {

@@ -64,7 +64,8 @@ export class QuestionService {
   async remove(id: string) {
     const current = await this.repository.findForEdit(id);
     if (!current) return null;
-    return { action: await this.repository.remove(id) };
+    const action = await this.repository.remove(id);
+    return action ? { action } : null;
   }
 
   private async validate(input: IQuestionMutationInput) {

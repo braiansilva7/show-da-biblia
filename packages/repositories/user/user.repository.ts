@@ -3,6 +3,7 @@ import { and, desc, eq, ne, sql } from 'drizzle-orm';
 import type { AppDatabase } from '@core/plugins/database/index.js';
 import { users } from '@core/models/user/user.model.js';
 import { playerProgress } from '@core/models/player/playerProgress.model.js';
+import { questions } from '@core/models/question/question.model.js';
 import type {
   LanguageCode,
   User,
@@ -240,11 +241,39 @@ export class UserRepository {
     return row ? mapUser(row, this.permissions, this.db) : null;
   }
 
-  async delete(id: string): Promise<boolean> {
-    const deleted = await this.db
-      .delete(users)
-      .where(eq(users.id, id))
-      .returning({ id: users.id });
-    return deleted.length === 1;
+  async deleteWithDependencies(
+    id: string,
+    executorId: string
+  ): Promise<{ deleted: boolean; profilePictureUrl: string | null }> {
+    return this.db.transaction(async (tx) => {
+      const [current] = await tx
+        .select({ profilePictureUrl: users.profile_picture_url })
+        .from(users)
+        .where(eq(users.id, id))
+        .limit(1);
+      if (!current) return { deleted: false, profilePictureUrl: null };
+
+      await tx
+        .update(questions)
+        .set({ created_by_user_id: executorId })
+        .where(eq(questions.created_by_user_id, id));
+      await tx.execute(sql`
+        DELETE FROM score_events
+        WHERE user_id=${id}
+           OR game_session_id IN (
+             SELECT id FROM game_sessions WHERE user_id=${id}
+           )
+      `);
+      await tx.execute(sql`DELETE FROM game_sessions WHERE user_id=${id}`);
+      const deleted = await tx
+        .delete(users)
+        .where(eq(users.id, id))
+        .returning({ id: users.id });
+
+      return {
+        deleted: deleted.length === 1,
+        profilePictureUrl: current.profilePictureUrl,
+      };
+    });
   }
 }
